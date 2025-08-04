@@ -15,9 +15,9 @@ set_saturation(
 \item{long_codes}{A data frame output from \code{create_saturation_tracking()} containing
 columns \code{Code}, \code{Priority_Count}, and \code{Heterogeneity_Count}.}
 
-\item{min_priority}{Integer. Minimum count threshold for Priority codes to include. Default is 1.}
+\item{min_priority}{Integer. Minimum count threshold for Priority codes to include. Default is 3.}
 
-\item{min_heterogeneity}{Integer. Minimum count threshold for Heterogeneity codes to include. Default is 1.}
+\item{min_heterogeneity}{Integer. Minimum count threshold for Heterogeneity codes to include. Default is 3.}
 
 \item{plot}{Logical. Whether to create and display a plot. If TRUE (default), creates a stacked bar chart. If FALSE, returns the filtered data frame.}
 }

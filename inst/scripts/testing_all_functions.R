@@ -5,9 +5,9 @@ library(dplyr)
 library(tidyverse)
 library(readxl)
 
-raw_data <- read_xlsx("inst/data/test_data_manipulated.xlsx")
+raw_data <- read_xlsx("inst/raw_data/test_data_manipulated.xlsx")
 
-long_codes <- create_saturation_tracking("inst/data/test_data_manipulated.xlsx",
+long_codes <- create_saturation_tracking("inst/raw_data/test_data_manipulated.xlsx",
                                          preferred_coders = c("s", "r", "l", "a"))
 
 # Plot saturation

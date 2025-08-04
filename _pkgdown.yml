@@ -1,0 +1,31 @@
+url: ~
+template:
+  logo: man/figures/sticker.png
+  bootstrap: 5
+  includes:
+    in_header: |
+      <link rel="icon" type="image/png" href="reference/figures/sticker.png">
+      <style>
+        .navbar {
+          background-color: #330662 !important;
+        }
+        .navbar-dark .navbar-nav .nav-link {
+          color: rgba(255, 255, 255, 0.85);
+        }
+        .navbar-dark .navbar-nav .nav-link:hover {
+          color: rgba(255, 255, 255, 1);
+        }
+      </style>
+  opengraph:
+    image:
+      src: reference/figures/sticker.png
+      alt: "DedooseR package hex sticker"
+  params:
+    bootswatch: flatly
+    logo: reference/figures/sticker.png
+navbar:
+  right:
+    - icon: fa-github fa-lg
+      href: https://github.com/abiraahmi/DedooseR
+      aria-label: "GitHub repository"
+
