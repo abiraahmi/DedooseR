@@ -1,0 +1,44 @@
+Package: DedooseR
+Title: DedooseR for Qualitative data monitoring & analysis
+Version: 0.0.0.9000
+Authors@R: 
+    c(person(
+        given  = "Abiraahmi",
+        family = "Shankar", 
+        email = "abiraahmi.shankar@nyu.edu", 
+        role = c("aut", "cre"),
+        comment = c(ORCID = "0000-0001-8354-5353")
+      ), 
+      person(
+        given  = "Catalina",
+        family = "Cañizares", 
+        email = "cc9082@nyu.edu", 
+        role = c("aut"),
+        comment = c(ORCID = "0000-0002-6854-5205")
+      ), 
+      person(
+        given  = "Francisco",
+        family = "Cardozo", 
+        email = "foc9@miami.edu", 
+        role = c("aut"),
+        comment = c(ORCID = "0000-0002-1925-4954")
+      ))
+Description: DedooseR is an R package that streamlines the analysis of 
+             qualitative data exported from Dedoose. It helps researchers 
+             monitor thematic saturation, calculate code frequencies, 
+             view and organize excerpts, develop 
+             dynamic codebooks, and assess interrater reliability - all within R.
+License: Apache License (>= 2)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports:
+    dplyr,
+    readxl,
+    tidyr,
+    stringr,
+    magrittr,
+    ggplot2,
+    reshape2
+Suggests:
+    testthat (>= 3.0.0)
