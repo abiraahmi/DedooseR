@@ -1,0 +1,26 @@
+
+# DedooseR
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of DedooseR is to ...
+
+## Installation
+
+You can install the development version of DedooseR from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("abiraahmi/DedooseR")
+```
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+``` r
+library(DedooseR)
+## basic example code
+```
+
