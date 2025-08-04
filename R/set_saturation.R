@@ -6,10 +6,11 @@
 #'
 #' @param long_codes A data frame output from \code{create_saturation_tracking()} containing
 #'   columns \code{Code}, \code{Priority_Count}, and \code{Heterogeneity_Count}.
-#' @param min_priority Integer. Minimum count threshold for Priority codes to include. Default is 1.
-#' @param min_heterogeneity Integer. Minimum count threshold for Heterogeneity codes to include. Default is 1.
+#' @param min_priority Integer. Minimum count threshold for Priority codes to include. Default is 3.
+#' @param min_heterogeneity Integer. Minimum count threshold for Heterogeneity codes to include. Default is 3.
+#' @param plot Logical. Whether to create and display a plot. If TRUE (default), creates a stacked bar chart. If FALSE, returns the filtered data frame.
 #'
-#' @return A ggplot object showing a stacked bar chart of Priority and Heterogeneity code counts for codes meeting the thresholds.
+#' @return If plot = TRUE, returns a ggplot object (invisibly) showing a stacked bar chart of Priority and Heterogeneity code counts for codes meeting the thresholds. If plot = FALSE, returns a data frame with filtered codes and their counts.
 #'
 #' @examples
 #' \dontrun{
@@ -20,6 +21,7 @@
 #' @importFrom ggplot2 ggplot aes geom_bar coord_flip labs scale_fill_manual theme theme_minimal element_text
 #' @importFrom dplyr filter select
 #' @importFrom tidyr pivot_longer
+#' @importFrom stats reorder
 #'
 #' @export
 set_saturation <- function(long_codes, min_priority = 3, min_heterogeneity = 3, plot = TRUE) {
@@ -47,7 +49,7 @@ set_saturation <- function(long_codes, min_priority = 3, min_heterogeneity = 3, 
       dplyr::filter(Count > 0)
 
     # Generate plot
-    p <- ggplot2::ggplot(filtered_melted, ggplot2::aes(x = reorder(Code, Count), y = Count, fill = Type)) +
+    p <- ggplot2::ggplot(filtered_melted, ggplot2::aes(x = stats::reorder(Code, Count), y = Count, fill = Type)) +
       ggplot2::geom_bar(stat = "identity", position = "stack") +
       ggplot2::theme_minimal() +
       ggplot2::coord_flip() +

@@ -16,3 +16,10 @@ Heterogeneity code counts
 \description{
 Plot Saturation Tracking Bar Chart
 }
+\examples{
+\dontrun{
+long_codes <- create_saturation_tracking("path/to/your/data.xlsx",
+c("coder1", "coder2"))
+plot_saturation(long_codes)
+}
+}

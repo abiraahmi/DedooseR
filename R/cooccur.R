@@ -7,23 +7,19 @@
 #'   - If named vector: names are original codes, values are labels.
 #'   - If data.frame: must have columns 'Code' and 'Label'.
 #' @return A ggplot2 heatmap object visualizing code co-occurrences above the threshold.
-#' @importFrom ggplot2 ggplot aes geom_tile scale_fill_viridis_c theme theme_minimal element_text labs coord_flip
+#' @importFrom ggplot2 ggplot aes geom_tile scale_fill_viridis_c theme theme_minimal element_text labs coord_flip element_blank
 #' @importFrom reshape2 melt
-#' @importFrom dplyr filter select mutate
+#' @importFrom dplyr filter select mutate left_join
 #' @importFrom readxl read_excel
+#' @importFrom stats reorder
 #' @export
 #'
 coccur <- function(file_path,
                                            sheet = 1,
                                            min_frequency = 5,
                                            code_labels = NULL) {
-  library(readxl)
-  library(reshape2)
-  library(dplyr)
-  library(ggplot2)
-
   # Read data
-  data <- read_excel(file_path, sheet = sheet)
+  data <- readxl::read_excel(file_path, sheet = sheet)
 
   # Clean duplicated column names (e.g. Religion...89) by making unique
   colnames(data) <- make.unique(colnames(data))
@@ -41,7 +37,7 @@ coccur <- function(file_path,
   ]
 
   # Melt matrix into long format
-  melted_data <- melt(matrix_data)
+  melted_data <- reshape2::melt(matrix_data)
   colnames(melted_data) <- c("Code1", "Code2", "Frequency")
 
   # Filter by frequency threshold
@@ -60,10 +56,10 @@ coccur <- function(file_path,
     } else if (is.data.frame(code_labels) && all(c("Code", "Label") %in% colnames(code_labels))) {
       # Data frame mapping
       melted_data <- melted_data %>%
-        tidyr::left_join(code_labels, by = c("Code1" = "Code")) %>%
+        dplyr::left_join(code_labels, by = c("Code1" = "Code")) %>%
         dplyr::mutate(Code1 = ifelse(!is.na(Label), Label, Code1)) %>%
         dplyr::select(-Label) %>%
-        tidyr::left_join(code_labels, by = c("Code2" = "Code")) %>%
+        dplyr::left_join(code_labels, by = c("Code2" = "Code")) %>%
         dplyr::mutate(Code2 = ifelse(!is.na(Label), Label, Code2)) %>%
         dplyr::select(-Label)
     } else {
@@ -72,17 +68,17 @@ coccur <- function(file_path,
   }
 
   # Create heatmap plot
-  p <- ggplot2::ggplot(melted_data, aes(x = reorder(Code2, Frequency), y = Code1, fill = Frequency)) +
+  p <- ggplot2::ggplot(melted_data, ggplot2::aes(x = stats::reorder(Code2, Frequency), y = Code1, fill = Frequency)) +
     ggplot2::geom_tile(color = "white", linewidth = 0.1) +  # use linewidth instead of deprecated size
     ggplot2::scale_fill_viridis_c(name = "Co-occurrence\nFrequency",
                          option = "plasma",
                          trans = "sqrt") +
     ggplot2::theme_minimal() +
-    ggplot2:: theme(
-      axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
-      axis.text.y = element_text(size = 8),
-      axis.title = element_blank(),
-      plot.title = element_text(size = 14, hjust = 0.5),
+    ggplot2::theme(
+      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, size = 8),
+      axis.text.y = ggplot2::element_text(size = 8),
+      axis.title = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(size = 14, hjust = 0.5),
       legend.position = "right"
     ) +
     ggplot2::labs(title = paste0("Code Co-occurrence Heatmap (>", min_frequency, ")"))

@@ -3,11 +3,17 @@
 #' @param long_codes A data frame output from create_saturation_tracking()
 #' @return A ggplot object showing stacked bar chart of Priority and
 #' Heterogeneity code counts
-#' @examples
 #' @importFrom ggplot2 ggplot aes geom_bar coord_flip labs scale_fill_manual theme theme_minimal element_text
+#' @importFrom dplyr select filter
+#' @importFrom tidyr pivot_longer
+#' @importFrom stats reorder
+#' @examples
+#' \dontrun{
 #' long_codes <- create_saturation_tracking("path/to/your/data.xlsx",
 #' c("coder1", "coder2"))
 #' plot_saturation(long_codes)
+#' }
+#' @export
 #'
 plot_saturation <- function(long_codes) {
   # Check input
@@ -24,7 +30,7 @@ plot_saturation <- function(long_codes) {
     dplyr::filter(Count > 0)
 
   # Step 2: Create the bar chart
-  p <- ggplot2::ggplot(long_codes_melted, aes(x = reorder(Code, Count), y = Count,
+  p <- ggplot2::ggplot(long_codes_melted, ggplot2::aes(x = stats::reorder(Code, Count), y = Count,
                                      fill = Type)) +
     ggplot2::geom_bar(stat = "identity", position = "stack") +
     ggplot2:: theme_minimal() +
@@ -35,7 +41,7 @@ plot_saturation <- function(long_codes) {
       y = "Count",
       fill = "Type"
     ) +
-    ggplot2::cale_fill_manual(values = c("Priority_Count" = "#330662",
+    ggplot2::scale_fill_manual(values = c("Priority_Count" = "#330662",
                                  "Heterogeneity_Count" = "#3CBBB1")) +
     ggplot2::theme(
       axis.text.x = element_text(angle = 45, hjust = 1)

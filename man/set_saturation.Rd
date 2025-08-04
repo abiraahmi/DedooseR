@@ -18,9 +18,11 @@ columns \code{Code}, \code{Priority_Count}, and \code{Heterogeneity_Count}.}
 \item{min_priority}{Integer. Minimum count threshold for Priority codes to include. Default is 1.}
 
 \item{min_heterogeneity}{Integer. Minimum count threshold for Heterogeneity codes to include. Default is 1.}
+
+\item{plot}{Logical. Whether to create and display a plot. If TRUE (default), creates a stacked bar chart. If FALSE, returns the filtered data frame.}
 }
 \value{
-A ggplot object showing a stacked bar chart of Priority and Heterogeneity code counts for codes meeting the thresholds.
+If plot = TRUE, returns a ggplot object (invisibly) showing a stacked bar chart of Priority and Heterogeneity code counts for codes meeting the thresholds. If plot = FALSE, returns a data frame with filtered codes and their counts.
 }
 \description{
 This function filters the saturation tracking data based on user-defined

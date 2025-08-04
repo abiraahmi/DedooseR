@@ -12,7 +12,7 @@
 #' @export
 #'
 #' @importFrom readxl read_xlsx
-#' @importFrom dplyr select filter mutate group_by ungroup summarise arrange pull ends_with all_of
+#' @importFrom dplyr select filter mutate group_by ungroup summarise arrange pull ends_with all_of desc
 #' @importFrom tidyr pivot_longer
 #' @importFrom stringr str_replace
 #' @importFrom magrittr %>%
@@ -90,7 +90,7 @@ create_saturation_tracking <- function(data_path = NULL,
       Heterogeneity_Count = sum(Heterogeneity_Applied),
       .groups = "drop"
     ) %>%
-    dplyr::arrange(desc(Priority_Count), desc(Heterogeneity_Count)) %>%
+    dplyr::arrange(dplyr::desc(Priority_Count), dplyr::desc(Heterogeneity_Count)) %>%
     dplyr::mutate(Code = stringr::str_replace(Code, "^Code:", "")) %>% # Remove "Code:" only from the start
     dplyr::mutate(Code = stringr::str_replace(Code, " Applied$", "")) %>% # Remove "Applied" from the end if it exists
     dplyr::mutate(Code = stringr::str_replace(Code, "\\\\", "\\\\\\\\")) # Escape backslashes properly
