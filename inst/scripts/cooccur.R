@@ -1,18 +1,3 @@
-#' Plot Code Co-occurrence Heatmap
-#'
-#' @param file_path String path to Excel file containing co-occurrence matrix.
-#' @param sheet Integer or string specifying sheet number or name (default: 1).
-#' @param min_frequency Numeric; minimum frequency threshold to display in heatmap (default: 5).
-#' @param code_labels Optional named vector or data.frame for mapping codes to readable labels.
-#'   - If named vector: names are original codes, values are labels.
-#'   - If data.frame: must have columns 'Code' and 'Label'.
-#' @return A ggplot2 heatmap object visualizing code co-occurrences above the threshold.
-#' @importFrom ggplot2 ggplot aes geom_tile scale_fill_viridis_c theme theme_minimal element_text labs coord_flip
-#' @importFrom reshape2 melt
-#' @importFrom dplyr filter select mutate
-#' @importFrom readxl read_excel
-#' @export
-
 cooccur <- function(file_path,
                                            sheet = 1,
                                            min_frequency = 5,

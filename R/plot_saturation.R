@@ -17,27 +17,27 @@ plot_saturation <- function(long_codes) {
 
   # Step 1: Reshape the data
   long_codes_melted <- long_codes %>%
-    select(Code, Priority_Count, Heterogeneity_Count) %>%
-    pivot_longer(cols = c(Priority_Count, Heterogeneity_Count),
+    dplyr::select(Code, Priority_Count, Heterogeneity_Count) %>%
+    tidyr::pivot_longer(cols = c(Priority_Count, Heterogeneity_Count),
                  names_to = "Type",
                  values_to = "Count") %>%
-    filter(Count > 0)
+    dplyr::filter(Count > 0)
 
   # Step 2: Create the bar chart
-  p <- ggplot(long_codes_melted, aes(x = reorder(Code, Count), y = Count,
+  p <- ggplot2::ggplot(long_codes_melted, aes(x = reorder(Code, Count), y = Count,
                                      fill = Type)) +
-    geom_bar(stat = "identity", position = "stack") +
-    theme_minimal() +
-    coord_flip() +
-    labs(
+    ggplot2::geom_bar(stat = "identity", position = "stack") +
+    ggplot2:: theme_minimal() +
+    ggplot2::coord_flip() +
+    ggplot2::labs(
       title = "Priority and Heterogeneity Counts",
       x = "Code",
       y = "Count",
       fill = "Type"
     ) +
-    scale_fill_manual(values = c("Priority_Count" = "#330662",
+    ggplot2::cale_fill_manual(values = c("Priority_Count" = "#330662",
                                  "Heterogeneity_Count" = "#3CBBB1")) +
-    theme(
+    ggplot2::theme(
       axis.text.x = element_text(angle = 45, hjust = 1)
     )
 

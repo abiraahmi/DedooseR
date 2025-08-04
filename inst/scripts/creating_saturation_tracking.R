@@ -1,25 +1,9 @@
-# Script to test saturation function for package
-# Abi
-# July 31, 2025
-
 # Load packages
 library(tidyverse)
 library(readxl)
 library(writexl)
 library(knitr)
 
-
-#' Create Saturation Tracking Data
-#'
-#' @param data_path Path to the Excel file containing excerpt data
-#' @param preferred_coders Vector of preferred coders in order of preference (based on reliability scores)
-#' @return A data frame with code counts for Priority and Heterogeneity
-#' @examples
-#' # Example usage:
-#' # result <- create_saturation_tracking(
-#' #   data_path = "path/to/your/data.xlsx",
-#' #   preferred_coders = c("coder1", "coder2", "coder3")
-#' # )
 create_saturation_tracking <- function(data_path = NULL,
                                      preferred_coders = NULL) {
 
