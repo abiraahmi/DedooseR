@@ -11,13 +11,12 @@ and rigor in qualitative coding and analysis.
 
 ## Key Features
 
-DedooseR currently supports:
+DedooseR currently allows you to:
 
-- Summarize codes by coder
-- Cleaning data exported from Dedoose and calculating code frequencies  
-- Setting saturation criteria  
-- Plotting saturation according to set critera
-- Producing code co-occurrence heatmaps  
+- Clean data exported from Dedoose
+- Summarize code frquencies with one coder/media title in order of coder preference
+- Set a saturation criteria and plot it
+- Produce code co-occurrence heatmaps  
 
 ### Coming Soon
 
@@ -31,20 +30,15 @@ DedooseR currently supports:
 Ongoing challenges in qualitative research include defining what constitutes 
 high-quality data and demonstrating transparency in how saturation is 
 reached (Small & Calarco, 2022). Informed by guidelines for high-quality 
-qualitative research (Hennink & Kaiser, 2022), DedooseR pays particular 
-attention to indicators like:
+qualitative research (Hennink & Kaiser, 2022), DedooseR allows you to
+better understand your data with quality tags in Dedoose like:
 
 - The **concreteness** of excerpts (priority code)
 - The **heterogeneity** within codes  (heterogeneity code)
 
 By tagging these indicators in Dedoose and exploring them in R, 
-we were able to gain greater confidence in both the **depth** and **diversity** 
-of our dataset.
-
-Note: while the package currently requires that concreteness and heterogeneity
-are tagged in Dedoose, we will soon be relaxing the functionality so you can
-use the package even without it (though we strongly recommend it for reasons 
-stated above).
+this allows for gain greater confidence in both the **depth** and **diversity** 
+of datasets.
 
 ## Installation
 

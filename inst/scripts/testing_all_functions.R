@@ -7,10 +7,13 @@ library(readxl)
 
 raw_data <- read_xlsx("inst/raw_data/test_data_manipulated.xlsx")
 
-# Summarize codes
-excerpts <- read_xlsx("inst/raw_data/test_data_manipulated.xlsx")
+# Clean data
+filepath <- "inst/raw_data/test_data_manipulated.xlsx"
 preferred_coders <- c("s", "r", "l", "a")
-summarize_codes(excerpts, preferred_coders, output_type = "datatable")
+excerpts <- clean_data(filepath = filepath, preferred_coders = preferred_coders)
+
+# Summarize codes
+summarize_codes(excerpts = excerpts, preferred_coders = preferred_coders, output_type = "datatable")
 
 # Quality indicator check
 
@@ -23,7 +26,7 @@ quality_indicators(
 )
 
 # Plot saturation by qual indicators
-plot_saturation(long_codes)
+plot_saturation(excerpts)
 
 # Test returning filtered data frame only
 filtered_df <- set_saturation(long_codes, min_priority = 3, min_heterogeneity = 3, plot = FALSE)
@@ -45,7 +48,9 @@ plot_code_cooccurrence_heatmap(file_path, min_frequency = 10)
 ## Create shell for function script
 library(usethis)
   # REPLACE with function name
-use_r("summarize_codes.R")
+use_r("clean_data.R")
+
+# Paste function
 
 ## Build > Check
 
@@ -56,11 +61,12 @@ use_r("summarize_codes.R")
 
 # Update documentation - run below in console
 devtools::document()
+# If you want to clear your current function so no conflict exists, run:
+rm(summarize_codes)
 
 # Run devtools::install() to rebuild & install your local package.
 devtools::install()
-  # If you want to clear your current function so no conflict exists, run:
-  rm(summarize_codes)
+
 
 # Restart R session and load package (library(DedooseR)).
 
