@@ -68,12 +68,18 @@ excerpts <- read_xlsx("file path")
 cooccurence <- read_xlsx("file path")
 
 # Summarize codes per coder
-summarize_codes(excerpts, preferred_coders, output_type = kable)
+summarize_codes(excerpts, 
+                # If you have preferred coders, select below, or list all
+                preferred_coders, 
+                output_type = kable)
 
-# Clean data and calculate code frequencies
-long_codes <- create_saturation_tracking(excerpts,
-                                         preferred_coders = 
-                                         c("s", "r", "l", "a"))
+# If you've been tagging excerpts by quality indicators, set them below and 
+# summarize code counts based on these selections
+quality_indicators(
+  excerpts = excerpts,
+  preferred_coders = preferred_coders,
+  qual_indicators = c("Priority excerpt", "Heterogeniety")
+)
                                          
 # Plot code frequencies
 plot_saturation(excerpts)

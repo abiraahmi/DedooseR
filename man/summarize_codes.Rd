@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarize_codes.R
 \name{summarize_codes}
 \alias{summarize_codes}
-\title{Summarize Code Counts by Coder}
+\title{Summarize Code Counts by Coder and from Preferred Coders}
 \usage{
 summarize_codes(
   excerpts,
@@ -13,8 +13,8 @@ summarize_codes(
 \arguments{
 \item{excerpts}{A data frame of coded excerpts, typically read from an Excel file.
 Must include a column \verb{Excerpt Creator} indicating who coded each excerpt,
-a column \verb{Media Title} identifying the transcript, and columns prefixed
-with \verb{Code:} for each code.}
+a column \verb{Media Title} identifying the transcript,
+and columns prefixed with \verb{Code:} for each code (binary indicators).}
 
 \item{preferred_coders}{A character vector of coder names in preferred order,
 used to resolve duplicates when multiple coders coded the same transcript.}
@@ -24,12 +24,17 @@ used to resolve duplicates when multiple coders coded the same transcript.}
 }
 \value{
 A table summarizing the number of times each code was applied by each coder,
-with a total count column. The format depends on \code{output_type}.
+including total counts from all coders and from preferred coders only.
+The format depends on \code{output_type}.
 }
 \description{
-This function summarizes how many times each code was applied by each coder
+This function summarizes how many times each code was applied by each coder,
 and presents the data in a wide format: one row per code, one column per coder,
-and a total count column at the end.
+along with two total count columns:
+\itemize{
+\item Total count from all coders (regardless of preference)
+\item Total count from preferred coders only (one coder per media title, selected in order of preference)
+}
 }
 \examples{
 \dontrun{

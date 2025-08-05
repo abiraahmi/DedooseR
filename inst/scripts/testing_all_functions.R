@@ -3,6 +3,7 @@
 library(DedooseR)
 library(tidyverse)
 library(dplyr)
+library(readxl)
 
 raw_data <- read_xlsx("inst/raw_data/test_data_manipulated.xlsx")
 
@@ -44,7 +45,7 @@ plot_code_cooccurrence_heatmap(file_path, min_frequency = 10)
 ## Create shell for function script
 library(usethis)
   # REPLACE with function name
-use_r("quality_indicators.R")
+use_r("summarize_codes.R")
 
 ## Build > Check
 
