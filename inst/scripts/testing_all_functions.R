@@ -28,4 +28,14 @@ SAT <- set_saturation(long_codes, min_priority = 10, min_heterogeneity = 10, plo
 file_path <- "inst/data/cooccur.xlsx"
 plot_code_cooccurrence_heatmap(file_path, min_frequency = 10)
 
+# Summarize codes
 
+excerpts <- read_xlsx("inst/raw_data/test_data_manipulated.xlsx")
+preferred_coders <- c("s", "r", "l", "a")
+summarize_codes(excerpts, preferred_coders, output_type = "datatable")
+
+# Instructions: PUSH TO PACKAGE
+## Create shell for function script
+library(usethis)
+  # REPLACE with function name
+use_r("codes_per_coder.R")
