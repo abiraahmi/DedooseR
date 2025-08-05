@@ -13,6 +13,7 @@ and rigor in qualitative coding and analysis.
 
 DedooseR currently supports:
 
+- Summarize codes by coder
 - Cleaning data exported from Dedoose and calculating code frequencies  
 - Setting saturation criteria  
 - Plotting saturation according to set critera
@@ -57,7 +58,7 @@ pak::pak("abiraahmi/DedooseR")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+This is a basic example which shows you how you may the package:
 
 ``` r
 library(DedooseR)
@@ -65,6 +66,9 @@ library(DedooseR)
 # Load excerpts and co-occurence datasets from Dedoose
 excerpts <- read_xlsx("file path")
 cooccurence <- read_xlsx("file path")
+
+# Summarize codes per coder
+summarize_codes(excerpts, preferred_coders, output_type = kable)
 
 # Clean data and calculate code frequencies
 long_codes <- create_saturation_tracking(excerpts,

@@ -41,6 +41,8 @@ Imports:
     ggplot2,
     reshape2,
     knitr,
-    DT
+    DT,
+    purrr,
+    rlang
 Suggests:
     testthat (>= 3.0.0)
