@@ -14,37 +14,56 @@ plot_saturation(
 )
 }
 \arguments{
-\item{qual_indicators}{A character vector of quality indicator names to plot (e.g., \code{c("Priority excerpt", "Heterogeniety")}). These determine which columns to use and filter on.}
+\item{df_all_summary}{A data frame (tibble) summarizing codes, must contain at
+least \code{Code} and \code{total_preferred_coder} columns.}
 
-\item{min_counts}{Optional named numeric vector specifying minimum counts for each quality indicator to include a code (e.g., \code{c("Priority excerpt" = 20, "Heterogeniety" = 30)}). Codes with counts below these thresholds for the respective quality indicators will be excluded.}
+\item{df_qual_summary}{A data frame (tibble) containing quality indicator counts
+per code. Must have columns matching \code{paste0(qual_indicators, "_Count")} and
+a \code{Code} column.}
 
-\item{stacked}{Logical; if \code{TRUE} (default), bars for quality indicators will be stacked; if \code{FALSE}, bars will be dodged (side-by-side).}
+\item{qual_indicators}{A character vector of quality indicator names to plot
+(e.g., \code{c("Priority excerpt", "Heterogeniety")}). These determine which
+columns to use and filter on.}
 
-\item{as_proportion}{Logical; if \code{TRUE}, the y-axis will represent proportions of counts per code rather than raw counts.}
+\item{min_counts}{Optional named numeric vector specifying minimum counts for
+each quality indicator to include a code
+(e.g., \code{c("Priority excerpt" = 20, "Heterogeniety" = 30)}). Codes with
+counts below these thresholds for the respective quality indicators will be
+excluded.}
 
-\item{summarize_df}{A data frame (tibble) summarizing codes, must contain at least \code{Code} and \code{total_preferred_coder} columns.}
+\item{stacked}{Logical; if \code{TRUE} (default), bars for quality indicators will
+be stacked; if \code{FALSE}, bars will be dodged (side-by-side).}
 
-\item{quality_df}{A data frame (tibble) containing quality indicator counts per code. Must have columns matching \code{paste0(qual_indicators, "_Count")} and a \code{Code} column.}
+\item{as_proportion}{Logical; if \code{TRUE}, the y-axis will represent
+proportions of counts per code rather than raw counts.}
 }
 \value{
-A \code{ggplot} object displaying the counts or proportions of quality indicator annotations by code.
+A \code{ggplot} object displaying the counts or proportions of quality
+indicator annotations by code.
 }
 \description{
-Creates a horizontal stacked or dodged bar plot visualizing counts or proportions of quality indicator annotations per code.
-Only codes that have \emph{all} specified quality indicators present at least once (count > 0) are shown.
+Creates a horizontal stacked or dodged bar plot visualizing counts or
+proportions of quality indicator annotations per code.
+Only codes that have \emph{all} specified quality indicators present at least
+once (count > 0) are shown.
 }
 \details{
 \itemize{
-\item The function filters to only display codes that have counts greater than zero for \emph{all} specified quality indicators.
-\item The plot orders codes by descending total counts from \code{total_preferred_coder}.
+\item The function filters to only display codes that have counts greater than
+zero for \emph{all} specified quality indicators.
+\item The plot orders codes by descending total counts from
+\code{total_preferred_coder}.
 \item Colors are generated with a discrete gradient palette for visual clarity.
-\item Input data frames should be outputs from \code{summarize_codes()} and \code{quality_indicators()} functions or have equivalent structure.
+\item Input data frames should be outputs from \code{summarize_codes()} and
+\code{quality_indicators()} functions or have equivalent structure.
 }
 }
 \examples{
 \dontrun{
-summary_data <- summarize_codes(excerpts, preferred_coders, output_type = "tibble")
-quality_data <- quality_indicators(excerpts, preferred_coders, qual_indicators = c("Priority excerpt", "Heterogeniety"))
+summary_data <- summarize_codes(excerpts, preferred_coders,
+output_type = "tibble")
+quality_data <- quality_indicators(excerpts, preferred_coders,
+qual_indicators = c("Priority excerpt", "Heterogeniety"))
 
 plot_saturation(
   summary_data,

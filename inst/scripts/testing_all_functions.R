@@ -52,8 +52,8 @@ thresholds_list <- list(
 )
 
 plot_saturation_comp(
-  summary_data = summary_data,
-  quality_summary = quality_summary,
+  df_all_summary,
+  df_qual_summary,
   thresholds_list = thresholds_list,
   stacked = TRUE,
   as_proportion = TRUE,

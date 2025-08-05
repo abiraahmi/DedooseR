@@ -1,27 +1,46 @@
 #' Plot Code Saturation by Quality Indicators
 #'
-#' Creates a horizontal stacked or dodged bar plot visualizing counts or proportions of quality indicator annotations per code.
-#' Only codes that have *all* specified quality indicators present at least once (count > 0) are shown.
+#' Creates a horizontal stacked or dodged bar plot visualizing counts or
+#' proportions of quality indicator annotations per code.
+#' Only codes that have *all* specified quality indicators present at least
+#' once (count > 0) are shown.
 #'
-#' @param summarize_df A data frame (tibble) summarizing codes, must contain at least `Code` and `total_preferred_coder` columns.
-#' @param quality_df A data frame (tibble) containing quality indicator counts per code. Must have columns matching `paste0(qual_indicators, "_Count")` and a `Code` column.
-#' @param qual_indicators A character vector of quality indicator names to plot (e.g., `c("Priority excerpt", "Heterogeniety")`). These determine which columns to use and filter on.
-#' @param min_counts Optional named numeric vector specifying minimum counts for each quality indicator to include a code (e.g., `c("Priority excerpt" = 20, "Heterogeniety" = 30)`). Codes with counts below these thresholds for the respective quality indicators will be excluded.
-#' @param stacked Logical; if `TRUE` (default), bars for quality indicators will be stacked; if `FALSE`, bars will be dodged (side-by-side).
-#' @param as_proportion Logical; if `TRUE`, the y-axis will represent proportions of counts per code rather than raw counts.
+#' @param df_all_summary A data frame (tibble) summarizing codes, must contain at
+#' least `Code` and `total_preferred_coder` columns.
+#' @param df_qual_summary A data frame (tibble) containing quality indicator counts
+#' per code. Must have columns matching `paste0(qual_indicators, "_Count")` and
+#' a `Code` column.
+#' @param qual_indicators A character vector of quality indicator names to plot
+#' (e.g., `c("Priority excerpt", "Heterogeniety")`). These determine which
+#' columns to use and filter on.
+#' @param min_counts Optional named numeric vector specifying minimum counts for
+#'  each quality indicator to include a code
+#'  (e.g., `c("Priority excerpt" = 20, "Heterogeniety" = 30)`). Codes with
+#'  counts below these thresholds for the respective quality indicators will be
+#'  excluded.
+#' @param stacked Logical; if `TRUE` (default), bars for quality indicators will
+#'  be stacked; if `FALSE`, bars will be dodged (side-by-side).
+#' @param as_proportion Logical; if `TRUE`, the y-axis will represent
+#' proportions of counts per code rather than raw counts.
 #'
-#' @return A `ggplot` object displaying the counts or proportions of quality indicator annotations by code.
+#' @return A `ggplot` object displaying the counts or proportions of quality
+#' indicator annotations by code.
 #'
 #' @details
-#' - The function filters to only display codes that have counts greater than zero for *all* specified quality indicators.
-#' - The plot orders codes by descending total counts from `total_preferred_coder`.
+#' - The function filters to only display codes that have counts greater than
+#' zero for *all* specified quality indicators.
+#' - The plot orders codes by descending total counts from
+#' `total_preferred_coder`.
 #' - Colors are generated with a discrete gradient palette for visual clarity.
-#' - Input data frames should be outputs from `summarize_codes()` and `quality_indicators()` functions or have equivalent structure.
+#' - Input data frames should be outputs from `summarize_codes()` and
+#' `quality_indicators()` functions or have equivalent structure.
 #'
 #' @examples
 #' \dontrun{
-#' summary_data <- summarize_codes(excerpts, preferred_coders, output_type = "tibble")
-#' quality_data <- quality_indicators(excerpts, preferred_coders, qual_indicators = c("Priority excerpt", "Heterogeniety"))
+#' summary_data <- summarize_codes(excerpts, preferred_coders,
+#' output_type = "tibble")
+#' quality_data <- quality_indicators(excerpts, preferred_coders,
+#' qual_indicators = c("Priority excerpt", "Heterogeniety"))
 #'
 #' plot_saturation(
 #'   summary_data,
@@ -61,9 +80,11 @@ plot_saturation <- function(df_all_summary, df_qual_summary,
          paste(missing_cols, collapse = ", "))
   }
 
-  # Join total_preferred_coder counts from df_all_summary to df_qual_summary on Code
+  # Join total_preferred_coder counts from df_all_summary to df_qual_summary by
+  # Code
   plot_df <- df_qual_summary %>%
-    left_join(df_all_summary %>% select(Code, total_preferred_coder), by = "Code")
+    left_join(df_all_summary %>% select(Code, total_preferred_coder), by =
+                "Code")
 
   # Pivot longer by quality indicators for plotting
   plot_long <- plot_df %>%

@@ -13,6 +13,9 @@ plot_counts(
 )
 }
 \arguments{
+\item{df_all_summary}{A data frame or tibble containing at least two columns: \code{Code} and \code{total_preferred_coder},
+typically the output from \code{summarize_codes(output_type = "tibble")}.}
+
 \item{plot_proportion}{Logical. If \code{TRUE}, plots code frequencies as proportions of the total count.
 Defaults to \code{FALSE} (raw counts).}
 
@@ -21,9 +24,6 @@ Defaults to \code{FALSE} (raw counts).}
 \item{min_proportion}{Numeric. Optional. Filters out codes with a proportion less than this value (e.g., 0.02).}
 
 \item{exclude_codes}{Character vector. Optional. Codes to exclude from the plot (e.g., c("Other", "Heterogeneity")).}
-
-\item{summary_data}{A data frame or tibble containing at least two columns: \code{Code} and \code{total_preferred_coder},
-typically the output from \code{summarize_codes(output_type = "tibble")}.}
 }
 \value{
 A \code{ggplot2} object showing a horizontal bar plot of code frequencies or proportions.

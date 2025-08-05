@@ -10,7 +10,8 @@ plot_saturation_comp <- function(df_all_summary,
   qual_indicators <- sub("_Count$", "", indicator_cols)
 
   if (!is.list(thresholds_list) || is.null(names(thresholds_list))) {
-    stop("thresholds_list must be a named list of named lists with thresholds per quality indicator.")
+    stop("thresholds_list must be a named list of named lists with thresholds
+         per quality indicator.")
   }
 
   plots <- lapply(names(thresholds_list), function(set_name) {
@@ -25,15 +26,16 @@ plot_saturation_comp <- function(df_all_summary,
       )
     }
 
-    # Create a neat string of thresholds, e.g. "Heterogeniety=3, Priority excerpt=2"
+    # Create a neat string of thresholds, e.g. "Heterogeniety=3,
+    # Priority excerpt=2"
     thresh_label <- paste(
       paste0(names(thresholds), " = ", thresholds),
       collapse = ", "
     )
 
     p <- plot_saturation(
-      summarize_df = df_all_summary,
-      quality_df = df_qual_summary,
+      df_all_summary = df_all_summary,
+      df_qual_summary = df_qual_summary,
       qual_indicators = qual_indicators,
       min_counts = thresholds,
       stacked = stacked,

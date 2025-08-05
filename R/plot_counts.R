@@ -4,7 +4,7 @@
 #' Users can optionally plot proportions instead of raw counts, filter by minimum frequency,
 #' or exclude specific codes.
 #'
-#' @param summary_data A data frame or tibble containing at least two columns: `Code` and `total_preferred_coder`,
+#' @param df_all_summary A data frame or tibble containing at least two columns: `Code` and `total_preferred_coder`,
 #' typically the output from `summarize_codes(output_type = "tibble")`.
 #' @param plot_proportion Logical. If `TRUE`, plots code frequencies as proportions of the total count.
 #' Defaults to `FALSE` (raw counts).
