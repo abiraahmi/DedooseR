@@ -65,7 +65,12 @@ or exclude specific codes.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-plot-proportion">plot_proportion<a class="anchor" aria-label="anchor" href="#arg-plot-proportion"></a></dt>
+<dl><dt id="arg-df-all-summary">df_all_summary<a class="anchor" aria-label="anchor" href="#arg-df-all-summary"></a></dt>
+<dd><p>A data frame or tibble containing at least two columns: <code>Code</code> and <code>total_preferred_coder</code>,
+typically the output from <code>summarize_codes(output_type = "tibble")</code>.</p></dd>
+
+
+<dt id="arg-plot-proportion">plot_proportion<a class="anchor" aria-label="anchor" href="#arg-plot-proportion"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, plots code frequencies as proportions of the total count.
 Defaults to <code>FALSE</code> (raw counts).</p></dd>
 
@@ -80,11 +85,6 @@ Defaults to <code>FALSE</code> (raw counts).</p></dd>
 
 <dt id="arg-exclude-codes">exclude_codes<a class="anchor" aria-label="anchor" href="#arg-exclude-codes"></a></dt>
 <dd><p>Character vector. Optional. Codes to exclude from the plot (e.g., c("Other", "Heterogeneity")).</p></dd>
-
-
-<dt id="arg-summary-data">summary_data<a class="anchor" aria-label="anchor" href="#arg-summary-data"></a></dt>
-<dd><p>A data frame or tibble containing at least two columns: <code>Code</code> and <code>total_preferred_coder</code>,
-typically the output from <code>summarize_codes(output_type = "tibble")</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
