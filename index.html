@@ -124,11 +124,10 @@
 <span><span class="va">excerpts</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="st">"file path"</span><span class="op">)</span></span>
 <span><span class="va">cooccurence</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="st">"file path"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Summarize codes per coder</span></span>
-<span><span class="fu"><a href="reference/summarize_codes.html">summarize_codes</a></span><span class="op">(</span><span class="va">excerpts</span>, </span>
-<span>                <span class="co"># If you have preferred coders, select below, or list all</span></span>
-<span>                <span class="va">preferred_coders</span>, </span>
-<span>                output_type <span class="op">=</span> <span class="va">kable</span><span class="op">)</span></span>
+<span><span class="co"># Summarize codes (total counts across coders and 1 coder/transcript according</span></span>
+<span><span class="co"># to listed coder preference)</span></span>
+<span><span class="va">preferred_coders</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"s"</span>, <span class="st">"r"</span>, <span class="st">"l"</span>, <span class="st">"a"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/summarize_codes.html">summarize_codes</a></span><span class="op">(</span><span class="va">excerpts</span>, <span class="va">preferred_coders</span>, output_type <span class="op">=</span> <span class="st">"datatable"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># If you've been tagging excerpts by quality indicators, set them below and </span></span>
 <span><span class="co"># summarize code counts based on these selections</span></span>
