@@ -13,41 +13,52 @@ preferred_coders <- c("s", "r", "l", "a")
 excerpts <- clean_data(filepath = filepath, preferred_coders = preferred_coders)
 
 # Summarize codes
-summary_data <- summarize_codes(excerpts = excerpts, preferred_coders = preferred_coders, output_type = "tibble")
+df_all_summary <- summarize_codes(excerpts = excerpts, preferred_coders = preferred_coders, output_type = "tibble")
 
 # Quality indicator check
-quality_indicators(
+df_qual_summary <- quality_indicators(
   excerpts = excerpts,
   preferred_coders = preferred_coders,
   qual_indicators = c("Priority excerpt", "Heterogeniety")
 )
 
 # Plot raw frequency
-plot_counts(summary_data,
+plot_counts(df_all_summary,
             plot_proportion = FALSE,
-            min_count = 40,
+            min_count = 10,
             exclude_codes = c("Priority excerpt", "Heterogeniety"))
 
 
 # Plot saturation by qual indicators
-summary_data <- summarize_codes(excerpts, preferred_coders, output_type = "tibble")
-quality_data <- quality_indicators(excerpts, preferred_coders,
-                                   qual_indicators = c("Priority excerpt", "Heterogeniety"))
-# Now call your plot function with these two datasets
 plot_saturation(
-  summary_data,
-  quality_data,
+  df_all_summary,
+  df_qual_summary,
   qual_indicators = c("Priority excerpt", "Heterogeniety"),
   min_counts = c("Priority excerpt" = 3, "Heterogeniety" = 3),
   stacked = TRUE,
   as_proportion = FALSE)
 
-## Change this to compare codes when you move qual indicator criteria around
-# Test returning the plot
-set_saturation(long_codes, min_priority = 3, min_heterogeneity = 3, plot = TRUE)
+# Plot saturation comparison
+# Define thresholds
+thresholds_list <- list(
+  "Set 1" = list(
+    `Priority excerpt` = 2,
+    Heterogeniety = 3
+  ),
+  "Set 2" = list(
+    `Priority excerpt` = 5,
+    Heterogeniety = 3
+  )
+)
 
-# Setting saturation criteria
-SAT <- set_saturation(long_codes, min_priority = 10, min_heterogeneity = 10, plot = FALSE)
+plot_saturation_comp(
+  summary_data = summary_data,
+  quality_summary = quality_summary,
+  thresholds_list = thresholds_list,
+  stacked = TRUE,
+  as_proportion = TRUE,
+  ncol = 2
+)
 
 # Code co-occurence
 
@@ -59,7 +70,7 @@ plot_code_cooccurrence_heatmap(file_path, min_frequency = 10)
 ## Create shell for function script
 library(usethis)
   # REPLACE with function name
-use_r("plot_saturation.R")
+use_r("plot_saturation_comp.R")
 
 # Paste function
 
@@ -73,7 +84,7 @@ use_r("plot_saturation.R")
 # Update documentation - run below in console
 devtools::document()
 # If you want to clear your current function so no conflict exists, run:
-rm(quality_indicators)
+rm(plot_saturation)
 
 # Run devtools::install() to rebuild & install your local package.
 devtools::install()
@@ -82,7 +93,6 @@ devtools::install()
 
 # Run below to rebuild sit
 pkgdown::build_site()
-
 
 # Restart R session and load package (library(DedooseR)).
 

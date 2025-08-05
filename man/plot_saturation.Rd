@@ -5,8 +5,8 @@
 \title{Plot Code Saturation by Quality Indicators}
 \usage{
 plot_saturation(
-  summarize_df,
-  quality_df,
+  df_all_summary,
+  df_qual_summary,
   qual_indicators = NULL,
   min_counts = NULL,
   stacked = TRUE,
@@ -14,10 +14,6 @@ plot_saturation(
 )
 }
 \arguments{
-\item{summarize_df}{A data frame (tibble) summarizing codes, must contain at least \code{Code} and \code{total_preferred_coder} columns.}
-
-\item{quality_df}{A data frame (tibble) containing quality indicator counts per code. Must have columns matching \code{paste0(qual_indicators, "_Count")} and a \code{Code} column.}
-
 \item{qual_indicators}{A character vector of quality indicator names to plot (e.g., \code{c("Priority excerpt", "Heterogeniety")}). These determine which columns to use and filter on.}
 
 \item{min_counts}{Optional named numeric vector specifying minimum counts for each quality indicator to include a code (e.g., \code{c("Priority excerpt" = 20, "Heterogeniety" = 30)}). Codes with counts below these thresholds for the respective quality indicators will be excluded.}
@@ -25,6 +21,10 @@ plot_saturation(
 \item{stacked}{Logical; if \code{TRUE} (default), bars for quality indicators will be stacked; if \code{FALSE}, bars will be dodged (side-by-side).}
 
 \item{as_proportion}{Logical; if \code{TRUE}, the y-axis will represent proportions of counts per code rather than raw counts.}
+
+\item{summarize_df}{A data frame (tibble) summarizing codes, must contain at least \code{Code} and \code{total_preferred_coder} columns.}
+
+\item{quality_df}{A data frame (tibble) containing quality indicator counts per code. Must have columns matching \code{paste0(qual_indicators, "_Count")} and a \code{Code} column.}
 }
 \value{
 A \code{ggplot} object displaying the counts or proportions of quality indicator annotations by code.

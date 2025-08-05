@@ -13,8 +13,8 @@
 <link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="DedooseR for Qualitative data monitoring &amp; analysis">
 <meta name="description" content="DedooseR is an R package that streamlines the analysis of qualitative data exported from Dedoose. It helps researchers monitor thematic saturation, calculate code frequencies, view and organize excerpts, develop dynamic codebooks, and assess interrater reliability - all within R.">
 <meta property="og:description" content="DedooseR is an R package that streamlines the analysis of qualitative data exported from Dedoose. It helps researchers monitor thematic saturation, calculate code frequencies, view and organize excerpts, develop dynamic codebooks, and assess interrater reliability - all within R.">
@@ -73,14 +73,13 @@
 <div class="section level2">
 <h2 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a>
 </h2>
-<p>DedooseR currently supports:</p>
+<p>DedooseR currently allows you to:</p>
 <ul>
-<li>Cleaning data exported from Dedoose and calculating code frequencies<br>
-</li>
-<li>Setting saturation criteria<br>
-</li>
-<li>Plotting saturation according to set critera</li>
-<li>Producing code co-occurrence heatmaps</li>
+<li>Clean data exported from Dedoose</li>
+<li>Summarize code frquencies with one coder/media title in order of coder preference</li>
+<li>Plot raw frequencies or proportions of codes applied to total codes, define min frequency to visualize and/or exclude codes</li>
+<li>Set a saturation criteria and plot it</li>
+<li>Produce code co-occurrence heatmaps</li>
 </ul>
 <div class="section level3">
 <h3 id="coming-soon">Coming Soon<a class="anchor" aria-label="anchor" href="#coming-soon"></a>
@@ -96,13 +95,12 @@
 <div class="section level2">
 <h2 id="why-this-package">Why This Package?<a class="anchor" aria-label="anchor" href="#why-this-package"></a>
 </h2>
-<p>Ongoing challenges in qualitative research include defining what constitutes high-quality data and demonstrating transparency in how saturation is reached (Small &amp; Calarco, 2022). Informed by guidelines for high-quality qualitative research (Hennink &amp; Kaiser, 2022), DedooseR pays particular attention to indicators like:</p>
+<p>Ongoing challenges in qualitative research include defining what constitutes high-quality data and demonstrating transparency in how saturation is reached (Small &amp; Calarco, 2022). Informed by guidelines for high-quality qualitative research (Hennink &amp; Kaiser, 2022), DedooseR allows you to better understand your data with quality tags in Dedoose like:</p>
 <ul>
 <li>The <strong>concreteness</strong> of excerpts (priority code)</li>
 <li>The <strong>heterogeneity</strong> within codes (heterogeneity code)</li>
 </ul>
-<p>By tagging these indicators in Dedoose and exploring them in R, we were able to gain greater confidence in both the <strong>depth</strong> and <strong>diversity</strong> of our dataset.</p>
-<p>Note: while the package currently requires that concreteness and heterogeneity are tagged in Dedoose, we will soon be relaxing the functionality so you can use the package even without it (though we strongly recommend it for reasons stated above).</p>
+<p>By tagging these indicators in Dedoose and exploring them in R, this allows for gain greater confidence in both the <strong>depth</strong> and <strong>diversity</strong> of datasets.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -115,27 +113,54 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>This is a basic example which shows you how to solve a common problem:</p>
+<p>This is a basic example which shows you how you may the package:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">DedooseR</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Load excerpts and co-occurence datasets from Dedoose</span></span>
+<span><span class="co"># Load excerpts from Dedoose</span></span>
 <span><span class="va">excerpts</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="st">"file path"</span><span class="op">)</span></span>
 <span><span class="va">cooccurence</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="st">"file path"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Clean data and calculate code frequencies</span></span>
-<span><span class="va">long_codes</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_saturation_tracking.html">create_saturation_tracking</a></span><span class="op">(</span><span class="va">excerpts</span>,</span>
-<span>                                         preferred_coders <span class="op">=</span> </span>
-<span>                                         <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"s"</span>, <span class="st">"r"</span>, <span class="st">"l"</span>, <span class="st">"a"</span><span class="op">)</span><span class="op">)</span></span>
-<span>                                         </span>
-<span><span class="co"># Plot code frequencies</span></span>
-<span><span class="fu"><a href="reference/plot_saturation.html">plot_saturation</a></span><span class="op">(</span><span class="va">excerpts</span><span class="op">)</span></span>
+<span><span class="co"># Clean data</span></span>
+<span><span class="va">filepath</span> <span class="op">&lt;-</span> <span class="st">"path/to/your/file"</span></span>
+<span><span class="va">preferred_coders</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"s"</span>, <span class="st">"r"</span>, <span class="st">"l"</span>, <span class="st">"a"</span><span class="op">)</span></span>
+<span><span class="va">excerpts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/clean_data.html">clean_data</a></span><span class="op">(</span>filepath <span class="op">=</span> <span class="va">filepath</span>, preferred_coders <span class="op">=</span> <span class="va">preferred_coders</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Set saturation criteria</span></span>
-<span><span class="fu"><a href="reference/set_saturation.html">set_saturation</a></span><span class="op">(</span><span class="va">excerpts</span>, min_priority <span class="op">=</span> <span class="fl">10</span>, min_heterogeneity <span class="op">=</span> <span class="fl">10</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co"># Summarize codes (1 coder/transcript according to listed coder preference)</span></span>
+<span><span class="va">summary_data</span> <span class="op">&lt;-</span><span class="fu"><a href="reference/summarize_codes.html">summarize_codes</a></span><span class="op">(</span><span class="va">excerpts</span>, </span>
+<span>                              <span class="va">preferred_coders</span>, </span>
+<span>                              output_type <span class="op">=</span> <span class="st">"datatable"</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Plot counts by raq frequency, proportion of total codes, set minimum count to </span></span>
+<span><span class="co"># visualize, and/or exclude codes</span></span>
+<span><span class="fu"><a href="reference/plot_counts.html">plot_counts</a></span><span class="op">(</span><span class="va">summary_data</span>,</span>
+<span>            plot_proportion <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>            min_count <span class="op">=</span> <span class="fl">40</span>,</span>
+<span>            exclude_codes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span>, <span class="st">"Heterogeniety"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span><span class="co"># If you've been tagging excerpts by quality indicators, set them below and </span></span>
+<span><span class="co"># summarize code counts based on these selections</span></span>
+<span><span class="va">summary_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/summarize_codes.html">summarize_codes</a></span><span class="op">(</span><span class="va">excerpts</span>, </span>
+<span>                                <span class="va">preferred_coders</span>, </span>
+<span>                                output_type <span class="op">=</span> <span class="st">"tibble"</span><span class="op">)</span></span>
+<span><span class="va">quality_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/quality_indicators.html">quality_indicators</a></span><span class="op">(</span><span class="va">excerpts</span>, </span>
+<span>                                  <span class="va">preferred_coders</span>,</span>
+<span>                                  qual_indicators <span class="op">=</span> </span>
+<span>                                  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span>, <span class="st">"Heterogeniety"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Now call your plot function with these two datasets</span></span>
+<span><span class="fu"><a href="reference/plot_saturation.html">plot_saturation</a></span><span class="op">(</span></span>
+<span>  <span class="va">summary_data</span>,</span>
+<span>  <span class="va">quality_data</span>,</span>
+<span>  qual_indicators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span>, <span class="st">"Heterogeniety"</span><span class="op">)</span>,</span>
+<span>  min_counts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span> <span class="op">=</span> <span class="fl">3</span>, <span class="st">"Heterogeniety"</span> <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  stacked <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  as_proportion <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Load co-occurence datasets from Dedoose</span></span>
+<span><span class="va">cooccurence</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="st">"file path"</span><span class="op">)</span></span>
 <span><span class="co"># Produce code co-occurence heat map</span></span>
-<span><span class="fu">cooccur</span><span class="op">(</span><span class="va">cooccur</span>, min_frequency <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">cooccur</span><span class="op">(</span><span class="va">cooccurence</span>, min_frequency <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -166,6 +191,7 @@
 <li>Abiraahmi Shankar <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0001-8354-5353" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 <li>Catalina Cañizares <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-6854-5205" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 <li>Francisco Cardozo <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-1925-4954" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Pamela Morris-Perez <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0003-3375-3458" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
@@ -176,7 +202,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Abiraahmi Shankar, Catalina Cañizares, Francisco Cardozo.</p>
+  <p>Developed by Abiraahmi Shankar, Catalina Cañizares, Francisco Cardozo, Pamela Morris-Perez.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -4,10 +4,14 @@
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
 <url><loc>/news/index.html</loc></url>
+<url><loc>/reference/clean_data.html</loc></url>
 <url><loc>/reference/coccur.html</loc></url>
 <url><loc>/reference/create_saturation_tracking.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/plot_counts.html</loc></url>
 <url><loc>/reference/plot_saturation.html</loc></url>
+<url><loc>/reference/quality_indicators.html</loc></url>
 <url><loc>/reference/set_saturation.html</loc></url>
+<url><loc>/reference/summarize_codes.html</loc></url>
 </urlset>
 

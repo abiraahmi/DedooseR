@@ -39,31 +39,31 @@
 #' @importFrom scales gradient_n_pal
 #' @export
 
-plot_saturation <- function(summarize_df, quality_df,
+plot_saturation <- function(df_all_summary, df_qual_summary,
                             qual_indicators = NULL,
                             min_counts = NULL,
                             stacked = TRUE,
                             as_proportion = FALSE # if TRUE, plots proportions
 ) {
   # Validate inputs
-  if (missing(summarize_df) || missing(quality_df)) {
-    stop("Please provide both summarize_codes and quality_indicators outputs.")
+  if (missing(df_all_summary) || missing(df_qual_summary)) {
+    stop("Please provide both df_all_summary and df_qual_summary data frames.")
   }
   if (is.null(qual_indicators) || length(qual_indicators) == 0) {
     stop("Please provide a character vector of quality indicator names.")
   }
 
-  # Confirm all required columns exist in quality_df
+  # Confirm all required columns exist in df_qual_summary
   count_cols <- paste0(qual_indicators, "_Count")
-  missing_cols <- setdiff(count_cols, colnames(quality_df))
+  missing_cols <- setdiff(count_cols, colnames(df_qual_summary))
   if (length(missing_cols) > 0) {
     stop("Missing quality indicator count columns: ",
          paste(missing_cols, collapse = ", "))
   }
 
-  # Join total_preferred_coder counts to quality_df on Code
-  plot_df <- quality_df %>%
-    left_join(summarize_df %>% select(Code, total_preferred_coder), by = "Code")
+  # Join total_preferred_coder counts from df_all_summary to df_qual_summary on Code
+  plot_df <- df_qual_summary %>%
+    left_join(df_all_summary %>% select(Code, total_preferred_coder), by = "Code")
 
   # Pivot longer by quality indicators for plotting
   plot_long <- plot_df %>%

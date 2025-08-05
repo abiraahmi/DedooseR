@@ -2,27 +2,36 @@ Package: DedooseR
 Title: DedooseR for Qualitative data monitoring & analysis
 Version: 0.0.1
 Authors@R: 
-    c(person(
+    c(
+      person(
         given  = "Abiraahmi",
         family = "Shankar", 
-        email = "abiraahmi.shankar@nyu.edu", 
-        role = c("aut", "cre"),
+        email  = "abiraahmi.shankar@nyu.edu", 
+        role   = c("aut", "cre"),
         comment = c(ORCID = "0000-0001-8354-5353")
       ), 
       person(
         given  = "Catalina",
         family = "Cañizares", 
-        email = "cc9082@nyu.edu", 
-        role = c("aut"),
+        email  = "cc9082@nyu.edu", 
+        role   = c("aut"),
         comment = c(ORCID = "0000-0002-6854-5205")
       ), 
       person(
         given  = "Francisco",
         family = "Cardozo", 
-        email = "foc9@miami.edu", 
-        role = c("aut"),
+        email  = "foc9@miami.edu", 
+        role   = c("aut"),
         comment = c(ORCID = "0000-0002-1925-4954")
-      ))
+      ),
+      person(
+        given  = "Pamela",
+        family = "Morris-Perez", 
+        email  = "pam7@nyu.edu", 
+        role   = c("aut"),
+        comment = c(ORCID = "0000-0003-3375-3458")
+      )
+    )
 Description: DedooseR is an R package that streamlines the analysis of 
              qualitative data exported from Dedoose. It helps researchers 
              monitor thematic saturation, calculate code frequencies, 

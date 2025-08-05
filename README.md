@@ -58,31 +58,74 @@ This is a basic example which shows you how you may the package:
 ``` r
 library(DedooseR)
 
-# Load excerpts and co-occurence datasets from Dedoose
+# Load excerpts from Dedoose
 excerpts <- read_xlsx("file path")
 cooccurence <- read_xlsx("file path")
 
-# Summarize codes (total counts across coders and 1 coder/transcript according
-# to listed coder preference)
+# Clean data
+filepath <- "path/to/your/file"
 preferred_coders <- c("s", "r", "l", "a")
-summarize_codes(excerpts, preferred_coders, output_type = "datatable")
+excerpts <- clean_data(filepath = filepath, preferred_coders = preferred_coders)
+
+# Summarize codes (1 coder/transcript according to listed coder preference)
+df_all_summary <-summarize_codes(excerpts, 
+                              preferred_coders, 
+                              output_type = "datatable")
+
+# Plot counts by raq frequency, proportion of total codes, set minimum count to 
+# visualize, and/or exclude codes
+plot_counts(df_all_summary,
+            plot_proportion = FALSE,
+            min_count = 40,
+            exclude_codes = c("Priority excerpt", "Heterogeniety"))
+
 
 # If you've been tagging excerpts by quality indicators, set them below and 
 # summarize code counts based on these selections
-quality_indicators(
-  excerpts = excerpts,
-  preferred_coders = preferred_coders,
-  qual_indicators = c("Priority excerpt", "Heterogeniety")
+
+df_qual_summary <- quality_indicators(excerpts, 
+                                  preferred_coders,
+                                  qual_indicators = 
+                                  c("Priority excerpt", "Heterogeniety"))
+df_all_summary <- summarize_codes(excerpts, 
+                                preferred_coders, 
+                                output_type = "tibble")
+# Now call your plot function with these two datasets
+# You can set a min code frequency to plot or plot by proportion of total counts
+plot_saturation(
+  df_all_summary,
+  df_qual_summary,
+  qual_indicators = c("Priority excerpt", "Heterogeniety"),
+  min_counts = c("Priority excerpt" = 3, "Heterogeniety" = 3),
+  stacked = TRUE,
+  as_proportion = FALSE)
+  
+# Play around with the thresholds and see which codes reach saturation
+# Define thresholds
+thresholds_list <- list(
+  "Set 1" = list(
+    `Priority excerpt` = 2,
+    Heterogeniety = 3
+  ),
+  "Set 2" = list(
+    `Priority excerpt` = 5,
+    Heterogeniety = 3
+  )
 )
-                                         
-# Plot code frequencies
-plot_saturation(excerpts)
 
-# Set saturation criteria
-set_saturation(excerpts, min_priority = 10, min_heterogeneity = 10, plot = FALSE)
+plot_saturation_comp(
+  summary_data = summary_data,
+  quality_summary = quality_summary,
+  thresholds_list = thresholds_list,
+  stacked = TRUE,
+  as_proportion = TRUE,
+  ncol = 2
+)
 
+# Load co-occurence datasets from Dedoose
+cooccurence <- read_xlsx("file path")
 # Produce code co-occurence heat map
-cooccur(cooccur, min_frequency = 10)
+cooccur(cooccurence, min_frequency = 10)
 
 ```
 
