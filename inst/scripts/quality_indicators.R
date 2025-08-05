@@ -19,50 +19,42 @@ quality_indicators <- function(excerpts = NULL,
     stop("Please specify at least one quality indicator code name in `qual_indicators`.")
   }
 
-  # Construct full column names for quality indicators
-  qual_cols <- paste0("Code: ", qual_indicators, " Applied")
-
-  # Check if all quality indicator columns exist
-  missing_cols <- setdiff(qual_cols, colnames(excerpts))
+  # Check if all quality indicator columns exist (clean names, no prefix/suffix)
+  missing_cols <- setdiff(qual_indicators, colnames(excerpts))
   if (length(missing_cols) > 0) {
     stop("These quality indicator columns are missing: ", paste(missing_cols, collapse = ", "))
   }
 
-  # Clean excerpts - keep preferred coder per Media Title
+  # Filter excerpts to preferred coders per Media Title (if not already done)
+  # Optional: skip if already done in clean_data()
   excerpts_clean <- excerpts %>%
-    select(-c(`Excerpt Range`, `Excerpt Date`, `Resource Creator`, `Resource Date`),
-           -ends_with("Range"), -ends_with("Weight")) %>%
-    mutate(coder_rank = match(`Excerpt Creator`, preferred_coders)) %>%
-    filter(!is.na(coder_rank)) %>%
-    group_by(`Media Title`) %>%
-    filter(coder_rank == min(coder_rank)) %>%
-    ungroup() %>%
-    select(-coder_rank, -`Excerpt Creator`)
+    dplyr::mutate(coder_rank = base::match(`Excerpt Creator`, preferred_coders)) %>%
+    dplyr::filter(!is.na(coder_rank)) %>%
+    dplyr::group_by(`Media Title`) %>%
+    dplyr::filter(coder_rank == min(coder_rank)) %>%
+    dplyr::ungroup()
 
-  # Identify excerpts where each quality indicator applied
-  qual_excerpts_list <- lapply(qual_cols, function(col) {
-    excerpts %>%
-      filter(.data[[col]] == "True") %>%
-      pull(`Excerpt Copy`)
+  # Identify excerpts where each quality indicator applied (logical TRUE)
+  qual_excerpts_list <- lapply(qual_indicators, function(col) {
+    excerpts_clean %>%
+      dplyr::filter(.data[[col]] == TRUE) %>%
+      dplyr::pull(`Excerpt Copy`)
   })
   names(qual_excerpts_list) <- qual_indicators
 
   # Identify all code columns except the quality indicators
-  code_columns <- grep("^Code: ", colnames(excerpts), value = TRUE)
-  code_columns <- setdiff(code_columns, qual_cols)
+  code_columns <- setdiff(
+    colnames(excerpts_clean)[vapply(excerpts_clean, is.logical, logical(1))],
+    qual_indicators
+  )
 
   # Convert to long format and add indicator flags
-  long_codes <- excerpts %>%
-    select(`Excerpt Copy`, all_of(code_columns)) %>%
-    pivot_longer(cols = all_of(code_columns), names_to = "Code", values_to = "Applied") %>%
-    filter(Applied == "True") %>%
-    mutate(
-      Code = str_replace(Code, "^Code: ?", ""),
-      Code = str_replace(Code, " Applied$", ""),
-      Code = str_replace(Code, "\\\\", "\\\\\\\\")
-    )
+  long_codes <- excerpts_clean %>%
+    dplyr::select(`Excerpt Copy`, dplyr::all_of(code_columns)) %>%
+    tidyr::pivot_longer(cols = dplyr::all_of(code_columns), names_to = "Code", values_to = "Applied") %>%
+    dplyr::filter(Applied == TRUE)
 
-  # Add columns for each quality indicator flag
+  # Add columns for each quality indicator flag (1 if excerpt copy is in that qual indicator's excerpts)
   for (qual in qual_indicators) {
     long_codes[[paste0(qual, "_Applied")]] <- ifelse(long_codes$`Excerpt Copy` %in% qual_excerpts_list[[qual]], 1, 0)
   }
@@ -74,11 +66,12 @@ quality_indicators <- function(excerpts = NULL,
     paste0(qual_indicators, "_Count")
   )
 
+  arrange_exprs <- purrr::map(paste0(qual_indicators, "_Count"), function(col) {
+    rlang::expr(dplyr::desc(!!rlang::sym(col)))
+  })
+
   long_codes %>%
     group_by(Code) %>%
     summarise(!!!summarise_expr, .groups = "drop") %>%
-    arrange(across(starts_with(qual_indicators[1]), desc), across(starts_with(qual_indicators[2]), desc))
+    arrange(!!!arrange_exprs)
 }
-
-
-

@@ -6,7 +6,7 @@
 \usage{
 summarize_codes(
   excerpts,
-  preferred_coders = NULL,
+  preferred_coders,
   output_type = c("tibble", "kable", "datatable")
 )
 }

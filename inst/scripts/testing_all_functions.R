@@ -16,9 +16,6 @@ excerpts <- clean_data(filepath = filepath, preferred_coders = preferred_coders)
 summarize_codes(excerpts = excerpts, preferred_coders = preferred_coders, output_type = "datatable")
 
 # Quality indicator check
-
-excerpts <- read_xlsx("inst/raw_data/test_data_manipulated.xlsx")
-preferred_coders <- c("s", "r", "l", "a")
 quality_indicators(
   excerpts = excerpts,
   preferred_coders = preferred_coders,
@@ -48,7 +45,7 @@ plot_code_cooccurrence_heatmap(file_path, min_frequency = 10)
 ## Create shell for function script
 library(usethis)
   # REPLACE with function name
-use_r("clean_data.R")
+use_r("quality_indicators.R")
 
 # Paste function
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/quality_indicators.R
 \name{quality_indicators}
 \alias{quality_indicators}
-\title{Summarize Quality Indicators Applied to Excerpts by Preferred Coders}
+\title{Summarize Quality Indicator Counts by Code from Excerpts Data}
 \usage{
 quality_indicators(
   excerpts = NULL,
@@ -11,44 +11,40 @@ quality_indicators(
 )
 }
 \arguments{
-\item{excerpts}{A data frame containing excerpt coding data, including columns
-named like \code{"Code: <Indicator> Applied"} (e.g., \code{"Code: Priority excerpt Applied"}).}
+\item{excerpts}{A data frame containing excerpt data with logical code columns.
+Code columns should use clean variable names without prefixes or suffixes (e.g., \code{"Priority excerpt"}).}
 
-\item{preferred_coders}{A character vector specifying coder names in order of
-preference. For each media title, only excerpts from the highest-ranked coder are kept.}
+\item{preferred_coders}{A character vector specifying coders in order of preference.
+Used to filter excerpts to only those from the highest-ranked coder per media title.}
 
-\item{qual_indicators}{A character vector of quality indicator code names (without
-\code{"Code: "} prefix or \code{"Applied"} suffix). For example: \code{c("Priority excerpt", "Heterogeniety")}.}
+\item{qual_indicators}{A character vector of quality indicator code names to summarize.
+These should match the clean column names present in \code{excerpts}.}
 }
 \value{
-A tibble summarizing counts of excerpts coded with each code, along with counts
-for each specified quality indicator applied, grouped by code.
+A tibble grouped by \code{Code} containing counts of excerpts where each quality indicator was applied.
+Columns are named as \code{"<quality_indicator>_Count"}.
+The output is arranged in descending order by these counts.
 }
 \description{
-This function analyzes coding excerpts data, filters to keep only excerpts
-from preferred coders (by their order of preference), and summarizes how
-frequently specified quality indicator codes are applied to excerpts.
+This function analyzes a data frame of coded excerpts to summarize counts of specified quality indicators
+by code. It filters excerpts to preferred coders per media title (if not already filtered),
+identifies excerpts where each quality indicator applies (logical TRUE),
+and returns a summary table counting how many excerpts for each code have each quality indicator applied.
 }
 \details{
-The function:
 \itemize{
-\item Validates the presence of quality indicator columns in the data.
-\item Filters excerpts to only include those from the preferred coder per media title.
-\item Converts wide code columns to long format.
-\item Flags excerpts where each quality indicator is applied.
-\item Summarizes and returns counts of how often each code appears along with counts
-of quality indicators applied.
+\item The function expects the \code{excerpts} data frame to have logical columns representing codes.
+\item It filters to preferred coders per media title to avoid duplicates.
+\item It computes counts of excerpts for each code where each quality indicator was applied.
+\item Input excerpts should be pre-cleaned with consistent code naming (e.g., using \code{clean_data()}).
 }
 }
 \examples{
 \dontrun{
-excerpts <- readxl::read_xlsx("path/to/excerpts.xlsx")
-preferred_coders <- c("s", "r", "l", "a")
-quality_indicators(
-  excerpts = excerpts,
-  preferred_coders = preferred_coders,
-  qual_indicators = c("Heterogeniety", "Priority excerpt", "Knowledge/Awareness")
-)
+# Assume 'df' is your cleaned excerpts data frame
+preferred_coders <- c("Coder1", "Coder2")
+qual_indicators <- c("Priority excerpt", "Heterogeniety")
+quality_indicators(df, preferred_coders, qual_indicators)
 }
 
 }
