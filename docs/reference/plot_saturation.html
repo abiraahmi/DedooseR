@@ -50,8 +50,8 @@ Only codes that have <em>all</em> specified quality indicators present at least 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_saturation</span><span class="op">(</span></span>
-<span>  <span class="va">summarize_df</span>,</span>
-<span>  <span class="va">quality_df</span>,</span>
+<span>  <span class="va">df_all_summary</span>,</span>
+<span>  <span class="va">df_qual_summary</span>,</span>
 <span>  qual_indicators <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  min_counts <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  stacked <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -63,15 +63,7 @@ Only codes that have <em>all</em> specified quality indicators present at least 
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-summarize-df">summarize_df<a class="anchor" aria-label="anchor" href="#arg-summarize-df"></a></dt>
-<dd><p>A data frame (tibble) summarizing codes, must contain at least <code>Code</code> and <code>total_preferred_coder</code> columns.</p></dd>
-
-
-<dt id="arg-quality-df">quality_df<a class="anchor" aria-label="anchor" href="#arg-quality-df"></a></dt>
-<dd><p>A data frame (tibble) containing quality indicator counts per code. Must have columns matching <code>paste0(qual_indicators, "_Count")</code> and a <code>Code</code> column.</p></dd>
-
-
-<dt id="arg-qual-indicators">qual_indicators<a class="anchor" aria-label="anchor" href="#arg-qual-indicators"></a></dt>
+<dl><dt id="arg-qual-indicators">qual_indicators<a class="anchor" aria-label="anchor" href="#arg-qual-indicators"></a></dt>
 <dd><p>A character vector of quality indicator names to plot (e.g., <code>c("Priority excerpt", "Heterogeniety")</code>). These determine which columns to use and filter on.</p></dd>
 
 
@@ -85,6 +77,14 @@ Only codes that have <em>all</em> specified quality indicators present at least 
 
 <dt id="arg-as-proportion">as_proportion<a class="anchor" aria-label="anchor" href="#arg-as-proportion"></a></dt>
 <dd><p>Logical; if <code>TRUE</code>, the y-axis will represent proportions of counts per code rather than raw counts.</p></dd>
+
+
+<dt id="arg-summarize-df">summarize_df<a class="anchor" aria-label="anchor" href="#arg-summarize-df"></a></dt>
+<dd><p>A data frame (tibble) summarizing codes, must contain at least <code>Code</code> and <code>total_preferred_coder</code> columns.</p></dd>
+
+
+<dt id="arg-quality-df">quality_df<a class="anchor" aria-label="anchor" href="#arg-quality-df"></a></dt>
+<dd><p>A data frame (tibble) containing quality indicator counts per code. Must have columns matching <code>paste0(qual_indicators, "_Count")</code> and a <code>Code</code> column.</p></dd>
 
 </dl></div>
     <div class="section level2">

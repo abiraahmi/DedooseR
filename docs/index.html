@@ -127,13 +127,13 @@
 <span><span class="va">excerpts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/clean_data.html">clean_data</a></span><span class="op">(</span>filepath <span class="op">=</span> <span class="va">filepath</span>, preferred_coders <span class="op">=</span> <span class="va">preferred_coders</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Summarize codes (1 coder/transcript according to listed coder preference)</span></span>
-<span><span class="va">summary_data</span> <span class="op">&lt;-</span><span class="fu"><a href="reference/summarize_codes.html">summarize_codes</a></span><span class="op">(</span><span class="va">excerpts</span>, </span>
+<span><span class="va">df_all_summary</span> <span class="op">&lt;-</span><span class="fu"><a href="reference/summarize_codes.html">summarize_codes</a></span><span class="op">(</span><span class="va">excerpts</span>, </span>
 <span>                              <span class="va">preferred_coders</span>, </span>
 <span>                              output_type <span class="op">=</span> <span class="st">"datatable"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Plot counts by raq frequency, proportion of total codes, set minimum count to </span></span>
 <span><span class="co"># visualize, and/or exclude codes</span></span>
-<span><span class="fu"><a href="reference/plot_counts.html">plot_counts</a></span><span class="op">(</span><span class="va">summary_data</span>,</span>
+<span><span class="fu"><a href="reference/plot_counts.html">plot_counts</a></span><span class="op">(</span><span class="va">df_all_summary</span>,</span>
 <span>            plot_proportion <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>            min_count <span class="op">=</span> <span class="fl">40</span>,</span>
 <span>            exclude_codes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span>, <span class="st">"Heterogeniety"</span><span class="op">)</span><span class="op">)</span></span>
@@ -141,21 +141,45 @@
 <span></span>
 <span><span class="co"># If you've been tagging excerpts by quality indicators, set them below and </span></span>
 <span><span class="co"># summarize code counts based on these selections</span></span>
-<span><span class="va">summary_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/summarize_codes.html">summarize_codes</a></span><span class="op">(</span><span class="va">excerpts</span>, </span>
-<span>                                <span class="va">preferred_coders</span>, </span>
-<span>                                output_type <span class="op">=</span> <span class="st">"tibble"</span><span class="op">)</span></span>
-<span><span class="va">quality_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/quality_indicators.html">quality_indicators</a></span><span class="op">(</span><span class="va">excerpts</span>, </span>
+<span></span>
+<span><span class="va">df_qual_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/quality_indicators.html">quality_indicators</a></span><span class="op">(</span><span class="va">excerpts</span>, </span>
 <span>                                  <span class="va">preferred_coders</span>,</span>
 <span>                                  qual_indicators <span class="op">=</span> </span>
 <span>                                  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span>, <span class="st">"Heterogeniety"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">df_all_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/summarize_codes.html">summarize_codes</a></span><span class="op">(</span><span class="va">excerpts</span>, </span>
+<span>                                <span class="va">preferred_coders</span>, </span>
+<span>                                output_type <span class="op">=</span> <span class="st">"tibble"</span><span class="op">)</span></span>
 <span><span class="co"># Now call your plot function with these two datasets</span></span>
+<span><span class="co"># You can set a min code frequency to plot or plot by proportion of total counts</span></span>
 <span><span class="fu"><a href="reference/plot_saturation.html">plot_saturation</a></span><span class="op">(</span></span>
-<span>  <span class="va">summary_data</span>,</span>
-<span>  <span class="va">quality_data</span>,</span>
+<span>  <span class="va">df_all_summary</span>,</span>
+<span>  <span class="va">df_qual_summary</span>,</span>
 <span>  qual_indicators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span>, <span class="st">"Heterogeniety"</span><span class="op">)</span>,</span>
 <span>  min_counts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span> <span class="op">=</span> <span class="fl">3</span>, <span class="st">"Heterogeniety"</span> <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  stacked <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  as_proportion <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  </span>
+<span><span class="co"># Play around with the thresholds and see which codes reach saturation</span></span>
+<span><span class="co"># Define thresholds</span></span>
+<span><span class="va">thresholds_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="st">"Set 1"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    `Priority excerpt` <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>    Heterogeniety <span class="op">=</span> <span class="fl">3</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  <span class="st">"Set 2"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    `Priority excerpt` <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>    Heterogeniety <span class="op">=</span> <span class="fl">3</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/plot_saturation_comp.html">plot_saturation_comp</a></span><span class="op">(</span></span>
+<span>  summary_data <span class="op">=</span> <span class="va">summary_data</span>,</span>
+<span>  quality_summary <span class="op">=</span> <span class="va">quality_summary</span>,</span>
+<span>  thresholds_list <span class="op">=</span> <span class="va">thresholds_list</span>,</span>
+<span>  stacked <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  as_proportion <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ncol <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Load co-occurence datasets from Dedoose</span></span>
 <span><span class="va">cooccurence</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="st">"file path"</span><span class="op">)</span></span>
