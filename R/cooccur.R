@@ -2,12 +2,16 @@
 #'
 #' @param file_path String path to Excel file containing co-occurrence matrix.
 #' @param sheet Integer or string specifying sheet number or name (default: 1).
-#' @param min_frequency Numeric; minimum frequency threshold to display in heatmap (default: 5).
-#' @param code_labels Optional named vector or data.frame for mapping codes to readable labels.
+#' @param min_frequency Numeric; minimum frequency threshold to display in
+#'  heatmap (default: 5).
+#' @param code_labels Optional named vector or data.frame for mapping codes to
+#' readable labels.
 #'   - If named vector: names are original codes, values are labels.
 #'   - If data.frame: must have columns 'Code' and 'Label'.
-#' @return A ggplot2 heatmap object visualizing code co-occurrences above the threshold.
-#' @importFrom ggplot2 ggplot aes geom_tile scale_fill_viridis_c theme theme_minimal element_text labs coord_flip element_blank
+#' @return A ggplot2 heatmap object visualizing code co-occurrences above the
+#' threshold.
+#' @importFrom ggplot2 ggplot aes geom_tile scale_fill_viridis_c theme
+#' theme_minimal element_text labs coord_flip element_blank
 #' @importFrom reshape2 melt
 #' @importFrom dplyr filter select mutate left_join
 #' @importFrom readxl read_excel
@@ -53,7 +57,8 @@ coccur <- function(file_path,
       melted_data$Code2 <- ifelse(melted_data$Code2 %in% names(code_labels),
                                   code_labels[melted_data$Code2],
                                   melted_data$Code2)
-    } else if (is.data.frame(code_labels) && all(c("Code", "Label") %in% colnames(code_labels))) {
+    } else if (is.data.frame(code_labels) && all(c("Code", "Label") %in%
+                                                 colnames(code_labels))) {
       # Data frame mapping
       melted_data <- melted_data %>%
         dplyr::left_join(code_labels, by = c("Code1" = "Code")) %>%
@@ -63,13 +68,16 @@ coccur <- function(file_path,
         dplyr::mutate(Code2 = ifelse(!is.na(Label), Label, Code2)) %>%
         dplyr::select(-Label)
     } else {
-      warning("`code_labels` must be a named vector or a data frame with columns 'Code' and 'Label'.")
+      warning("`code_labels` must be a named vector or a data frame with
+              columns 'Code' and 'Label'.")
     }
   }
 
   # Create heatmap plot
-  p <- ggplot2::ggplot(melted_data, ggplot2::aes(x = stats::reorder(Code2, Frequency), y = Code1, fill = Frequency)) +
-    ggplot2::geom_tile(color = "white", linewidth = 0.1) +  # use linewidth instead of deprecated size
+  p <- ggplot2::ggplot(melted_data, ggplot2::aes(
+    x = stats::reorder(Code2, Frequency), y = Code1, fill = Frequency)) +
+    # use linewidth instead of deprecated size
+    ggplot2::geom_tile(color = "white", linewidth = 0.1) +
     ggplot2::scale_fill_viridis_c(name = "Co-occurrence\nFrequency",
                          option = "plasma",
                          trans = "sqrt") +
@@ -81,7 +89,8 @@ coccur <- function(file_path,
       plot.title = ggplot2::element_text(size = 14, hjust = 0.5),
       legend.position = "right"
     ) +
-    ggplot2::labs(title = paste0("Code Co-occurrence Heatmap (>", min_frequency, ")"))
+    ggplot2::labs(title =
+                    paste0("Code Co-occurrence Heatmap (>", min_frequency, ")"))
 
   print(p)
   invisible(p)

@@ -62,8 +62,8 @@ plot_saturation_comp(
 
 # Code co-occurence
 
-file_path <- "inst/data/cooccur.xlsx"
-plot_code_cooccurrence_heatmap(file_path, min_frequency = 10)
+file_path <- "inst/raw_data/coccur.xlsx"
+coccur(file_path, sheet = 1, min_frequency = 10)
 
 
 # Instructions: PUSH TO PACKAGE

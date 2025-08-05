@@ -11,16 +11,19 @@ coccur(file_path, sheet = 1, min_frequency = 5, code_labels = NULL)
 
 \item{sheet}{Integer or string specifying sheet number or name (default: 1).}
 
-\item{min_frequency}{Numeric; minimum frequency threshold to display in heatmap (default: 5).}
+\item{min_frequency}{Numeric; minimum frequency threshold to display in
+heatmap (default: 5).}
 
-\item{code_labels}{Optional named vector or data.frame for mapping codes to readable labels.
+\item{code_labels}{Optional named vector or data.frame for mapping codes to
+readable labels.
 \itemize{
 \item If named vector: names are original codes, values are labels.
 \item If data.frame: must have columns 'Code' and 'Label'.
 }}
 }
 \value{
-A ggplot2 heatmap object visualizing code co-occurrences above the threshold.
+A ggplot2 heatmap object visualizing code co-occurrences above the
+threshold.
 }
 \description{
 Plot Code Co-occurrence Heatmap
