@@ -75,6 +75,7 @@
 </h2>
 <p>DedooseR currently supports:</p>
 <ul>
+<li>Summarize codes by coder</li>
 <li>Cleaning data exported from Dedoose and calculating code frequencies<br>
 </li>
 <li>Setting saturation criteria<br>
@@ -115,7 +116,7 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>This is a basic example which shows you how to solve a common problem:</p>
+<p>This is a basic example which shows you how you may the package:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">DedooseR</span><span class="op">)</span></span>
 <span></span>
@@ -123,8 +124,11 @@
 <span><span class="va">excerpts</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="st">"file path"</span><span class="op">)</span></span>
 <span><span class="va">cooccurence</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="st">"file path"</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Summarize codes per coder</span></span>
+<span><span class="fu"><a href="reference/summarize_codes.html">summarize_codes</a></span><span class="op">(</span><span class="va">excerpts</span>, <span class="va">preferred_coders</span>, output_type <span class="op">=</span> <span class="va">kable</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># Clean data and calculate code frequencies</span></span>
-<span><span class="va">long_codes</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_saturation_tracking.html">create_saturation_tracking</a></span><span class="op">(</span><span class="va">excerpts</span>,</span>
+<span><span class="va">long_codes</span> <span class="op">&lt;-</span> <span class="fu">create_saturation_tracking</span><span class="op">(</span><span class="va">excerpts</span>,</span>
 <span>                                         preferred_coders <span class="op">=</span> </span>
 <span>                                         <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"s"</span>, <span class="st">"r"</span>, <span class="st">"l"</span>, <span class="st">"a"</span><span class="op">)</span><span class="op">)</span></span>
 <span>                                         </span>
