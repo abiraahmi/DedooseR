@@ -60,7 +60,7 @@ devtools::document()
 # Run devtools::install() to rebuild & install your local package.
 devtools::install()
   # If you want to clear your current function so no conflict exists, run:
-  rm(quality_indicators)
+  rm(summarize_codes)
 
 # Restart R session and load package (library(DedooseR)).
 

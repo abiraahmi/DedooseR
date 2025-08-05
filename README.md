@@ -67,11 +67,10 @@ library(DedooseR)
 excerpts <- read_xlsx("file path")
 cooccurence <- read_xlsx("file path")
 
-# Summarize codes per coder
-summarize_codes(excerpts, 
-                # If you have preferred coders, select below, or list all
-                preferred_coders, 
-                output_type = kable)
+# Summarize codes (total counts across coders and 1 coder/transcript according
+# to listed coder preference)
+preferred_coders <- c("s", "r", "l", "a")
+summarize_codes(excerpts, preferred_coders, output_type = "datatable")
 
 # If you've been tagging excerpts by quality indicators, set them below and 
 # summarize code counts based on these selections

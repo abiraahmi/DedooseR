@@ -1,21 +1,27 @@
 #' Summarize Code Counts by Coder and from Preferred Coders
 #'
 #' This function summarizes how many times each code was applied by each coder,
-#' and presents the data in a wide format: one row per code, one column per coder,
+#' and presents the data in a wide format: one row per code, one column per
+#' coder,
 #' along with two total count columns:
 #' - Total count from all coders (regardless of preference)
-#' - Total count from preferred coders only (one coder per media title, selected in order of preference)
+#' - Total count from preferred coders only (one coder per media title, selected
+#'  in order of preference)
 #'
-#' @param excerpts A data frame of coded excerpts, typically read from an Excel file.
-#'        Must include a column `Excerpt Creator` indicating who coded each excerpt,
+#' @param excerpts A data frame of coded excerpts, typically read from an Excel
+#' file.
+#'        Must include a column `Excerpt Creator` indicating who coded each
+#'        excerpt,
 #'        a column `Media Title` identifying the transcript,
 #'        and columns prefixed with `Code:` for each code (binary indicators).
 #' @param preferred_coders A character vector of coder names in preferred order,
-#'        used to resolve duplicates when multiple coders coded the same transcript.
+#'        used to resolve duplicates when multiple coders coded the same
+#'        transcript.
 #' @param output_type A string indicating the output format: one of `"tibble"`,
 #'        `"kable"`, or `"datatable"`. Defaults to `"tibble"`.
 #'
-#' @return A table summarizing the number of times each code was applied by each coder,
+#' @return A table summarizing the number of times each code was applied by
+#' each coder,
 #'         including total counts from all coders and from preferred coders only.
 #'         The format depends on `output_type`.
 #' @export
