@@ -15,7 +15,7 @@ DedooseR currently allows you to:
 
 - Clean data exported from Dedoose
 - Summarize code frquencies with one coder/media title in order of coder preference
-- Plot raw frequencies, proportions and/or filter out codes
+- Plot raw frequencies or proportions of codes applied to total codes, define min frequency to visualize  and/or exclude codes
 - Set a saturation criteria and plot it
 - Produce code co-occurrence heatmaps  
 
