@@ -13,7 +13,7 @@ preferred_coders <- c("s", "r", "l", "a")
 excerpts <- clean_data(filepath = filepath, preferred_coders = preferred_coders)
 
 # Summarize codes
-summarize_codes(excerpts = excerpts, preferred_coders = preferred_coders, output_type = "datatable")
+summary_data <- summarize_codes(excerpts = excerpts, preferred_coders = preferred_coders, output_type = "tibble")
 
 # Quality indicator check
 quality_indicators(
@@ -21,6 +21,13 @@ quality_indicators(
   preferred_coders = preferred_coders,
   qual_indicators = c("Priority excerpt", "Heterogeniety")
 )
+
+# Plot raw frequency
+plot_counts(summary_data,
+            plot_proportion = FALSE,
+            min_count = 40,
+            exclude_codes = c("Priority excerpt", "Heterogeniety"))
+
 
 # Plot saturation by qual indicators
 plot_saturation(excerpts)
@@ -59,7 +66,7 @@ use_r("quality_indicators.R")
 # Update documentation - run below in console
 devtools::document()
 # If you want to clear your current function so no conflict exists, run:
-rm(summarize_codes)
+rm(quality_indicators)
 
 # Run devtools::install() to rebuild & install your local package.
 devtools::install()
