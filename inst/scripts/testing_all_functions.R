@@ -86,7 +86,7 @@ use_r("summarize_codes.R")
 # Update documentation - run below in console
 devtools::document()
 # If you want to clear your current function so no conflict exists, run:
-rm(plot_saturation)
+rm(summarize_codes)
 
 # Run devtools::install() to rebuild & install your local package.
 devtools::install()
