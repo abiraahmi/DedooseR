@@ -8,7 +8,7 @@ library(readxl)
 raw_data <- read_xlsx("inst/raw_data/test_data_manipulated.xlsx")
 
 # Clean data
-filepath <- "inst/raw_data/test_data_manipulated.xlsx"
+filepath <- "/Users/abishankar/Library/CloudStorage/Box-Box/Directing Change: Qualitative interviews (Spring 2025)/Data/Analysis/Downloaded data/Dedoose excerpts/2025-08-06.xlsx"
 preferred_coders <- c("s", "r", "l", "a")
 excerpts <- clean_data(filepath = filepath, preferred_coders = preferred_coders)
 
@@ -65,12 +65,14 @@ plot_saturation_comp(
 file_path <- "inst/raw_data/coccur.xlsx"
 coccur(file_path, sheet = 1, min_frequency = 10)
 
+# View excerpts
+view_excerpts(excerpts)
 
 # Instructions: PUSH TO PACKAGE
 ## Create shell for function script
 library(usethis)
   # REPLACE with function name
-use_r("plot_saturation_comp.R")
+use_r("summarize_codes.R")
 
 # Paste function
 

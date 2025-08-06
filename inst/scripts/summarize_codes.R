@@ -38,6 +38,11 @@ summarize_codes <- function(excerpts, preferred_coders,
     tidyr::pivot_wider(names_from = `Excerpt Creator`, values_from = Count, values_fill = 0) %>%
     dplyr::arrange(desc(Code))
 
+  # Rename coder columns to coder_01, coder_02, etc.
+  coder_names <- intersect(preferred_coders, colnames(coder_code_counts))
+  anonymized_names <- paste0("coder_", sprintf("%02d", seq_along(coder_names)))
+  names(coder_code_counts)[names(coder_code_counts) %in% coder_names] <- anonymized_names
+
   # Join totals to the coder_code_counts
   combined <- coder_code_counts %>%
     dplyr::left_join(total_preferred_coder, by = "Code") %>%

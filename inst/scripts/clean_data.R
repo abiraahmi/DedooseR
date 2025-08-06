@@ -9,14 +9,19 @@ clean_data <- function(filepath, preferred_coders) {
   # Read all columns as text to avoid type guessing warnings
   excerpts <- readxl::read_xlsx(filepath, col_types = "text")
 
+  # Rename "Excerpt Copy" to "Excerpt" for consistency
+  excerpts <- dplyr::rename(excerpts, Excerpt = `Excerpt Copy`)
+
   # Drop columns ending with Range or Weight
-  drop_cols <- base::grep("(Range|Weight)$", base::colnames(excerpts), value = TRUE)
+  drop_cols <- base::grep("(Range|Weight)$", base::colnames(excerpts),
+                          value = TRUE)
   excerpts <- dplyr::select(excerpts, -dplyr::all_of(drop_cols))
 
   # Identify code columns (starting with "Code: ")
   code_cols <- base::grep("^Code: ", base::colnames(excerpts), value = TRUE)
 
-  # Convert code columns from text to logical: TRUE if "true" (case insensitive), else FALSE
+  # Convert code columns from text to logical: TRUE if "true"
+  # (case insensitive), else FALSE
   for (col in code_cols) {
     vals <- excerpts[[col]]
     excerpts[[col]] <- tolower(vals) == "true"
