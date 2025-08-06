@@ -5,11 +5,17 @@ library(tidyverse)
 library(dplyr)
 library(readxl)
 
-raw_data <- read_xlsx("inst/raw_data/test_data_manipulated.xlsx")
+# # Clean data
+# filepath <- "inst/raw_data/test_data_manipulated.xlsx"
+# preferred_coders <- c("s", "r", "l", "a")
+# excerpts <- clean_data(filepath = filepath, preferred_coders = preferred_coders)
 
 # Clean data
-filepath <- "/Users/abishankar/Library/CloudStorage/Box-Box/Directing Change: Qualitative interviews (Spring 2025)/Data/Analysis/Downloaded data/Dedoose excerpts/2025-08-06.xlsx"
-preferred_coders <- c("s", "r", "l", "a")
+filepath = '/Users/abishankar/Library/CloudStorage/Box-Box/Directing Change: Qualitative interviews (Spring 2025)/Data/Analysis/Downloaded data/Dedoose excerpts/2025-08-06.xlsx'
+
+# Set preferred coders
+preferred_coders = c("safaltashukla", "ritvikkammend",
+                     "leaburgos", "lilianguo", "colinatlas")
 excerpts <- clean_data(filepath = filepath, preferred_coders = preferred_coders)
 
 # Summarize codes
@@ -72,7 +78,7 @@ view_excerpts(excerpts)
 ## Create shell for function script
 library(usethis)
   # REPLACE with function name
-use_r("summarize_codes.R")
+use_r("plot_saturation_comp.R")
 
 # Paste function
 
@@ -84,6 +90,7 @@ use_r("summarize_codes.R")
   # Push
 
 # Update documentation - run below in console
+devtools::load_all()
 devtools::document()
 # If you want to clear your current function so no conflict exists, run:
 rm(summarize_codes)
