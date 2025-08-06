@@ -3,38 +3,38 @@ library(tidyr)
 library(ggplot2)
 library(scales)  # for color manipulation
 
-plot_saturation <- function(summarize_df, quality_df,
+plot_saturation <- function(df_all_summary, df_qual_summary,
                             qual_indicators = NULL,
-                            min_counts = NULL,    # named numeric vector, e.g. c("Priority excerpt" = 20, "Heterogeniety" = 30)
+                            min_counts = NULL,
                             stacked = TRUE,
-                            as_proportion = FALSE # if TRUE, plot proportions per code
+                            as_proportion = FALSE # if TRUE, plots proportions
 ) {
   # Validate inputs
-  if (missing(summarize_df) || missing(quality_df)) {
-    stop("Please provide both summarize_codes and quality_indicators outputs.")
+  if (missing(df_all_summary) || missing(df_qual_summary)) {
+    stop("Please provide both df_all_summary and df_qual_summary data frames.")
   }
   if (is.null(qual_indicators) || length(qual_indicators) == 0) {
     stop("Please provide a character vector of quality indicator names.")
   }
 
-  # Confirm all required columns exist in quality_df
-  count_cols <- paste0(qual_indicators, "_Count")
-  missing_cols <- setdiff(count_cols, colnames(quality_df))
+  # Confirm all required columns exist in df_qual_summary
+  count_cols <- qual_indicators
+  missing_cols <- setdiff(count_cols, colnames(df_qual_summary))
   if (length(missing_cols) > 0) {
-    stop("Missing quality indicator count columns: ", paste(missing_cols, collapse = ", "))
+    stop("Missing quality indicator columns: ",
+         paste(missing_cols, collapse = ", "))
   }
 
-  # Join total_preferred_coder counts to quality_df on Code
-  plot_df <- quality_df %>%
-    left_join(summarize_df %>% select(Code, total_preferred_coder), by = "Code")
+  # Join total_preferred_coder counts from df_all_summary to df_qual_summary by Code
+  plot_df <- df_qual_summary %>%
+    left_join(df_all_summary %>% select(Code, total_preferred_coder), by = "Code")
 
   # Pivot longer by quality indicators for plotting
   plot_long <- plot_df %>%
     select(Code, total_preferred_coder, all_of(count_cols)) %>%
-    pivot_longer(cols = all_of(count_cols), names_to = "QualityIndicator", values_to = "Count") %>%
-    mutate(
-      QualityIndicator = sub("_Count$", "", QualityIndicator)
-    )
+    pivot_longer(cols = all_of(count_cols),
+                 names_to = "QualityIndicator",
+                 values_to = "Count")
 
   # Apply minimum count filtering if min_counts provided
   if (!is.null(min_counts)) {
@@ -42,14 +42,16 @@ plot_saturation <- function(summarize_df, quality_df,
       stop("All names of min_counts must be in qual_indicators.")
     }
     plot_long <- plot_long %>%
-      filter(!(QualityIndicator %in% names(min_counts) & Count < min_counts[QualityIndicator]))
+      filter(!(QualityIndicator %in% names(min_counts) &
+                 Count < min_counts[QualityIndicator]))
   }
 
-  # Keep only codes that have all quality indicators with Count > 0 ***
+  # Keep only codes that have all quality indicators with Count > 0
   codes_with_all_qual_indicators <- plot_long %>%
     group_by(Code) %>%
     summarize(
-      all_present = all(qual_indicators %in% QualityIndicator[Count > 0])
+      all_present = all(qual_indicators %in% QualityIndicator[Count > 0]),
+      .groups = "drop"
     ) %>%
     filter(all_present) %>%
     pull(Code)
@@ -66,7 +68,7 @@ plot_saturation <- function(summarize_df, quality_df,
       ungroup()
   }
 
-  # Order codes by total_preferred_coder descending (only codes left after filtering)
+  # Order codes by total_preferred_coder descending
   remaining_codes <- plot_long %>%
     distinct(Code, total_preferred_coder) %>%
     arrange(desc(total_preferred_coder)) %>%
@@ -96,17 +98,17 @@ plot_saturation <- function(summarize_df, quality_df,
   if (as_proportion) {
     # Use Proportion for y and set y-axis label accordingly
     p <- p +
-      geom_bar(aes(y = Proportion), stat = "identity", position = ifelse(stacked, "stack", "dodge")) +
+      geom_bar(aes(y = Proportion),
+               stat = "identity",
+               position = ifelse(stacked, "stack", "dodge")) +
       ylab("Proportion of Total Counts")
   } else {
     # Use Count for y
     p <- p +
-      geom_bar(aes(y = Count), stat = "identity", position = ifelse(stacked, "stack", "dodge")) +
+      geom_bar(aes(y = Count), stat = "identity",
+               position = ifelse(stacked, "stack", "dodge")) +
       ylab("Count")
   }
 
   return(p)
 }
-
-
-

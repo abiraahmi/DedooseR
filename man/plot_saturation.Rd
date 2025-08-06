@@ -18,16 +18,15 @@ plot_saturation(
 least \code{Code} and \code{total_preferred_coder} columns.}
 
 \item{df_qual_summary}{A data frame (tibble) containing quality indicator counts
-per code. Must have columns matching \code{paste0(qual_indicators, "_Count")} and
-a \code{Code} column.}
+per code. Must have columns named exactly as in \code{qual_indicators}, and a \code{Code} column.}
 
 \item{qual_indicators}{A character vector of quality indicator names to plot
-(e.g., \code{c("Priority excerpt", "Heterogeniety")}). These determine which
+(e.g., \code{c("Priority excerpt", "Heterogeneity")}). These determine which
 columns to use and filter on.}
 
 \item{min_counts}{Optional named numeric vector specifying minimum counts for
 each quality indicator to include a code
-(e.g., \code{c("Priority excerpt" = 20, "Heterogeniety" = 30)}). Codes with
+(e.g., \code{c("Priority excerpt" = 20, "Heterogeneity" = 30)}). Codes with
 counts below these thresholds for the respective quality indicators will be
 excluded.}
 
@@ -63,13 +62,13 @@ zero for \emph{all} specified quality indicators.
 summary_data <- summarize_codes(excerpts, preferred_coders,
 output_type = "tibble")
 quality_data <- quality_indicators(excerpts, preferred_coders,
-qual_indicators = c("Priority excerpt", "Heterogeniety"))
+qual_indicators = c("Priority excerpt", "Heterogeneity"))
 
 plot_saturation(
   summary_data,
   quality_data,
-  qual_indicators = c("Priority excerpt", "Heterogeniety"),
-  min_counts = c("Priority excerpt" = 3, "Heterogeniety" = 3),
+  qual_indicators = c("Priority excerpt", "Heterogeneity"),
+  min_counts = c("Priority excerpt" = 3, "Heterogeneity" = 3),
   stacked = TRUE,
   as_proportion = FALSE
 )
