@@ -55,6 +55,7 @@ Imports:
     rlang,
     tibble,
     scales,
-    patchwork
+    patchwork,
+    labelled
 Suggests:
     testthat (>= 3.0.0)

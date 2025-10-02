@@ -2,41 +2,57 @@
 % Please edit documentation in R/clean_data.R
 \name{clean_data}
 \alias{clean_data}
-\title{Clean and Prepare Excerpts Data from Excel File}
+\title{Clean and prepare Dedoose excerpt data}
 \usage{
-clean_data(filepath, preferred_coders)
+clean_data(excerpts, preferred_coders)
 }
 \arguments{
-\item{filepath}{A character string giving the path to the Excel file to read.}
+\item{excerpts}{A data frame of excerpts or a file path (character string) to
+an Excel file exported from Dedoose.}
 
-\item{preferred_coders}{A character vector listing coders in order of preference.
-The function keeps excerpts only from the highest-ranked coder per \verb{Media Title}.}
+\item{preferred_coders}{A character vector giving the coders in order of
+preference. Excerpts will be filtered so that, for each media title,
+only excerpts from the highest-ranked coder are retained.}
 }
 \value{
-A cleaned tibble/data frame containing filtered excerpts with logical code columns
-and only preferred coders per media title.
+A cleaned \code{data.frame} containing excerpts and associated
+variables.
 }
 \description{
-This function reads an Excel file containing excerpt data, cleans and processes it by:
+This function takes excerpt data exported from Dedoose (either as a data frame
+or as a file path to an Excel file) and prepares it for analysis by:
 \itemize{
-\item Reading all columns as text to avoid type guessing issues,
-\item Dropping columns whose names end with "Range" or "Weight",
-\item Converting code columns (those starting with "Code: ") from text to logical,
-interpreting "true" (case insensitive) as TRUE, otherwise FALSE,
-\item Renaming code columns by removing the prefix "Code: " and suffix " Applied",
-\item Filtering the data to keep only one preferred coder per \verb{Media Title} based on the provided order.
+\item Standardizing variable names to lowercase
+\item Renaming \code{"excerpt copy"} to \code{"excerpt"}
+\item Dropping columns ending with \code{"range"} or \code{"weight"}
+\item Converting code columns (prefixed with \code{"code: "}) to logical variables
+\item Renaming code columns to remove prefixes/suffixes
+\item Filtering excerpts to retain only the coder with the highest preference
+\item Adding variable labels for interpretability
 }
 }
 \details{
-The function expects columns starting with "Code: " to contain textual "true"/"false" values,
-which are converted to logical TRUE/FALSE. Columns ending with "Range" or "Weight" are removed.
-Excerpts are filtered so that for each \verb{Media Title}, only the coder highest in the
-\code{preferred_coders} vector is retained.
+In addition to returning a cleaned data frame, the function creates a
+\code{codebook} object in the global environment that contains metadata on all
+variables in the dataset, including variable names, labels, and types.
+
+The function also creates a \code{codebook} object in the global environment
+with three columns:
+\itemize{
+\item \code{variable}: the variable name
+\item \code{label}: the variable label (if assigned, otherwise the name)
+\item \code{type}: the storage type/class of the variable
+}
 }
 \examples{
 \dontrun{
-preferred <- c("Coder1", "Coder2", "Coder3")
-cleaned_data <- clean_data("path/to/excerpts.xlsx", preferred)
+# Example usage
+excerpts <- readxl::read_xlsx("inst/raw_data/test_data_manipulated.xlsx")
+preferred_coders <- c("s", "r", "l", "a")
+cleaned <- clean_data(excerpts, preferred_coders)
+
+# View codebook
+head(codebook)
 }
 
 }

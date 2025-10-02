@@ -1,76 +1,147 @@
-#' Clean and Prepare Excerpts Data from Excel File
+#' Clean and prepare Dedoose excerpt data
 #'
-#' This function reads an Excel file containing excerpt data, cleans and processes it by:
-#' - Reading all columns as text to avoid type guessing issues,
-#' - Dropping columns whose names end with "Range" or "Weight",
-#' - Converting code columns (those starting with "Code: ") from text to logical,
-#'   interpreting "true" (case insensitive) as TRUE, otherwise FALSE,
-#' - Renaming code columns by removing the prefix "Code: " and suffix " Applied",
-#' - Filtering the data to keep only one preferred coder per `Media Title` based on the provided order.
+#' This function takes excerpt data exported from Dedoose (either as a data frame
+#' or as a file path to an Excel file) and prepares it for analysis by:
+#' \itemize{
+#'   \item Standardizing variable names to lowercase
+#'   \item Renaming `"excerpt copy"` to `"excerpt"`
+#'   \item Dropping columns ending with `"range"` or `"weight"`
+#'   \item Converting code columns (prefixed with `"code: "`) to logical variables
+#'   \item Renaming code columns to remove prefixes/suffixes
+#'   \item Filtering excerpts to retain only the coder with the highest preference
+#'   \item Adding variable labels for interpretability
+#' }
 #'
-#' @param filepath A character string giving the path to the Excel file to read.
-#' @param preferred_coders A character vector listing coders in order of preference.
-#'   The function keeps excerpts only from the highest-ranked coder per `Media Title`.
+#' In addition to returning a cleaned data frame, the function creates a
+#' `codebook` object in the global environment that contains metadata on all
+#' variables in the dataset, including variable names, labels, and types.
 #'
-#' @return A cleaned tibble/data frame containing filtered excerpts with logical code columns
-#'   and only preferred coders per media title.
+#' @param excerpts A data frame of excerpts or a file path (character string) to
+#'   an Excel file exported from Dedoose.
+#' @param preferred_coders A character vector giving the coders in order of
+#'   preference. Excerpts will be filtered so that, for each media title,
+#'   only excerpts from the highest-ranked coder are retained.
+#'
+#' @return A cleaned \code{data.frame} containing excerpts and associated
+#'   variables.
 #'
 #' @details
-#' The function expects columns starting with "Code: " to contain textual "true"/"false" values,
-#' which are converted to logical TRUE/FALSE. Columns ending with "Range" or "Weight" are removed.
-#' Excerpts are filtered so that for each `Media Title`, only the coder highest in the
-#' `preferred_coders` vector is retained.
-#'
-#' @importFrom readxl read_xlsx
-#' @importFrom dplyr select all_of rename_with starts_with ends_with mutate filter group_by ungroup
-#' @importFrom stringr str_replace
+#' The function also creates a \code{codebook} object in the global environment
+#' with three columns:
+#' \itemize{
+#'   \item \code{variable}: the variable name
+#'   \item \code{label}: the variable label (if assigned, otherwise the name)
+#'   \item \code{type}: the storage type/class of the variable
+#' }
 #'
 #' @examples
 #' \dontrun{
-#' preferred <- c("Coder1", "Coder2", "Coder3")
-#' cleaned_data <- clean_data("path/to/excerpts.xlsx", preferred)
+#' # Example usage
+#' excerpts <- readxl::read_xlsx("inst/raw_data/test_data_manipulated.xlsx")
+#' preferred_coders <- c("s", "r", "l", "a")
+#' cleaned <- clean_data(excerpts, preferred_coders)
+#'
+#' # View codebook
+#' head(codebook)
 #' }
 #'
 #' @export
-clean_data <- function(filepath, preferred_coders) {
-  if (!base::file.exists(filepath)) {
-    stop("The specified file does not exist.")
-  }
+clean_data <- function(excerpts, preferred_coders) {
   if (missing(preferred_coders) || is.null(preferred_coders)) {
     stop("Please provide a vector of preferred_coders in order of preference.")
   }
 
-  # Read all columns as text to avoid type guessing warnings
-  excerpts <- readxl::read_xlsx(filepath, col_types = "text")
-
-  # Drop columns ending with Range or Weight
-  drop_cols <- base::grep("(Range|Weight)$", base::colnames(excerpts), value = TRUE)
-  excerpts <- dplyr::select(excerpts, -dplyr::all_of(drop_cols))
-
-  # Identify code columns (starting with "Code: ")
-  code_cols <- base::grep("^Code: ", base::colnames(excerpts), value = TRUE)
-
-  # Convert code columns from text to logical: TRUE if "true" (case insensitive), else FALSE
-  for (col in code_cols) {
-    vals <- excerpts[[col]]
-    excerpts[[col]] <- tolower(vals) == "true"
+  # If a filepath was passed, read it in
+  if (is.character(excerpts) && length(excerpts) == 1) {
+    if (!file.exists(excerpts)) {
+      stop("The specified file does not exist.")
+    }
+    excerpts <- readxl::read_xlsx(excerpts, col_types = "text")
   }
 
-  # Rename code columns: remove prefix "Code: " and suffix " Applied"
-  excerpts <- dplyr::rename_with(excerpts,
-                                 ~ stringr::str_replace(., "^Code: ", ""),
-                                 dplyr::starts_with("Code:"))
-  excerpts <- dplyr::rename_with(excerpts,
-                                 ~ stringr::str_replace(., " Applied$", ""),
-                                 dplyr::ends_with("Applied"))
+  # Make variable names lower case
+  names(excerpts) <- tolower(names(excerpts))
 
-  # Filter to preferred coder per Media Title
+  # Rename "excerpt copy" to "excerpt" for consistency
+  if ("excerpt copy" %in% names(excerpts)) {
+    excerpts <- dplyr::rename(excerpts, excerpt = `excerpt copy`)
+  }
+
+  # Drop columns ending with range or weight
+  drop_cols <- grep("(range|weight)$", colnames(excerpts), value = TRUE)
+  if (length(drop_cols) > 0) {
+    excerpts <- dplyr::select(excerpts, -dplyr::all_of(drop_cols))
+  }
+
+  # Identify code columns (starting with "code: ")
+  code_cols <- grep("^code: ", colnames(excerpts), value = TRUE)
+
+  # Convert code columns from text to logical: TRUE if "true" (case insensitive)
+  for (col in code_cols) {
+    excerpts[[col]] <- stringr::str_to_lower(excerpts[[col]]) == "true"
+  }
+
+  # Rename code columns: remove prefix "code: " and suffix " applied"
+  excerpts <- dplyr::rename_with(
+    excerpts,
+    ~ stringr::str_replace(., "^code: ", ""),
+    .cols = dplyr::starts_with("code: ")
+  )
+  excerpts <- dplyr::rename_with(
+    excerpts,
+    ~ stringr::str_replace(., regex(" applied$", ignore_case = TRUE), ""),
+    .cols = dplyr::ends_with("applied")
+  )
+
+  # Save the final code column names (after renaming)
+  renamed_code_cols <- stringr::str_replace(code_cols, "^code: ", "")
+  renamed_code_cols <- stringr::str_replace(renamed_code_cols, regex(" applied$", ignore_case = TRUE), "")
+  final_code_cols <- intersect(colnames(excerpts), renamed_code_cols)
+
+  # Filter to preferred coder per media title
   excerpts <- excerpts %>%
-    dplyr::mutate(coder_rank = base::match(`Excerpt Creator`, preferred_coders)) %>%
+    dplyr::mutate(coder_rank = match(`excerpt creator`, preferred_coders)) %>%
     dplyr::filter(!is.na(coder_rank)) %>%
-    dplyr::group_by(`Media Title`) %>%
-    dplyr::filter(coder_rank == min(coder_rank)) %>%
+    dplyr::group_by(`media title`) %>%
+    dplyr::slice_min(coder_rank, with_ties = FALSE) %>%
     dplyr::ungroup()
+
+  # Add variable labels
+  if ("media title" %in% names(excerpts))
+    labelled::var_label(excerpts$`media title`) <- "transcript/media title"
+  if ("excerpt creator" %in% names(excerpts))
+    labelled::var_label(excerpts$`excerpt creator`) <- "coder who created the excerpt"
+  if ("excerpt date" %in% names(excerpts))
+    labelled::var_label(excerpts$`excerpt date`) <- "date excerpt was created"
+  if ("excerpt" %in% names(excerpts))
+    labelled::var_label(excerpts$excerpt) <- "full text of excerpt"
+  if ("codes applied combined" %in% names(excerpts))
+    labelled::var_label(excerpts$`codes applied combined`) <- "all codes applied to excerpt"
+  if ("resource date" %in% names(excerpts))
+    labelled::var_label(excerpts$`resource date`) <- "date media/transcript was added to Dedoose"
+  if ("coder rank" %in% names(excerpts))
+    labelled::var_label(excerpts$`coder rank`) <- "rank of coder, according to listed coder preference"
+
+  # Auto-label all code columns with their variable names
+  for (col in final_code_cols) {
+    labelled::var_label(excerpts[[col]]) <- col
+  }
+
+  # Save codebook in global environment
+  codebook <- data.frame(
+    variable = names(excerpts),
+    label = sapply(names(excerpts), function(col) {
+      lbl <- labelled::var_label(excerpts[[col]])
+      if (is.null(lbl) || lbl == "") col else lbl
+    }),
+    type = sapply(excerpts, function(x) class(x)[1]), # take first class if multiple
+    stringsAsFactors = FALSE
+  )
+  assign("codebook", codebook, envir = .GlobalEnv)
+  # --------------------------------------------------------
+
+  # Force return as base data.frame
+  excerpts <- as.data.frame(excerpts, stringsAsFactors = FALSE)
 
   return(excerpts)
 }
