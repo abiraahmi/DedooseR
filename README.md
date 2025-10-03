@@ -18,7 +18,7 @@ DedooseR currently allows you to:
 - Plot raw frequencies or proportions of codes applied to codes, define min frequency to visualize  and/or exclude codes
 - Set a saturation criteria and plot it
 - Plot and play with saturation thresholds
-- Produce code co-occurrence heatmaps  
+- Produce and plot code co-occurrence heatmaps  
 
 ### Coming Soon
 

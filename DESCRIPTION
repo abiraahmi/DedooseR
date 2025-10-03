@@ -47,7 +47,6 @@ Imports:
     dplyr,
     readxl,
     tidyr,
-    stringr,
     ggplot2,
     reshape2,
     knitr,
@@ -55,9 +54,9 @@ Imports:
     purrr,
     rlang,
     tibble,
-    scales,
-    patchwork,
     labelled,
-    kableExtra
+    kableExtra,
+    ggraph,
+    igraph
 Suggests:
     testthat (>= 3.0.0)
