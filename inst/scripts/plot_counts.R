@@ -1,58 +1,51 @@
-plot_counts <- function(summary_data,
-                        plot_proportion = FALSE,
+plot_counts <- function(code_counts,
+                        exclude_codes = NULL,
                         min_count = NULL,
-                        min_proportion = NULL,
-                        exclude_codes = NULL) {
-  # Ensure it's a tibble or data frame
-  if (!tibble::is_tibble(summary_data)) {
-    summary_data <- as.data.frame(summary_data)
+                        min_prop = NULL,
+                        metric = c("count", "n_media_titles"),
+                        fill_color = "steelblue") {
+  metric <- match.arg(metric)
+
+  # Check input
+  if (!is.data.frame(code_counts)) {
+    stop("`code_counts` must be a tibble or data frame (from count_codes()).")
+  }
+  if (!all(c("code", "count", "n_media_titles") %in% names(code_counts))) {
+    stop("`code_counts` must contain columns `code`, `count`, and `n_media_titles`.")
   }
 
-  # Sanity check: required columns
-  if (!"Code" %in% colnames(summary_data) || !"total_preferred_coder" %in% colnames(summary_data)) {
-    stop("`summary_data` must contain columns `Code` and `total_preferred_coder`.")
-  }
+  df <- code_counts
 
-  # Exclude certain codes
+  # Exclude codes
   if (!is.null(exclude_codes)) {
-    summary_data <- summary_data %>% dplyr::filter(!Code %in% exclude_codes)
+    df <- dplyr::filter(df, !(code %in% exclude_codes))
   }
 
-  # Filter by count
+  # Filter by count (uses chosen metric)
   if (!is.null(min_count)) {
-    summary_data <- summary_data %>% dplyr::filter(total_preferred_coder >= min_count)
+    df <- dplyr::filter(df, .data[[metric]] >= min_count)
   }
 
-  # Filter by proportion
-  if (!is.null(min_proportion)) {
-    total <- sum(summary_data$total_preferred_coder, na.rm = TRUE)
-    summary_data <- summary_data %>%
-      dplyr::mutate(Proportion = total_preferred_coder / total) %>%
-      dplyr::filter(Proportion >= min_proportion)
+  # Filter by proportion of max (uses chosen metric)
+  if (!is.null(min_prop)) {
+    max_val <- max(df[[metric]], na.rm = TRUE)
+    df <- dplyr::filter(df, .data[[metric]] >= min_prop * max_val)
   }
+
+  # Arrange for plotting (lowest to highest, so bars flip nicely)
+  df <- dplyr::arrange(df, .data[[metric]])
 
   # Plot
-  if (plot_proportion) {
-    if (!"Proportion" %in% names(summary_data)) {
-      total <- sum(summary_data$total_preferred_coder, na.rm = TRUE)
-      summary_data <- summary_data %>%
-        dplyr::mutate(Proportion = total_preferred_coder / total)
-    }
-
-    p <- ggplot2::ggplot(summary_data,
-                         ggplot2::aes(x = reorder(Code, Proportion), y = Proportion)) +
-      ggplot2::geom_col(fill = "#330662") +
-      ggplot2::coord_flip() +
-      ggplot2::labs(title = "Code Frequencies (Proportion)",
-                    x = "Code", y = "Proportion")
-  } else {
-    p <- ggplot2::ggplot(summary_data,
-                         ggplot2::aes(x = reorder(Code, total_preferred_coder), y = total_preferred_coder)) +
-      ggplot2::geom_col(fill = "#330662") +
-      ggplot2::coord_flip() +
-      ggplot2::labs(title = "Code Frequencies (Raw Count)",
-                    x = "Code", y = "Count")
-  }
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = reorder(code, .data[[metric]]),
+                                        y = .data[[metric]])) +
+    ggplot2::geom_col(fill = fill_color) +
+    ggplot2::coord_flip() +
+    ggplot2::labs(
+      x = "Code",
+      y = ifelse(metric == "count", "Excerpt Frequency", "Media Title Coverage"),
+      title = paste("Code Frequencies by", ifelse(metric == "count", "Excerpts", "Media Titles"))
+    ) +
+    ggplot2::theme_minimal()
 
   return(p)
 }

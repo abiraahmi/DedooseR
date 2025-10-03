@@ -2,42 +2,80 @@
 % Please edit documentation in R/plot_counts.R
 \name{plot_counts}
 \alias{plot_counts}
-\title{Plot Code Frequencies from Summarized Coding Data}
+\title{Plot code frequencies}
 \usage{
 plot_counts(
-  df_all_summary,
-  plot_proportion = FALSE,
+  code_counts,
+  exclude_codes = NULL,
   min_count = NULL,
-  min_proportion = NULL,
-  exclude_codes = NULL
+  min_prop = NULL,
+  metric = c("count", "n_media_titles"),
+  fill_color = "steelblue"
 )
 }
 \arguments{
-\item{df_all_summary}{A data frame or tibble containing at least two columns: \code{Code} and \code{total_preferred_coder},
-typically the output from \code{summarize_codes(output_type = "tibble")}.}
+\item{code_counts}{A tibble or data frame output from \code{\link[=count_codes]{count_codes()}}. Must
+contain at least the columns \code{code}, \code{count}, and \code{n_media_titles}.}
 
-\item{plot_proportion}{Logical. If \code{TRUE}, plots code frequencies as proportions of the total count.
-Defaults to \code{FALSE} (raw counts).}
+\item{exclude_codes}{A character vector of code names to exclude from the plot.
+Defaults to \code{NULL} (no exclusions).}
 
-\item{min_count}{Integer. Optional. Filters out codes with fewer than this number of occurrences.}
+\item{min_count}{An integer specifying the minimum absolute count for a code
+to be included. Defaults to \code{NULL}.}
 
-\item{min_proportion}{Numeric. Optional. Filters out codes with a proportion less than this value (e.g., 0.02).}
+\item{min_prop}{A numeric value between 0 and 1 specifying the minimum
+proportion (relative to the maximum of the chosen metric) required for a
+code to be included. Defaults to \code{NULL}.}
 
-\item{exclude_codes}{Character vector. Optional. Codes to exclude from the plot (e.g., c("Other", "Heterogeneity")).}
+\item{metric}{Which metric to plot. One of \code{"count"} (excerpt frequency) or
+\code{"n_media_titles"} (media title coverage). Defaults to \code{"count"}.}
+
+\item{fill_color}{A character string giving the fill color for the bars.
+Defaults to \code{"steelblue"}.}
 }
 \value{
-A \code{ggplot2} object showing a horizontal bar plot of code frequencies or proportions.
+A \code{ggplot} object showing code frequencies.
 }
 \description{
-Creates a horizontal bar plot of code frequencies based on the output of \code{summarize_codes()}.
-Users can optionally plot proportions instead of raw counts, filter by minimum frequency,
-or exclude specific codes.
+This function takes the output of \code{\link[=count_codes]{count_codes()}} and produces a bar plot of
+code frequencies using \code{ggplot2}. It supports excluding specific codes,
+filtering by absolute count, or filtering by proportion of the maximum count.
+The user can choose whether to plot the total excerpt frequency (\code{count}) or
+the number of distinct media titles containing each code (\code{n_media_titles}).
+}
+\details{
+\itemize{
+\item Codes can be filtered either by absolute count (\code{min_count}) or by proportion
+of the maximum (\code{min_prop}). If both are supplied, \emph{both filters are applied}.
+\item Codes listed in \code{exclude_codes} are removed prior to filtering.
+\item The \code{metric} argument controls whether the y-axis shows excerpt frequency or
+number of unique media titles containing the code.
+}
 }
 \examples{
-\dontrun{
-summary_data <- summarize_codes(my_excerpts, preferred_coders, output_type = "tibble")
-plot_counts(summary_data, plot_proportion = TRUE, min_proportion = 0.02)
-plot_counts(summary_data, min_count = 30, exclude_codes = c("Other"))
-}
+# Example data
+df <- data.frame(
+  media_title = c("Doc1", "Doc1", "Doc2", "Doc2", "Doc3"),
+  c_theme1 = c(TRUE, FALSE, TRUE, FALSE, TRUE),
+  c_theme2 = c(FALSE, TRUE, TRUE, TRUE, FALSE),
+  c_theme3 = c(FALSE, FALSE, FALSE, TRUE, TRUE)
+)
+
+code_counts <- count_codes(df)
+
+# Plot excerpt frequencies
+plot_counts(code_counts)
+
+# Plot by media-title coverage
+plot_counts(code_counts, metric = "n_media_titles")
+
+# Exclude one code
+plot_counts(code_counts, exclude_codes = "c_theme2")
+
+# Filter by absolute count
+plot_counts(code_counts, min_count = 2)
+
+# Filter by proportion (keep codes at least 50\% of max)
+plot_counts(code_counts, min_prop = 0.5)
 
 }
