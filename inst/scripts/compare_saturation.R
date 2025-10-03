@@ -26,7 +26,7 @@ compare_saturation <- function(code_counts, excerpts, thresholds_list,
   }
 }
 
-
+# Define thresholds
 thresholds_list <- list(
   Set1 = list(code_count = 10, prop_media_title = 0.2),
   Set2 = list(code_count = 10, prop_media_title = 0.4)
