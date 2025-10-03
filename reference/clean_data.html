@@ -3,11 +3,11 @@
 similar qualitative coding platform). It standardizes variable names,
 converts code columns to logicals, filters to the preferred coder per
 transcript, and assigns variable labels. A codebook is also generated and
-saved to the global environment."><meta property="og:description" content="This function cleans a dataset of coded excerpts exported from Dedoose (or a
+returned along with the cleaned dataset."><meta property="og:description" content="This function cleans a dataset of coded excerpts exported from Dedoose (or a
 similar qualitative coding platform). It standardizes variable names,
 converts code columns to logicals, filters to the preferred coder per
 transcript, and assigns variable labels. A codebook is also generated and
-saved to the global environment."><meta property="og:image" content="https://abiraahmi.github.io/DedooseR/reference/figures/sticker.png"><meta property="og:image:alt" content="DedooseR package hex sticker"><link rel="icon" type="image/png" href="reference/figures/sticker.png"><style>
+returned along with the cleaned dataset."><meta property="og:image" content="https://abiraahmi.github.io/DedooseR/reference/figures/sticker.png"><meta property="og:image:alt" content="DedooseR package hex sticker"><link rel="icon" type="image/png" href="reference/figures/sticker.png"><style>
   .navbar {
     background-color: #330662 !important;
   }
@@ -53,7 +53,7 @@ saved to the global environment."><meta property="og:image" content="https://abi
 similar qualitative coding platform). It standardizes variable names,
 converts code columns to logicals, filters to the preferred coder per
 transcript, and assigns variable labels. A codebook is also generated and
-saved to the global environment.</p>
+returned along with the cleaned dataset.</p>
     </div>
 
     <div class="section level2">
@@ -77,10 +77,15 @@ preference (e.g., <code>c("a", "l", "i", "r")</code>).</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A cleaned data frame of excerpts with standardized columns, filtered
-to the preferred coder, and with labeled variables. A codebook data frame
-is also assigned to the global environment.</p>
-    </div>
+    <p>A list with two elements:</p><dl><dt><code>data</code></dt>
+<dd><p>The cleaned data frame of excerpts with standardized columns,
+filtered to the preferred coder, and with labeled variables.</p></dd>
+
+<dt><code>codebook</code></dt>
+<dd><p>A data frame containing variable names, labels, and types.</p></dd>
+
+
+</dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The cleaning steps performed are:</p><ol><li><p>Standardize all column names to lowercase and replace spaces with underscores.</p></li>
@@ -90,13 +95,11 @@ is also assigned to the global environment.</p>
 <li><p>Convert code columns from text to logical (<code>TRUE</code> if "true", otherwise <code>FALSE</code>).</p></li>
 <li><p>Clean and rename code column names by stripping prefixes/suffixes and
 adding a <code>c_</code> prefix.</p></li>
-<li><p>Save the final set of cleaned code column names for labeling.</p></li>
 <li><p>Filter to the preferred coder for each <code>media_title</code>, based on the
 order of <code>preferred_coders</code>.</p></li>
 <li><p>Apply human-readable variable labels for common metadata fields and
 all code columns.</p></li>
-<li><p>Generate a codebook (variable, label, and type) and assign it to the
-global environment as <code>codebook</code>.</p></li>
+<li><p>Generate a codebook (variable, label, and type).</p></li>
 </ol></div>
 
     <div class="section level2">
@@ -105,11 +108,15 @@ global environment as <code>codebook</code>.</p></li>
 <span class="r-in"><span><span class="co"># Example usage</span></span></span>
 <span class="r-in"><span><span class="va">raw_excerpts</span> <span class="op">&lt;-</span> <span class="fu">readxl</span><span class="fu">::</span><span class="fu"><a href="https://readxl.tidyverse.org/reference/read_excel.html" class="external-link">read_xlsx</a></span><span class="op">(</span><span class="st">"inst/raw_data/test_data.xlsx"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">preferred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"l"</span>, <span class="st">"i"</span>, <span class="st">"r"</span>, <span class="st">"s"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">cleaned</span> <span class="op">&lt;-</span> <span class="fu">clean_data</span><span class="op">(</span><span class="va">raw_excerpts</span>, <span class="va">preferred</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">clean_data</span><span class="op">(</span><span class="va">raw_excerpts</span>, <span class="va">preferred</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># View the automatically created codebook</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">codebook</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Extract cleaned data</span></span></span>
+<span class="r-in"><span><span class="va">cleaned</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">data</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># View the generated codebook</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">codebook</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
