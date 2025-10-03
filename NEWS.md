@@ -1,5 +1,7 @@
+# DedooseR 0.0.4
+
 # DedooseR 0.0.3
-* 2025-10-03: Updated the set_saturation function so we can set by either code counts or transcript coverage
+* 2025-10-03: Updated the set_saturation function so we can set by either code counts, transcript coverage or both
 * 2025-10-03: Updated the plot_counts function so we can plot by either code counts or transcript coverage
 * 2025-10-03: Updated the count_codes function to output transcript coverage
 
