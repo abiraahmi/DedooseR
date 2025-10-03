@@ -1,5 +1,10 @@
 # Global variables used in NSE contexts to suppress R CMD check warnings
+
 #' @importFrom utils globalVariables
+#' @importFrom dplyr %>% across everything desc
+#' @importFrom ggplot2 scale_fill_gradient
+NULL
+
 utils::globalVariables(c(
   # Variables used in coccur.R
   "Frequency", "Label", "Code1", "Code2",
@@ -16,5 +21,8 @@ utils::globalVariables(c(
   # Additional variables flagged by R CMD check
   "Meets", "Set", "applied", "code", "excerpt_copy",
   "excerpt_creator", "media_title", "n_media_titles",
-  "name", "prop_media_titles", "weight"
+  "name", "prop_media_titles", "weight",
+
+  # Tidyverse pronouns/placeholders
+  ".", ".data", "count"
 ))

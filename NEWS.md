@@ -1,4 +1,5 @@
 # DedooseR 0.0.4
+* 2025-10-03: Added the merge_codes function to collapse codes into others/new ones
 * 2025-10-03: Added the create_cooccur_matrix function allowing for counts and proportions to be tabled
 * 2025-10-03: Added the plot_compare_saturation function so we can visualize the codes that meet criteria for thresholds set
 * 2025-10-03: Added the compare_saturation function so we can set saturation thresholds and see if codes meet them

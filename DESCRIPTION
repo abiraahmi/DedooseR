@@ -51,8 +51,6 @@ Imports:
     reshape2,
     knitr,
     DT,
-    purrr,
-    rlang,
     tibble,
     labelled,
     kableExtra,
