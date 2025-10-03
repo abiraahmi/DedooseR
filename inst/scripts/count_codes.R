@@ -1,6 +1,7 @@
 count_codes <- function(excerpts,
                         min_count = 1,
-                        output_type = c("tibble", "kable", "datatable")) {
+                        output_type = c("tibble", "kable", "datatable"),
+                        exclude = NULL) {
   output_type <- match.arg(output_type)
 
   if (!is.data.frame(excerpts)) {
@@ -14,12 +15,19 @@ count_codes <- function(excerpts,
   # Identify code columns — only logical columns assumed to be codes
   code_columns <- colnames(excerpts)[vapply(excerpts, is.logical, logical(1))]
 
+  # Drop excluded codes if specified
+  if (!is.null(exclude)) {
+    code_columns <- setdiff(code_columns, exclude)
+  }
+
   # Summarize total counts for each code
   total_counts <- excerpts %>%
     dplyr::select(media_title, all_of(code_columns)) %>%
-    tidyr::pivot_longer(cols = all_of(code_columns),
-                        names_to = "code",
-                        values_to = "applied") %>%
+    tidyr::pivot_longer(
+      cols = all_of(code_columns),
+      names_to = "code",
+      values_to = "applied"
+    ) %>%
     dplyr::filter(applied == TRUE) %>%
     dplyr::group_by(code) %>%
     dplyr::summarise(
