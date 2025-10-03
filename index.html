@@ -116,74 +116,63 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abiraahmi.github.io/DedooseR">DedooseR</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Load excerpts from Dedoose</span></span>
-<span><span class="va">excerpts</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="st">"file path"</span><span class="op">)</span></span>
-<span><span class="va">cooccurence</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="st">"file path"</span><span class="op">)</span></span>
-<span></span>
 <span><span class="co"># Clean data</span></span>
-<span><span class="va">filepath</span> <span class="op">&lt;-</span> <span class="st">"path/to/your/file"</span></span>
-<span><span class="va">preferred_coders</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"s"</span>, <span class="st">"r"</span>, <span class="st">"l"</span>, <span class="st">"a"</span><span class="op">)</span></span>
-<span><span class="va">excerpts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/clean_data.html">clean_data</a></span><span class="op">(</span>filepath <span class="op">=</span> <span class="va">filepath</span>, preferred_coders <span class="op">=</span> <span class="va">preferred_coders</span><span class="op">)</span></span>
+<span><span class="va">filepath</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="st">"inst/raw_data/test_data.xlsx"</span><span class="op">)</span></span>
+<span><span class="va">preferred_coders</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"l"</span>, <span class="st">"i"</span>, <span class="st">"r"</span>, <span class="st">"s"</span>, <span class="st">"v"</span>, <span class="st">"c"</span>, <span class="st">"n"</span>, <span class="st">"k"</span><span class="op">)</span></span>
+<span><span class="va">clean_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/clean_data.html">clean_data</a></span><span class="op">(</span><span class="va">filepath</span>, <span class="va">preferred_coders</span><span class="op">)</span></span>
+<span><span class="va">excerpts</span> <span class="op">&lt;-</span> <span class="va">clean_data</span><span class="op">$</span><span class="va">data</span></span>
+<span><span class="va">codebook</span> <span class="op">&lt;-</span> <span class="va">clean_data</span><span class="op">$</span><span class="va">codebook</span></span>
 <span></span>
-<span><span class="co"># Summarize codes (1 coder/transcript according to listed coder preference)</span></span>
-<span><span class="va">df_all_summary</span> <span class="op">&lt;-</span><span class="fu">summarize_codes</span><span class="op">(</span><span class="va">excerpts</span>, </span>
-<span>                              <span class="va">preferred_coders</span>, </span>
-<span>                              output_type <span class="op">=</span> <span class="st">"datatable"</span><span class="op">)</span></span>
+<span><span class="co"># Merge codes</span></span>
+<span><span class="va">excerpts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/merge_codes.html">merge_codes</a></span><span class="op">(</span><span class="va">excerpts</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  c_belonging_connectedness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"c_sense_of_belonging"</span>, <span class="st">"c_sense_of_belonging_others"</span>, <span class="st">"c_sense_of_belonging_self"</span>,</span>
+<span>    <span class="st">"c_sense_of_connectedness"</span>, <span class="st">"c_sense_of_connectedness_family"</span>,</span>
+<span>    <span class="st">"c_sense_of_connectedness_peers"</span>, <span class="st">"c_sense_of_connectedness_school_community"</span>,</span>
+<span>    <span class="st">"c_sense_of_connectedness_staff"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  c_suicide_comfort <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"c__suicide_comfort_directing_change"</span>, <span class="st">"c__suicide_comfort_general"</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Plot counts by raq frequency, proportion of total codes, set minimum count to </span></span>
-<span><span class="co"># visualize, and/or exclude codes</span></span>
-<span><span class="fu"><a href="reference/plot_counts.html">plot_counts</a></span><span class="op">(</span><span class="va">df_all_summary</span>,</span>
-<span>            plot_proportion <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>            min_count <span class="op">=</span> <span class="fl">40</span>,</span>
-<span>            exclude_codes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span>, <span class="st">"Heterogeniety"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Count codes</span></span>
+<span><span class="va">code_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/count_codes.html">count_codes</a></span><span class="op">(</span><span class="va">excerpts</span>,</span>
+<span>                           min_count <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>                           exclude <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"c_priority_excerpt"</span>, <span class="st">"c_heterogeneity"</span>, <span class="st">"c_program_implementation_unique_value_opportunity_from_dc"</span>,</span>
+<span>                                       <span class="st">"c_ripple_impact_ripple_impact_who"</span>, <span class="st">"c_ripple_impact_ripple_missed"</span><span class="op">)</span>,</span>
+<span>                           output <span class="op">=</span> <span class="st">"tibble"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># If you've been tagging excerpts by quality indicators, set them below and </span></span>
-<span><span class="co"># summarize code counts based on these selections</span></span>
+<span><span class="co"># Plot codes</span></span>
+<span><span class="va">plot_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/plot_counts.html">plot_counts</a></span><span class="op">(</span><span class="va">code_counts</span>,</span>
+<span>                           exclude_codes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"c_priority_excerpt"</span>, <span class="st">"c_self_efficacy"</span><span class="op">)</span>,</span>
+<span>                           metric <span class="op">=</span> <span class="st">"n_media_titles"</span>,</span>
+<span>                           min_prop <span class="op">=</span> <span class="fl">0.40</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">df_qual_summary</span> <span class="op">&lt;-</span> <span class="fu">quality_indicators</span><span class="op">(</span><span class="va">excerpts</span>, </span>
-<span>                                  <span class="va">preferred_coders</span>,</span>
-<span>                                  qual_indicators <span class="op">=</span> </span>
-<span>                                  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span>, <span class="st">"Heterogeniety"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">df_all_summary</span> <span class="op">&lt;-</span> <span class="fu">summarize_codes</span><span class="op">(</span><span class="va">excerpts</span>, </span>
-<span>                                <span class="va">preferred_coders</span>, </span>
-<span>                                output_type <span class="op">=</span> <span class="st">"tibble"</span><span class="op">)</span></span>
-<span><span class="co"># Now call your plot function with these two datasets</span></span>
-<span><span class="co"># You can set a min code frequency to plot or plot by proportion of total counts</span></span>
-<span><span class="fu"><a href="reference/plot_saturation.html">plot_saturation</a></span><span class="op">(</span></span>
-<span>  <span class="va">df_all_summary</span>,</span>
-<span>  <span class="va">df_qual_summary</span>,</span>
-<span>  qual_indicators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span>, <span class="st">"Heterogeniety"</span><span class="op">)</span>,</span>
-<span>  min_counts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span> <span class="op">=</span> <span class="fl">3</span>, <span class="st">"Heterogeniety"</span> <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span>
-<span>  stacked <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  as_proportion <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span>  </span>
-<span><span class="co"># Play around with the thresholds and see which codes reach saturation</span></span>
+<span><span class="co"># Set saturation</span></span>
+<span><span class="va">saturation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_saturation.html">set_saturation</a></span><span class="op">(</span><span class="va">code_counts</span>, min_count <span class="op">=</span> <span class="fl">10</span>, min_prop_media_titles <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Plot saturation</span></span>
+<span><span class="va">plot_saturation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/plot_saturation.html">plot_saturation</a></span><span class="op">(</span><span class="va">saturation</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Compare saturation</span></span>
+<span></span>
 <span><span class="co"># Define thresholds</span></span>
 <span><span class="va">thresholds_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  <span class="st">"Set 1"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    `Priority excerpt` <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>    Heterogeniety <span class="op">=</span> <span class="fl">3</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  <span class="st">"Set 2"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    `Priority excerpt` <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>    Heterogeniety <span class="op">=</span> <span class="fl">3</span></span>
-<span>  <span class="op">)</span></span>
+<span>  Set1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>code_count <span class="op">=</span> <span class="fl">20</span>, prop_media_title <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span>,</span>
+<span>  Set2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>code_count <span class="op">=</span> <span class="fl">40</span>, prop_media_title <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">plot_saturation_comp</span><span class="op">(</span></span>
-<span>  summary_data <span class="op">=</span> <span class="va">summary_data</span>,</span>
-<span>  quality_summary <span class="op">=</span> <span class="va">quality_summary</span>,</span>
-<span>  thresholds_list <span class="op">=</span> <span class="va">thresholds_list</span>,</span>
-<span>  stacked <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  as_proportion <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  ncol <span class="op">=</span> <span class="fl">2</span></span>
-<span><span class="op">)</span></span>
+<span><span class="co"># Apply thresholds</span></span>
+<span><span class="va">comp_saturation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/compare_saturation.html">compare_saturation</a></span><span class="op">(</span><span class="va">code_counts</span>, <span class="va">excerpts</span>, <span class="va">thresholds_list</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Load co-occurence datasets from Dedoose</span></span>
-<span><span class="va">cooccurence</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="st">"file path"</span><span class="op">)</span></span>
-<span><span class="co"># Produce code co-occurence heat map</span></span>
-<span><span class="fu">cooccur</span><span class="op">(</span><span class="va">cooccurence</span>, min_frequency <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Plot saturation comparisons</span></span>
+<span><span class="va">plot_saturation_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/plot_compare_saturation.html">plot_compare_saturation</a></span><span class="op">(</span><span class="va">comp_saturation</span>, <span class="va">thresholds_list</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create co-occurence matrix</span></span>
+<span><span class="va">cooccur_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_cooccur_matrix.html">create_cooccur_matrix</a></span><span class="op">(</span><span class="va">excerpts</span>, min_bold <span class="op">=</span> <span class="fl">0.25</span>, scale <span class="op">=</span> <span class="st">"proportion"</span>, output <span class="op">=</span> <span class="st">"data.frame"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create co-occurence network map</span></span>
+<span><span class="va">map_cooccur_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/map_cooccur_matrix.html">map_cooccur_matrix</a></span><span class="op">(</span><span class="va">cooccur_matrix</span>, edge_min <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
