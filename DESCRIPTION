@@ -57,6 +57,7 @@ Imports:
     tibble,
     scales,
     patchwork,
-    labelled
+    labelled,
+    kableExtra
 Suggests:
     testthat (>= 3.0.0)

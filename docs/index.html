@@ -75,11 +75,11 @@
 </h2>
 <p>DedooseR currently allows you to:</p>
 <ul>
-<li>Clean data exported from Dedoose</li>
+<li>Clean data exported from Dedoose and populate a codebook</li>
 <li>Summarize code frquencies with one coder/media title in order of coder preference</li>
-<li>Plot raw frequencies or proportions of codes applied to total codes, define min frequency to visualize and/or exclude codes</li>
+<li>Plot raw frequencies or proportions of codes applied to codes, define min frequency to visualize and/or exclude codes</li>
 <li>Set a saturation criteria and plot it</li>
-<li>Plot and play with saturation criteria sets</li>
+<li>Plot and play with saturation thresholds</li>
 <li>Produce code co-occurrence heatmaps</li>
 </ul>
 <div class="section level3">
@@ -87,8 +87,6 @@
 </h3>
 <ul>
 <li>Viewing and organizing excerpts in an interactive table</li>
-<li>Developing codebooks<br>
-</li>
 <li>Calculating reliability per coder (Cohen’s kappa) and between coders (Fleiss’ kappa)</li>
 </ul>
 </div>
@@ -152,7 +150,7 @@
 <span>                                output_type <span class="op">=</span> <span class="st">"tibble"</span><span class="op">)</span></span>
 <span><span class="co"># Now call your plot function with these two datasets</span></span>
 <span><span class="co"># You can set a min code frequency to plot or plot by proportion of total counts</span></span>
-<span><span class="fu">plot_saturation</span><span class="op">(</span></span>
+<span><span class="fu"><a href="reference/plot_saturation.html">plot_saturation</a></span><span class="op">(</span></span>
 <span>  <span class="va">df_all_summary</span>,</span>
 <span>  <span class="va">df_qual_summary</span>,</span>
 <span>  qual_indicators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span>, <span class="st">"Heterogeniety"</span><span class="op">)</span>,</span>

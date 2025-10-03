@@ -13,17 +13,16 @@ and rigor in qualitative coding and analysis.
 
 DedooseR currently allows you to:
 
-- Clean data exported from Dedoose
+- Clean data exported from Dedoose and populate a codebook
 - Summarize code frquencies with one coder/media title in order of coder preference
-- Plot raw frequencies or proportions of codes applied to total codes, define min frequency to visualize  and/or exclude codes
+- Plot raw frequencies or proportions of codes applied to codes, define min frequency to visualize  and/or exclude codes
 - Set a saturation criteria and plot it
-- Plot and play with saturation criteria sets 
+- Plot and play with saturation thresholds
 - Produce code co-occurrence heatmaps  
 
 ### Coming Soon
 
 - Viewing and organizing excerpts in an interactive table
-- Developing codebooks  
 - Calculating reliability per coder (Cohen's kappa) and between coders 
 (Fleiss' kappa)
 
