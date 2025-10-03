@@ -18,17 +18,17 @@
 #'     "I felt connected to peers.",
 #'     "We should normalize conversations about MH.",
 #'     "My teachers helped me belong.",
-#'     "I am comfortable talking about suicide."
+#'     "I am comfortable asking for help when I need it."
 #'   ),
 #'   c_belonging = c(TRUE, FALSE, TRUE, FALSE),
 #'   c_destigmatization = c(FALSE, TRUE, FALSE, FALSE),
 #'   c_suicide_comfort = c(FALSE, FALSE, FALSE, TRUE)
 #' )
 #'
-#' view_excerpts_table(df)
+#' view_excerpts(df)
 #'
 #' @export
-view_excerpts_table <- function(data) {
+view_excerpts <- function(data) {
   stopifnot(requireNamespace("DT", quietly = TRUE))
   stopifnot(requireNamespace("tidyr", quietly = TRUE))
   stopifnot("excerpt" %in% names(data))

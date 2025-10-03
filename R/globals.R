@@ -19,7 +19,7 @@ utils::globalVariables(c(
   "Count", "Type",
 
   # Additional variables flagged by R CMD check
-  "Meets", "Set", "applied", "code", "excerpt_copy",
+  "Meets", "Set", "applied", "code", "excerpt_copy", "excerpt",
   "excerpt_creator", "media_title", "n_media_titles",
   "name", "prop_media_titles", "weight",
 
