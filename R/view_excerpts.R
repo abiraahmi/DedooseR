@@ -1,4 +1,34 @@
-view_excerpts <- function(data) {
+#' Interactive excerpts table
+#'
+#' Creates an interactive datatable where users can filter excerpts by code.
+#' Automatically detects all code columns starting with "c_".
+#'
+#' @param data A data.frame or tibble with one column called `excerpt`
+#'   and multiple code columns starting with `"c_"`.
+#'
+#' @return A DT datatable widget.
+#'
+#' @examples
+#' library(dplyr)
+#' library(tidyr)
+#' library(DT)
+#'
+#' df <- tibble::tibble(
+#'   excerpt = c(
+#'     "I felt connected to peers.",
+#'     "We should normalize conversations about MH.",
+#'     "My teachers helped me belong.",
+#'     "I am comfortable talking about suicide."
+#'   ),
+#'   c_belonging = c(TRUE, FALSE, TRUE, FALSE),
+#'   c_destigmatization = c(FALSE, TRUE, FALSE, FALSE),
+#'   c_suicide_comfort = c(FALSE, FALSE, FALSE, TRUE)
+#' )
+#'
+#' view_excerpts_table(df)
+#'
+#' @export
+view_excerpts_table <- function(data) {
   stopifnot(requireNamespace("DT", quietly = TRUE))
   stopifnot(requireNamespace("tidyr", quietly = TRUE))
   stopifnot("excerpt" %in% names(data))
@@ -63,30 +93,3 @@ view_excerpts <- function(data) {
       wordBreak = 'break-word'
     )
 }
-
-# Load libraries
-library(DedooseR)
-library(tidyverse)
-library(dplyr)
-library(readxl)
-
-# Clean data
-filepath <- read_xlsx("inst/raw_data/test_data.xlsx")
-preferred_coders <- c("a", "l", "i", "r", "s", "v", "c", "n", "k")
-clean_data <- clean_data(filepath, preferred_coders)
-excerpts <- clean_data$data
-codebook <- clean_data$codebook
-
-# Merge codes
-excerpts <- merge_codes(excerpts, list(
-  c_belonging_connectedness = c(
-    "c_sense_of_belonging", "c_sense_of_belonging_others", "c_sense_of_belonging_self",
-    "c_sense_of_connectedness", "c_sense_of_connectedness_family",
-    "c_sense_of_connectedness_peers", "c_sense_of_connectedness_school_community",
-    "c_sense_of_connectedness_staff"
-  ),
-  c_suicide_comfort = c("c__suicide_comfort_directing_change", "c__suicide_comfort_general")
-))
-
-# View excerpts
-view_excerpts(excerpts)
