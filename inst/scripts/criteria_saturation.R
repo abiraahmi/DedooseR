@@ -1,52 +1,81 @@
+set_saturation <- function(code_counts,
+                           total_media_titles = NULL,
+                           min_count = 1,
+                           min_prop_media_titles = NULL,
+                           output_type = c("tibble", "kable")) {
+  output_type <- match.arg(output_type)
 
-set_saturation <- function(long_codes, min_priority = 3, min_heterogeneity = 3, plot = TRUE) {
-  # Check input validity
-  if (is.null(long_codes) || !is.data.frame(long_codes)) {
-    stop("Please provide a valid data frame from create_saturation_tracking().")
+  # Check input
+  if (!is.data.frame(code_counts)) {
+    stop("`code_counts` must be a tibble or data frame (from count_codes()).")
+  }
+  if (!all(c("code", "count", "n_media_titles") %in% names(code_counts))) {
+    stop("`code_counts` must contain columns `code`, `count`, and `n_media_titles`.")
   }
 
-  # Filter codes meeting both minimum thresholds
-  filtered_codes <- long_codes %>%
-    dplyr::filter(Priority_Count >= min_priority & Heterogeneity_Count >= min_heterogeneity)
-
-  if (nrow(filtered_codes) == 0) {
-    warning("No codes meet the minimum count thresholds.")
-    return(invisible(NULL))
+  # Determine denominator for proportions
+  if (is.null(total_media_titles)) {
+    total_media_titles <- max(code_counts$n_media_titles, na.rm = TRUE)
   }
 
-  if (plot) {
-    # Reshape data for plotting (long format)
-    filtered_melted <- filtered_codes %>%
-      dplyr::select(Code, Priority_Count, Heterogeneity_Count) %>%
-      tidyr::pivot_longer(cols = c(Priority_Count, Heterogeneity_Count),
-                          names_to = "Type",
-                          values_to = "Count") %>%
-      dplyr::filter(Count > 0)
+  # Filter by count first
+  df <- code_counts %>%
+    dplyr::filter(count >= min_count) %>%
+    dplyr::mutate(
+      prop_media_titles = round(n_media_titles / total_media_titles, 2)
+    ) %>%
+    dplyr::select(code, count, prop_media_titles)   # keep only these columns
 
-    # Generate plot
-    p <- ggplot2::ggplot(filtered_melted, ggplot2::aes(x = reorder(Code, Count), y = Count, fill = Type)) +
-      ggplot2::geom_bar(stat = "identity", position = "stack") +
-      ggplot2::theme_minimal() +
-      ggplot2::coord_flip() +
-      ggplot2::labs(
-        title = paste("Codes with Priority >=", min_priority, "and Heterogeneity >=", min_heterogeneity),
-        x = "Code",
-        y = "Count",
-        fill = "Type"
-      ) +
-      ggplot2::scale_fill_manual(values = c("Priority_Count" = "#330662",
-                                            "Heterogeneity_Count" = "#3CBBB1")) +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+  # Filter by proportion if requested
+  if (!is.null(min_prop_media_titles)) {
+    df <- df %>%
+      dplyr::filter(prop_media_titles >= min_prop_media_titles)
+  }
 
-    print(p)
-    invisible(p)
+  # Arrange
+  df <- df %>%
+    dplyr::arrange(dplyr::desc(count))
 
+  # Return in requested format
+  if (output_type == "kable") {
+    return(knitr::kable(
+      df,
+      caption = paste(
+        "Code Counts with Transcript Proportions (min_count =",
+        min_count,
+        ", min_prop_media_titles =",
+        ifelse(is.null(min_prop_media_titles), "none", min_prop_media_titles),
+        ")"
+      ),
+      digits = 2
+    ))
   } else {
-    # Return filtered codes in wide format with counts as columns
-    return(filtered_codes %>%
-             dplyr::select(Code, Priority_Count, Heterogeneity_Count))
+    return(df)
   }
 }
 
+# test_script.R
+
+library(DedooseR)
+library(tidyverse)
+library(dplyr)
+library(readxl)
+
+# Clean data
+excerpts <- read_xlsx("inst/raw_data/test_data.xlsx")
+preferred_coders <- c("a", "l", "i", "r", "s", "v", "c", "n", "k")
+excerpts <- clean_data(excerpts, preferred_coders)
+
+# Count codes
+code_counts <- count_codes(excerpts, min_count = 10, output = "tibble")
 
 
+# Plot codes
+plot_counts <- plot_counts(code_counts,
+                           exclude_codes = c("c_priority_excerpt", "c_self_efficacy"),
+                           metric = "n_media_titles",
+                           min_prop = 0.40)
+plot_counts
+
+# Set saturation
+saturation <- set_saturation(code_counts, min_count = 10, min_prop_media_titles = 0.25)
