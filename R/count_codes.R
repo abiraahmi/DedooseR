@@ -1,136 +1,108 @@
-#' Count codes by preferred coder and transcript
+#' Count code applications across excerpts
 #'
-#' Summarizes binary \code{c_*} code columns after restricting each transcript
-#' to a single preferred coder. Returns per-code totals across excerpts and,
-#' per code, the number and proportion of transcripts in which the code appears
-#' at least once.
+#' This function summarizes the frequency of applied codes (logical columns)
+#' across a dataset of excerpts. It returns the total number of excerpts where
+#' each code appears, as well as the number of unique `media_title`s in which
+#' the code is applied. Results can be returned as a tibble, a formatted table
+#' (`knitr::kable`), or an interactive table (`DT::datatable`).
 #'
-#' @param excerpts A data frame containing at least \code{media_title},
-#'   \code{excerpt_creator}, and one or more numeric/binary columns whose names
-#'   start with \code{"c_"} (0/1 recommended).
-#' @param preferred_coders Character vector of coder names, ordered from most-
-#'   to least-preferred. Used to select which coder's excerpts are retained per
-#'   transcript (\code{media_title}).
-#' @param output_type One of \code{"tibble"}, \code{"kable"}, or
-#'   \code{"datatable"}; controls the return type. Default is \code{"tibble"}.
-#' @param include_zero Logical; if \code{TRUE}, keep codes with zero total
-#'   applications. Default \code{FALSE}.
+#' @param excerpts A data frame containing at least a `media_title` column and
+#'   one or more logical columns (assumed to represent codes). Each row should
+#'   represent a coded excerpt.
+#' @param min_count An integer specifying the minimum number of occurrences
+#'   required for a code to be included in the output. Defaults to `1`.
+#' @param output_type Character string specifying the output format. Must be one of:
+#'   \itemize{
+#'     \item `"tibble"`: returns a tibble (default).
+#'     \item `"kable"`: returns a formatted table via \code{knitr::kable()}.
+#'     \item `"datatable"`: returns an interactive table via \code{DT::datatable()}.
+#'   }
+#'
+#' @return A summary of code counts in the format specified by `output_type`.
+#'   By default, a tibble with the following columns:
+#'   \describe{
+#'     \item{code}{The name of the code (column name).}
+#'     \item{count}{Total number of excerpts where the code was applied.}
+#'     \item{n_media_titles}{Number of unique `media_title`s containing at least one excerpt with the code.}
+#'   }
 #'
 #' @details
-#' For each transcript (\code{media_title}), the function keeps \emph{all}
-#' excerpts from the most-preferred coder present in \code{preferred_coders}
-#' and drops rows by other coders. It then:
-#' \enumerate{
-#' \item Computes \code{total_preferred_coder}: the sum of 1s for each code
-#'   across the retained excerpts.
-#' \item Computes \code{transcript_count}: the number of distinct transcripts
-#'   in which a code appears at least once, and \code{transcript_proportion}:
-#'   that count divided by the number of transcripts retained after filtering.
-#' }
-#'
-#' Uses dplyr's \code{.by} argument (requires dplyr >= 1.1.0). If you need
-#' compatibility with older dplyr versions, replace that step with an explicit
-#' \code{group_by(media_title)} + \code{filter()}.
-#'
-#' @return
-#' If \code{output_type = "tibble"}, a tibble with columns:
-#' \itemize{
-#' \item \code{Code}: the code variable name (a \code{c_*} column).
-#' \item \code{total_preferred_coder}: total number of applications (sum of 1s).
-#' \item \code{transcript_count}: number of transcripts with at least one 1.
-#' \item \code{transcript_proportion}: proportion of transcripts with at least one 1
-#'   (0–1, rounded to 2 decimals).
-#' }
-#' If \code{"kable"}, a \code{knitr_kable} object; if \code{"datatable"}, a
-#' \code{DT::datatable} widget.
+#' The function automatically identifies code columns as those that are logical
+#' (`TRUE`/`FALSE`) within the provided `excerpts` data frame. It reshapes the
+#' data to long format, filters for `TRUE` values, and aggregates counts at the
+#' code level.
 #'
 #' @examples
-#' set.seed(1)
-#' toy <- data.frame(
-#'   media_title     = rep(paste0("T", 1:3), each = 4),
-#'   excerpt_creator = rep(c("Ann","Bob","Ann","Cara"), 3),
-#'   c_help          = rbinom(12, 1, .4),
-#'   c_harm          = rbinom(12, 1, .2),
-#'   stringsAsFactors = FALSE
+#' # Example dataset
+#' df <- data.frame(
+#'   media_title = c("Doc1", "Doc1", "Doc2", "Doc2", "Doc3"),
+#'   c_theme1 = c(TRUE, FALSE, TRUE, FALSE, TRUE),
+#'   c_theme2 = c(FALSE, TRUE, TRUE, TRUE, FALSE),
+#'   c_theme3 = c(FALSE, FALSE, FALSE, TRUE, TRUE)
 #' )
-#' # Prefer Ann over Bob over Cara
-#' count_codes(toy, preferred_coders = c("Ann","Bob","Cara"))
 #'
-#' # Keep zero-count codes
-#' count_codes(toy, c("Ann","Bob","Cara"), include_zero = TRUE)
+#' # Get code counts as a tibble
+#' count_codes(df)
 #'
-#' # Return a knitr::kable table
-#' count_codes(toy, c("Ann","Bob","Cara"), output_type = "kable")
+#' # Apply a minimum count filter (codes must appear in >= 2 excerpts)
+#' count_codes(df, min_count = 2)
 #'
+#' # Return results as a kable
+#' if (requireNamespace("knitr", quietly = TRUE)) {
+#'   count_codes(df, output_type = "kable")
+#' }
+#'
+#' # Return results as an interactive datatable
+#' if (requireNamespace("DT", quietly = TRUE)) {
+#'   count_codes(df, output_type = "datatable")
+#' }
+#'
+#' @importFrom dplyr select filter group_by summarise n n_distinct arrange
+#' @importFrom tidyr pivot_longer
+#' @importFrom knitr kable
+#' @importFrom DT datatable
 #' @export
-count_codes <- function(excerpts, preferred_coders,
-                        output_type = c("tibble", "kable", "datatable"),
-                        include_zero = FALSE) {
+count_codes <- function(excerpts,
+                        min_count = 1,
+                        output_type = c("tibble", "kable", "datatable")) {
   output_type <- match.arg(output_type)
 
   if (!is.data.frame(excerpts)) {
     stop("`excerpts` must be a data frame.")
   }
 
-  if (missing(preferred_coders) || is.null(preferred_coders)) {
-    stop("Please provide a vector of preferred_coders in order of preference.")
+  if (!"media_title" %in% names(excerpts)) {
+    stop("`excerpts` must contain a `media_title` column.")
   }
 
-  # Identify code columns — all vars starting with "c_"
-  code_columns <- grep("^c_", colnames(excerpts), value = TRUE)
+  # Identify code columns — only logical columns assumed to be codes
+  code_columns <- colnames(excerpts)[vapply(excerpts, is.logical, logical(1))]
 
-  # Keep ALL excerpts from the preferred coder for each transcript
-  excerpts_clean <- excerpts %>%
-    dplyr::mutate(coder_rank = match(excerpt_creator, preferred_coders)) %>%
-    dplyr::filter(!is.na(coder_rank)) %>%
-    dplyr::filter(coder_rank == min(coder_rank, na.rm = TRUE), .by = media_title)
-
-  # ----- Code counts -----
-  total_counts <- excerpts_clean %>%
-    dplyr::select(all_of(code_columns)) %>%
-    tidyr::pivot_longer(cols = everything(), names_to = "Code", values_to = "Applied") %>%
-    dplyr::group_by(Code) %>%
-    dplyr::summarise(total_preferred_coder = sum(Applied, na.rm = TRUE), .groups = "drop")
-
-  # ----- Transcript counts -----
-  total_transcripts <- dplyr::n_distinct(excerpts_clean$media_title)
-
-  transcript_counts <- excerpts_clean %>%
+  # Summarize total counts for each code
+  total_counts <- excerpts %>%
     dplyr::select(media_title, all_of(code_columns)) %>%
-    tidyr::pivot_longer(cols = -media_title, names_to = "Code", values_to = "Applied") %>%
-    dplyr::group_by(media_title, Code) %>%
-    dplyr::summarise(any_applied = any(Applied == 1, na.rm = TRUE), .groups = "drop") %>%
-    dplyr::filter(any_applied) %>%
-    dplyr::count(Code, name = "transcript_count") %>%
-    dplyr::mutate(transcript_proportion = round(transcript_count / total_transcripts, 2))
+    tidyr::pivot_longer(cols = all_of(code_columns),
+                        names_to = "code",
+                        values_to = "applied") %>%
+    dplyr::filter(applied == TRUE) %>%
+    dplyr::group_by(code) %>%
+    dplyr::summarise(
+      count = dplyr::n(),  # total # of excerpts with this code
+      n_media_titles = dplyr::n_distinct(media_title),  # unique media_title coverage
+      .groups = "drop"
+    ) %>%
+    dplyr::filter(count >= min_count) %>%
+    dplyr::arrange(desc(count))
 
-  # ----- Merge -----
-  combined_final <- total_counts %>%
-    dplyr::left_join(transcript_counts, by = "Code") %>%
-    dplyr::mutate(
-      transcript_count = dplyr::coalesce(transcript_count, 0L),
-      transcript_proportion = dplyr::coalesce(transcript_proportion, 0)
-    )
-
-  # Optionally filter out zeros
-  if (!include_zero) {
-    combined_final <- combined_final %>%
-      dplyr::filter(total_preferred_coder > 0)
-  }
-
-  combined_final <- combined_final %>%
-    dplyr::arrange(desc(total_preferred_coder))
-
-  # ----- Output -----
+  # Return as requested format
   if (output_type == "kable") {
-    return(knitr::kable(combined_final, caption = "Code Counts (Preferred Coders Only)"))
+    return(knitr::kable(total_counts,
+                        caption = paste("Total Code Counts (min_count =", min_count, ")")))
   } else if (output_type == "datatable") {
-    return(DT::datatable(
-      combined_final,
-      caption = "Code Counts (Preferred Coders Only)",
-      options = list(pageLength = 30, autoWidth = TRUE)
-    ))
+    return(DT::datatable(total_counts,
+                         caption = paste("Total Code Counts (min_count =", min_count, ")"),
+                         options = list(pageLength = 30, autoWidth = TRUE)))
   } else {
-    return(combined_final)
+    return(total_counts)
   }
 }

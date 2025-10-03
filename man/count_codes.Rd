@@ -2,80 +2,74 @@
 % Please edit documentation in R/count_codes.R
 \name{count_codes}
 \alias{count_codes}
-\title{Count codes by preferred coder and transcript}
+\title{Count code applications across excerpts}
 \usage{
 count_codes(
   excerpts,
-  preferred_coders,
-  output_type = c("tibble", "kable", "datatable"),
-  include_zero = FALSE
+  min_count = 1,
+  output_type = c("tibble", "kable", "datatable")
 )
 }
 \arguments{
-\item{excerpts}{A data frame containing at least \code{media_title},
-\code{excerpt_creator}, and one or more numeric/binary columns whose names
-start with \code{"c_"} (0/1 recommended).}
+\item{excerpts}{A data frame containing at least a \code{media_title} column and
+one or more logical columns (assumed to represent codes). Each row should
+represent a coded excerpt.}
 
-\item{preferred_coders}{Character vector of coder names, ordered from most-
-to least-preferred. Used to select which coder's excerpts are retained per
-transcript (\code{media_title}).}
+\item{min_count}{An integer specifying the minimum number of occurrences
+required for a code to be included in the output. Defaults to \code{1}.}
 
-\item{output_type}{One of \code{"tibble"}, \code{"kable"}, or
-\code{"datatable"}; controls the return type. Default is \code{"tibble"}.}
-
-\item{include_zero}{Logical; if \code{TRUE}, keep codes with zero total
-applications. Default \code{FALSE}.}
+\item{output_type}{Character string specifying the output format. Must be one of:
+\itemize{
+\item \code{"tibble"}: returns a tibble (default).
+\item \code{"kable"}: returns a formatted table via \code{knitr::kable()}.
+\item \code{"datatable"}: returns an interactive table via \code{DT::datatable()}.
+}}
 }
 \value{
-If \code{output_type = "tibble"}, a tibble with columns:
-\itemize{
-\item \code{Code}: the code variable name (a \code{c_*} column).
-\item \code{total_preferred_coder}: total number of applications (sum of 1s).
-\item \code{transcript_count}: number of transcripts with at least one 1.
-\item \code{transcript_proportion}: proportion of transcripts with at least one 1
-(0–1, rounded to 2 decimals).
+A summary of code counts in the format specified by \code{output_type}.
+By default, a tibble with the following columns:
+\describe{
+\item{code}{The name of the code (column name).}
+\item{count}{Total number of excerpts where the code was applied.}
+\item{n_media_titles}{Number of unique \code{media_title}s containing at least one excerpt with the code.}
 }
-If \code{"kable"}, a \code{knitr_kable} object; if \code{"datatable"}, a
-\code{DT::datatable} widget.
 }
 \description{
-Summarizes binary \code{c_*} code columns after restricting each transcript
-to a single preferred coder. Returns per-code totals across excerpts and,
-per code, the number and proportion of transcripts in which the code appears
-at least once.
+This function summarizes the frequency of applied codes (logical columns)
+across a dataset of excerpts. It returns the total number of excerpts where
+each code appears, as well as the number of unique \code{media_title}s in which
+the code is applied. Results can be returned as a tibble, a formatted table
+(\code{knitr::kable}), or an interactive table (\code{DT::datatable}).
 }
 \details{
-For each transcript (\code{media_title}), the function keeps \emph{all}
-excerpts from the most-preferred coder present in \code{preferred_coders}
-and drops rows by other coders. It then:
-\enumerate{
-\item Computes \code{total_preferred_coder}: the sum of 1s for each code
-across the retained excerpts.
-\item Computes \code{transcript_count}: the number of distinct transcripts
-in which a code appears at least once, and \code{transcript_proportion}:
-that count divided by the number of transcripts retained after filtering.
-}
-
-Uses dplyr's \code{.by} argument (requires dplyr >= 1.1.0). If you need
-compatibility with older dplyr versions, replace that step with an explicit
-\code{group_by(media_title)} + \code{filter()}.
+The function automatically identifies code columns as those that are logical
+(\code{TRUE}/\code{FALSE}) within the provided \code{excerpts} data frame. It reshapes the
+data to long format, filters for \code{TRUE} values, and aggregates counts at the
+code level.
 }
 \examples{
-set.seed(1)
-toy <- data.frame(
-  media_title     = rep(paste0("T", 1:3), each = 4),
-  excerpt_creator = rep(c("Ann","Bob","Ann","Cara"), 3),
-  c_help          = rbinom(12, 1, .4),
-  c_harm          = rbinom(12, 1, .2),
-  stringsAsFactors = FALSE
+# Example dataset
+df <- data.frame(
+  media_title = c("Doc1", "Doc1", "Doc2", "Doc2", "Doc3"),
+  c_theme1 = c(TRUE, FALSE, TRUE, FALSE, TRUE),
+  c_theme2 = c(FALSE, TRUE, TRUE, TRUE, FALSE),
+  c_theme3 = c(FALSE, FALSE, FALSE, TRUE, TRUE)
 )
-# Prefer Ann over Bob over Cara
-count_codes(toy, preferred_coders = c("Ann","Bob","Cara"))
 
-# Keep zero-count codes
-count_codes(toy, c("Ann","Bob","Cara"), include_zero = TRUE)
+# Get code counts as a tibble
+count_codes(df)
 
-# Return a knitr::kable table
-count_codes(toy, c("Ann","Bob","Cara"), output_type = "kable")
+# Apply a minimum count filter (codes must appear in >= 2 excerpts)
+count_codes(df, min_count = 2)
+
+# Return results as a kable
+if (requireNamespace("knitr", quietly = TRUE)) {
+  count_codes(df, output_type = "kable")
+}
+
+# Return results as an interactive datatable
+if (requireNamespace("DT", quietly = TRUE)) {
+  count_codes(df, output_type = "datatable")
+}
 
 }
