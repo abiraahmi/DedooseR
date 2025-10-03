@@ -1,3 +1,57 @@
+#' Clean and prepare excerpt-level coding data
+#'
+#' This function cleans a dataset of coded excerpts exported from Dedoose (or a
+#' similar qualitative coding platform). It standardizes variable names,
+#' converts code columns to logicals, filters to the preferred coder per
+#' transcript, and assigns variable labels. A codebook is also generated and
+#' returned along with the cleaned dataset.
+#'
+#' @param excerpts A data frame containing raw excerpt-level coding data.
+#'   Must include at least the columns `media_title` and `excerpt_creator`.
+#' @param preferred_coders A character vector of coder IDs in order of
+#'   preference (e.g., \code{c("a", "l", "i", "r")}).
+#'
+#' @details
+#' The cleaning steps performed are:
+#' \enumerate{
+#'   \item Standardize all column names to lowercase and replace spaces with underscores.
+#'   \item Rename \code{excerpt_copy} to \code{excerpt} if present.
+#'   \item Drop columns ending in "range" or "weight".
+#'   \item Identify code columns (names starting with "code" and ending with "applied").
+#'   \item Convert code columns from text to logical (\code{TRUE} if "true", otherwise \code{FALSE}).
+#'   \item Clean and rename code column names by stripping prefixes/suffixes and
+#'         adding a \code{c_} prefix.
+#'   \item Filter to the preferred coder for each \code{media_title}, based on the
+#'         order of \code{preferred_coders}.
+#'   \item Apply human-readable variable labels for common metadata fields and
+#'         all code columns.
+#'   \item Generate a codebook (variable, label, and type).
+#' }
+#'
+#' @return A list with two elements:
+#' \describe{
+#'   \item{\code{data}}{The cleaned data frame of excerpts with standardized columns,
+#'   filtered to the preferred coder, and with labeled variables.}
+#'   \item{\code{codebook}}{A data frame containing variable names, labels, and types.}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' # Example usage
+#' raw_excerpts <- readxl::read_xlsx("inst/raw_data/test_data.xlsx")
+#' preferred <- c("a", "l", "i", "r", "s")
+#' result <- clean_data(raw_excerpts, preferred)
+#'
+#' # Extract cleaned data
+#' cleaned <- result$data
+#'
+#' # View the generated codebook
+#' head(result$codebook)
+#' }
+#'
+#' @importFrom dplyr rename select all_of rename_with mutate filter group_by ungroup
+#' @importFrom labelled var_label
+#' @export
 clean_data <- function(excerpts, preferred_coders) {
   if (missing(preferred_coders) || is.null(preferred_coders)) {
     stop("Please provide a vector of preferred_coders in order of preference.")
