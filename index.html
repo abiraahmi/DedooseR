@@ -41,7 +41,7 @@
 
     <a class="navbar-brand me-2" href="index.html">DedooseR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -128,7 +128,7 @@
 <span><span class="va">excerpts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/clean_data.html">clean_data</a></span><span class="op">(</span>filepath <span class="op">=</span> <span class="va">filepath</span>, preferred_coders <span class="op">=</span> <span class="va">preferred_coders</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Summarize codes (1 coder/transcript according to listed coder preference)</span></span>
-<span><span class="va">df_all_summary</span> <span class="op">&lt;-</span><span class="fu"><a href="reference/summarize_codes.html">summarize_codes</a></span><span class="op">(</span><span class="va">excerpts</span>, </span>
+<span><span class="va">df_all_summary</span> <span class="op">&lt;-</span><span class="fu">summarize_codes</span><span class="op">(</span><span class="va">excerpts</span>, </span>
 <span>                              <span class="va">preferred_coders</span>, </span>
 <span>                              output_type <span class="op">=</span> <span class="st">"datatable"</span><span class="op">)</span></span>
 <span></span>
@@ -147,12 +147,12 @@
 <span>                                  <span class="va">preferred_coders</span>,</span>
 <span>                                  qual_indicators <span class="op">=</span> </span>
 <span>                                  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span>, <span class="st">"Heterogeniety"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">df_all_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/summarize_codes.html">summarize_codes</a></span><span class="op">(</span><span class="va">excerpts</span>, </span>
+<span><span class="va">df_all_summary</span> <span class="op">&lt;-</span> <span class="fu">summarize_codes</span><span class="op">(</span><span class="va">excerpts</span>, </span>
 <span>                                <span class="va">preferred_coders</span>, </span>
 <span>                                output_type <span class="op">=</span> <span class="st">"tibble"</span><span class="op">)</span></span>
 <span><span class="co"># Now call your plot function with these two datasets</span></span>
 <span><span class="co"># You can set a min code frequency to plot or plot by proportion of total counts</span></span>
-<span><span class="fu"><a href="reference/plot_saturation.html">plot_saturation</a></span><span class="op">(</span></span>
+<span><span class="fu">plot_saturation</span><span class="op">(</span></span>
 <span>  <span class="va">df_all_summary</span>,</span>
 <span>  <span class="va">df_qual_summary</span>,</span>
 <span>  qual_indicators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Priority excerpt"</span>, <span class="st">"Heterogeniety"</span><span class="op">)</span>,</span>
@@ -173,7 +173,7 @@
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="reference/plot_saturation_comp.html">plot_saturation_comp</a></span><span class="op">(</span></span>
+<span><span class="fu">plot_saturation_comp</span><span class="op">(</span></span>
 <span>  summary_data <span class="op">=</span> <span class="va">summary_data</span>,</span>
 <span>  quality_summary <span class="op">=</span> <span class="va">quality_summary</span>,</span>
 <span>  thresholds_list <span class="op">=</span> <span class="va">thresholds_list</span>,</span>
