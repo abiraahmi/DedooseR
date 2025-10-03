@@ -10,7 +10,7 @@ plot_saturation <- function(df_all_summary, df_qual_summary,
                             as_proportion = FALSE # if TRUE, plots proportions
 ) {
   # Validate inputs
-  if (missing(df_all_summary) || missing(df_qual_summary)) {
+  if (missing(df_all_summary) || missing(df_qual_summaary)) {
     stop("Please provide both df_all_summary and df_qual_summary data frames.")
   }
   if (is.null(qual_indicators) || length(qual_indicators) == 0) {

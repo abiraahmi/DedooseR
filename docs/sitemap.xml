@@ -1,18 +1,19 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
-<url><loc>/404.html</loc></url>
-<url><loc>/LICENSE.html</loc></url>
-<url><loc>/authors.html</loc></url>
-<url><loc>/index.html</loc></url>
-<url><loc>/news/index.html</loc></url>
-<url><loc>/reference/clean_data.html</loc></url>
-<url><loc>/reference/coccur.html</loc></url>
-<url><loc>/reference/create_saturation_tracking.html</loc></url>
-<url><loc>/reference/index.html</loc></url>
-<url><loc>/reference/plot_counts.html</loc></url>
-<url><loc>/reference/plot_saturation.html</loc></url>
-<url><loc>/reference/plot_saturation_comp.html</loc></url>
-<url><loc>/reference/quality_indicators.html</loc></url>
-<url><loc>/reference/set_saturation.html</loc></url>
-<url><loc>/reference/summarize_codes.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/404.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/LICENSE.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/authors.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/index.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/news/index.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/reference/clean_data.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/reference/coccur.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/reference/count_codes.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/reference/create_saturation_tracking.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/reference/index.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/reference/plot_counts.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/reference/plot_saturation.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/reference/plot_saturation_comp.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/reference/quality_indicators.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/reference/set_saturation.html</loc></url>
+<url><loc>https://abiraahmi.github.io/DedooseR/reference/summarize_codes.html</loc></url>
 </urlset>
 

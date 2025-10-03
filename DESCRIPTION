@@ -38,6 +38,8 @@ Description: DedooseR is an R package that streamlines the analysis of
              view and organize excerpts, develop 
              dynamic codebooks, and assess interrater reliability - all within R.
 License: Apache License (>= 2)
+URL: https://abiraahmi.github.io/DedooseR, https://github.com/abiraahmi/DedooseR
+BugReports: https://github.com/abiraahmi/DedooseR/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2

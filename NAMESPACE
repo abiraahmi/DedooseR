@@ -2,6 +2,7 @@
 
 export(clean_data)
 export(coccur)
+export(count_codes)
 export(plot_counts)
 export(plot_saturation)
 export(plot_saturation_comp)
