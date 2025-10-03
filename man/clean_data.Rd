@@ -2,100 +2,56 @@
 % Please edit documentation in R/clean_data.R
 \name{clean_data}
 \alias{clean_data}
-\title{Clean and harmonize coded excerpts, keep preferred coder, and attach a codebook}
+\title{Clean and prepare excerpt-level coding data}
 \usage{
 clean_data(excerpts, preferred_coders)
 }
 \arguments{
-\item{excerpts}{A data frame of excerpts \emph{or} a single-length character
-file path to an \code{.xlsx} file. If a path is provided, it is read via
-\code{readxl::read_xlsx(col_types = "text")} and then processed.}
+\item{excerpts}{A data frame containing raw excerpt-level coding data.
+Must include at least the columns \code{media_title} and \code{excerpt_creator}.}
 
-\item{preferred_coders}{Character vector of coder names ordered from most- to
-least-preferred. Used to select the coder to retain within each transcript
-(\code{media_title}).}
+\item{preferred_coders}{A character vector of coder IDs in order of
+preference (e.g., \code{c("a", "l", "i", "r")}).}
 }
 \value{
-A base \code{data.frame} with:
-\itemize{
-\item normalized column names,
-\item binary \code{c_*} columns (0/1; may contain \code{NA}),
-\item only the preferred coder's excerpts per \code{media_title},
-\item attached variable labels (via \code{labelled}).
-}
-Additionally, a \code{data.frame} codebook is attached as
-\code{attr(result, "codebook")} with columns \code{variable}, \code{label},
-and \code{type}.
+A cleaned data frame of excerpts with standardized columns, filtered
+to the preferred coder, and with labeled variables. A codebook data frame
+is also assigned to the global environment.
 }
 \description{
-Reads (optionally) an Excel file of excerpts, normalizes column names,
-converts Dedoose-style code columns (names starting with \code{code} and
-ending with \code{applied}) to binary \code{c_*} variables, and keeps only
-the most-preferred coder's excerpts per transcript. Also applies
-human-readable variable labels and attaches a simple codebook as an attribute.
+This function cleans a dataset of coded excerpts exported from Dedoose (or a
+similar qualitative coding platform). It standardizes variable names,
+converts code columns to logicals, filters to the preferred coder per
+transcript, and assigns variable labels. A codebook is also generated and
+saved to the global environment.
 }
 \details{
-\strong{Name normalization}
-\itemize{
-\item All column names are converted to lowercase and spaces are replaced with
-underscores.
-\item If present, \code{excerpt_copy} is renamed to \code{excerpt}.
-\item Columns with names ending in \code{"range"} or \code{"weight"} are dropped.
-}
-
-\strong{Code columns -> binary \code{c_*}}
-\itemize{
-\item Columns whose names match \code{^code.*applied$} are interpreted as
-Dedoose code flags. Their contents are coerced using
-\code{tolower(trimws(x)) == "true"} and then cast to numeric
-(TRUE -> 1, FALSE -> 0; \code{NA} remains \code{NA}).
-\item Those columns are then renamed: remove the leading \code{code} token and the
-trailing \code{applied}, sanitize punctuation/spaces to underscores, and prefix with
-\code{"c_"} (e.g., \code{code "Help" applied} -> \code{c_help}).
-\item As a safeguard, \emph{all} columns starting with \code{c_} are coerced to
-numeric 0/1 via \code{as.numeric(as.logical(x))}.
-}
-
-\strong{Preferred coder filtering}
-\itemize{
-\item Within each \code{media_title}, the function computes the coder's rank
-via \code{match(excerpt_creator, preferred_coders)} and retains all rows
-from the single most-preferred coder present (ties are broken by first match
-in \code{preferred_coders}; other coders' rows are removed).
-}
-
-\strong{Labels and codebook}
-\itemize{
-\item Applies descriptive labels to common columns (e.g., \code{media_title},
-\code{excerpt_creator}, \code{excerpt_date}, \code{excerpt}, etc.) using
-\code{labelled::var_label()}.
-\item Auto-labels every \code{c_*} variable with its own name.
-\item Builds a simple codebook with variables, labels, and types and
-attaches it as \code{attr(x, "codebook")}.
+The cleaning steps performed are:
+\enumerate{
+\item Standardize all column names to lowercase and replace spaces with underscores.
+\item Rename \code{excerpt_copy} to \code{excerpt} if present.
+\item Drop columns ending in "range" or "weight".
+\item Identify code columns (names starting with "code" and ending with "applied").
+\item Convert code columns from text to logical (\code{TRUE} if "true", otherwise \code{FALSE}).
+\item Clean and rename code column names by stripping prefixes/suffixes and
+adding a \code{c_} prefix.
+\item Save the final set of cleaned code column names for labeling.
+\item Filter to the preferred coder for each \code{media_title}, based on the
+order of \code{preferred_coders}.
+\item Apply human-readable variable labels for common metadata fields and
+all code columns.
+\item Generate a codebook (variable, label, and type) and assign it to the
+global environment as \code{codebook}.
 }
 }
-\section{Requirements}{
-
-The input must contain at least \code{media_title} and \code{excerpt_creator}.
-If you want automatic code detection, code variables should follow the pattern
-\code{^code.*applied$} prior to renaming.
-}
-
 \examples{
 \dontrun{
-# From a data frame
-df <- data.frame(
-  media_title = c("T1","T1","T2"),
-  excerpt_creator = c("Ann","Bob","Ann"),
-  `code "Help" applied` = c("TRUE","false", NA),
-  code_harm_applied = c("true","true","false"),
-  stringsAsFactors = FALSE
-)
-clean <- clean_data(df, preferred_coders = c("Ann","Bob"))
-attr(clean, "codebook")  # access the attached codebook
+# Example usage
+raw_excerpts <- readxl::read_xlsx("inst/raw_data/test_data.xlsx")
+preferred <- c("a", "l", "i", "r", "s")
+cleaned <- clean_data(raw_excerpts, preferred)
 
-# From a file path (all columns initially read as text)
-# clean <- clean_data("path/to/excerpts.xlsx", preferred_coders = c("Ann","Bob","Cara"))
+# View the automatically created codebook
+head(codebook)
 }
-
 }

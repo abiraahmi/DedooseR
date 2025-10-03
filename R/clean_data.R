@@ -1,166 +1,100 @@
-#' Clean and harmonize coded excerpts, keep preferred coder, and attach a codebook
+#' Clean and prepare excerpt-level coding data
 #'
-#' Reads (optionally) an Excel file of excerpts, normalizes column names,
-#' converts Dedoose-style code columns (names starting with \code{code} and
-#' ending with \code{applied}) to binary \code{c_*} variables, and keeps only
-#' the most-preferred coder's excerpts per transcript. Also applies
-#' human-readable variable labels and attaches a simple codebook as an attribute.
+#' This function cleans a dataset of coded excerpts exported from Dedoose (or a
+#' similar qualitative coding platform). It standardizes variable names,
+#' converts code columns to logicals, filters to the preferred coder per
+#' transcript, and assigns variable labels. A codebook is also generated and
+#' saved to the global environment.
 #'
-#' @param excerpts A data frame of excerpts \emph{or} a single-length character
-#'   file path to an \code{.xlsx} file. If a path is provided, it is read via
-#'   \code{readxl::read_xlsx(col_types = "text")} and then processed.
-#' @param preferred_coders Character vector of coder names ordered from most- to
-#'   least-preferred. Used to select the coder to retain within each transcript
-#'   (\code{media_title}).
+#' @param excerpts A data frame containing raw excerpt-level coding data.
+#'   Must include at least the columns `media_title` and `excerpt_creator`.
+#' @param preferred_coders A character vector of coder IDs in order of
+#'   preference (e.g., \code{c("a", "l", "i", "r")}).
 #'
 #' @details
-#' \strong{Name normalization}
-#' \itemize{
-#' \item All column names are converted to lowercase and spaces are replaced with
-#'   underscores.
-#' \item If present, \code{excerpt_copy} is renamed to \code{excerpt}.
-#' \item Columns with names ending in \code{"range"} or \code{"weight"} are dropped.
+#' The cleaning steps performed are:
+#' \enumerate{
+#'   \item Standardize all column names to lowercase and replace spaces with underscores.
+#'   \item Rename \code{excerpt_copy} to \code{excerpt} if present.
+#'   \item Drop columns ending in "range" or "weight".
+#'   \item Identify code columns (names starting with "code" and ending with "applied").
+#'   \item Convert code columns from text to logical (\code{TRUE} if "true", otherwise \code{FALSE}).
+#'   \item Clean and rename code column names by stripping prefixes/suffixes and
+#'         adding a \code{c_} prefix.
+#'   \item Save the final set of cleaned code column names for labeling.
+#'   \item Filter to the preferred coder for each \code{media_title}, based on the
+#'         order of \code{preferred_coders}.
+#'   \item Apply human-readable variable labels for common metadata fields and
+#'         all code columns.
+#'   \item Generate a codebook (variable, label, and type) and assign it to the
+#'         global environment as \code{codebook}.
 #' }
 #'
-#' \strong{Code columns -> binary \code{c_*}}
-#' \itemize{
-#' \item Columns whose names match \code{^code.*applied$} are interpreted as
-#'   Dedoose code flags. Their contents are coerced using
-#'   \code{tolower(trimws(x)) == "true"} and then cast to numeric
-#'   (TRUE -> 1, FALSE -> 0; \code{NA} remains \code{NA}).
-#' \item Those columns are then renamed: remove the leading \code{code} token and the
-#'   trailing \code{applied}, sanitize punctuation/spaces to underscores, and prefix with
-#'   \code{"c_"} (e.g., \code{code "Help" applied} -> \code{c_help}).
-#' \item As a safeguard, \emph{all} columns starting with \code{c_} are coerced to
-#'   numeric 0/1 via \code{as.numeric(as.logical(x))}.
-#' }
+#' @return A cleaned data frame of excerpts with standardized columns, filtered
+#'   to the preferred coder, and with labeled variables. A codebook data frame
+#'   is also assigned to the global environment.
 #'
-#' \strong{Preferred coder filtering}
-#' \itemize{
-#' \item Within each \code{media_title}, the function computes the coder's rank
-#'   via \code{match(excerpt_creator, preferred_coders)} and retains all rows
-#'   from the single most-preferred coder present (ties are broken by first match
-#'   in \code{preferred_coders}; other coders' rows are removed).
-#' }
-#'
-#' \strong{Labels and codebook}
-#' \itemize{
-#' \item Applies descriptive labels to common columns (e.g., \code{media_title},
-#'   \code{excerpt_creator}, \code{excerpt_date}, \code{excerpt}, etc.) using
-#'   \code{labelled::var_label()}.
-#' \item Auto-labels every \code{c_*} variable with its own name.
-#' \item Builds a simple codebook with variables, labels, and types and
-#'   attaches it as \code{attr(x, "codebook")}.
-#' }
-#'
-#' @return A base \code{data.frame} with:
-#' \itemize{
-#' \item normalized column names,
-#' \item binary \code{c_*} columns (0/1; may contain \code{NA}),
-#' \item only the preferred coder's excerpts per \code{media_title},
-#' \item attached variable labels (via \code{labelled}).
-#' }
-#' Additionally, a \code{data.frame} codebook is attached as
-#' \code{attr(result, "codebook")} with columns \code{variable}, \code{label},
-#' and \code{type}.
-#'
-#' @section Requirements:
-#' The input must contain at least \code{media_title} and \code{excerpt_creator}.
-#' If you want automatic code detection, code variables should follow the pattern
-#' \code{^code.*applied$} prior to renaming.
+#' @export
 #'
 #' @examples
 #' \dontrun{
-#' # From a data frame
-#' df <- data.frame(
-#'   media_title = c("T1","T1","T2"),
-#'   excerpt_creator = c("Ann","Bob","Ann"),
-#'   `code "Help" applied` = c("TRUE","false", NA),
-#'   code_harm_applied = c("true","true","false"),
-#'   stringsAsFactors = FALSE
-#' )
-#' clean <- clean_data(df, preferred_coders = c("Ann","Bob"))
-#' attr(clean, "codebook")  # access the attached codebook
+#' # Example usage
+#' raw_excerpts <- readxl::read_xlsx("inst/raw_data/test_data.xlsx")
+#' preferred <- c("a", "l", "i", "r", "s")
+#' cleaned <- clean_data(raw_excerpts, preferred)
 #'
-#' # From a file path (all columns initially read as text)
-#' # clean <- clean_data("path/to/excerpts.xlsx", preferred_coders = c("Ann","Bob","Cara"))
+#' # View the automatically created codebook
+#' head(codebook)
 #' }
-#'
-#' @importFrom readxl read_xlsx
-#' @importFrom dplyr mutate filter group_by slice_min ungroup select rename rename_with
-#' @importFrom stringr str_replace
-#' @importFrom labelled var_label
-#' @importFrom rlang .data sym
-#' @export
 clean_data <- function(excerpts, preferred_coders) {
   if (missing(preferred_coders) || is.null(preferred_coders)) {
     stop("Please provide a vector of preferred_coders in order of preference.")
   }
 
-  # If a filepath was passed, read it in
-  if (is.character(excerpts) && length(excerpts) == 1) {
-    if (!file.exists(excerpts)) {
-      stop("The specified file does not exist.")
-    }
-    excerpts <- readxl::read_xlsx(excerpts, col_types = "text")
-  }
+  # --- (1) Standardize column names ---
+  names(excerpts) <- tolower(names(excerpts))
+  names(excerpts) <- gsub(" ", "_", names(excerpts))
 
-  # Make variable names lower case and replace spaces with underscores
-  names(excerpts) <- gsub(" ", "_", tolower(names(excerpts)))
-
-  # Rename "excerpt_copy" to "excerpt" for consistency (use tidy-eval to avoid NSE NOTE)
+  # --- (2) Rename "excerpt_copy" → "excerpt" if present ---
   if ("excerpt_copy" %in% names(excerpts)) {
-    excerpts <- dplyr::rename(excerpts, excerpt = !!rlang::sym("excerpt_copy"))
+    excerpts <- dplyr::rename(excerpts, excerpt = excerpt_copy)
   }
 
-  # Drop columns ending with range or weight
-  drop_cols <- grep("(range|weight)$", colnames(excerpts), value = TRUE)
-  if (length(drop_cols) > 0) {
-    excerpts <- dplyr::select(excerpts, -dplyr::all_of(drop_cols))
-  }
+  # --- (3) Drop columns ending with "range" or "weight" ---
+  drop_cols <- grep("(range|weight)$", names(excerpts), value = TRUE, ignore.case = TRUE)
+  excerpts <- dplyr::select(excerpts, -dplyr::all_of(drop_cols))
 
-  # Identify code columns (starting with "code" and ending with "applied")
-  code_cols <- grep("^code.*applied$", colnames(excerpts), value = TRUE)
+  # --- (4) Identify code columns ---
+  code_cols <- grep("^code.*applied$", names(excerpts), value = TRUE, ignore.case = TRUE)
 
-  # Convert code columns from text -> logical -> numeric (0/1)
+  # --- (5) Convert code columns to logical ---
   for (col in code_cols) {
     excerpts[[col]] <- tolower(trimws(excerpts[[col]])) == "true"
-    excerpts[[col]] <- as.numeric(excerpts[[col]])  # TRUE->1, FALSE->0
   }
 
-  # Rename code columns: clean up names and add "c_" prefix
-  excerpts <- dplyr::rename_with(
-    excerpts,
-    ~ {
-      new <- stringr::str_replace(., "^code[:_ ]*", "")        # remove "code" + punctuation
-      new <- stringr::str_replace(new, "[:_ ]*applied$", "")   # remove trailing "applied"
-      new <- gsub('[\"\']', "", new)                           # remove quotes
-      new <- gsub("[[:punct:] ]+", "_", new)                   # replace punctuation/spaces -> "_"
-      new <- gsub("_+", "_", new)                              # collapse multiple underscores
-      new <- trimws(new, whitespace = "_")                     # strip leading/trailing "_"
-      paste0("c_", new)                                        # add "c_" prefix
-    },
-    .cols = code_cols
-  )
+  # --- (6) Clean and rename code columns ---
+  clean_names <- code_cols
+  clean_names <- gsub("^code[:_ ]*", "", clean_names, ignore.case = TRUE)
+  clean_names <- gsub("_*applied$", "", clean_names, ignore.case = TRUE)
+  clean_names <- gsub("[^a-z0-9]+", "_", clean_names)
+  clean_names <- paste0("c_", clean_names)
 
-  # Save the final code column names
-  final_code_cols <- grep("^c_", colnames(excerpts), value = TRUE)
+  excerpts <- dplyr::rename_with(excerpts,
+                                 .cols = all_of(code_cols),
+                                 .fn = ~ clean_names)
 
-  # Ensure all final code columns are numeric (double-safety)
-  excerpts[final_code_cols] <- lapply(
-    excerpts[final_code_cols],
-    function(x) as.numeric(as.logical(x))
-  )
+  # --- (7) Save final code column names ---
+  final_code_cols <- clean_names
 
-  # Filter to preferred coder per media_title (use .data pronoun to avoid NSE NOTES)
+  # --- (8) Filter to preferred coder per media_title ---
   excerpts <- excerpts %>%
-    dplyr::mutate(coder_rank = match(.data$excerpt_creator, preferred_coders)) %>%
-    dplyr::filter(!is.na(.data$coder_rank)) %>%
-    dplyr::group_by(.data$media_title) %>%
-    dplyr::slice_min(.data$coder_rank, with_ties = FALSE) %>%
+    dplyr::mutate(coder_rank = match(excerpt_creator, preferred_coders)) %>%
+    dplyr::filter(!is.na(coder_rank)) %>%
+    dplyr::group_by(media_title) %>%
+    dplyr::filter(coder_rank == min(coder_rank)) %>%
     dplyr::ungroup()
 
-  # Add variable labels
+  # --- (9) Add variable labels ---
   if ("media_title" %in% names(excerpts))
     labelled::var_label(excerpts$media_title) <- "transcript/media title"
   if ("excerpt_creator" %in% names(excerpts))
@@ -176,24 +110,22 @@ clean_data <- function(excerpts, preferred_coders) {
   if ("coder_rank" %in% names(excerpts))
     labelled::var_label(excerpts$coder_rank) <- "rank of coder, according to listed coder preference"
 
-  # Auto-label all code columns with their variable names
+  # Auto-label code columns
   for (col in final_code_cols) {
     labelled::var_label(excerpts[[col]]) <- col
   }
 
-  # Build codebook and ATTACH as an attribute (no global assignment)
+  # --- (10) Save codebook in global environment ---
   codebook <- data.frame(
     variable = names(excerpts),
-    label = vapply(names(excerpts), function(col) {
+    label = sapply(names(excerpts), function(col) {
       lbl <- labelled::var_label(excerpts[[col]])
       if (is.null(lbl) || lbl == "") col else lbl
-    }, FUN.VALUE = character(1)),
-    type = vapply(excerpts, function(x) class(x)[1], FUN.VALUE = character(1)),
+    }),
+    type = sapply(excerpts, function(x) class(x)[1]),
     stringsAsFactors = FALSE
   )
-  attr(excerpts, "codebook") <- codebook
+  assign("codebook", codebook, envir = .GlobalEnv)
 
-  # Force return as base data.frame (attributes preserved)
-  excerpts <- as.data.frame(excerpts, stringsAsFactors = FALSE)
   return(excerpts)
 }
