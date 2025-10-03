@@ -48,7 +48,6 @@ Imports:
     readxl,
     tidyr,
     stringr,
-    magrittr,
     ggplot2,
     reshape2,
     knitr,

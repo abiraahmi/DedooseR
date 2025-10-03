@@ -31,7 +31,7 @@ clean_data <- function(excerpts, preferred_coders) {
   # Convert code columns from text → logical → numeric (0/1)
   for (col in code_cols) {
     excerpts[[col]] <- tolower(trimws(excerpts[[col]])) == "true"
-    excerpts[[col]] <- as.numeric(excerpts[[col]])  # TRUE→1, FALSE→0
+    excerpts[[col]] <- as.numeric(excerpts[[col]])  # TRUE = 1, FALSE = 0
   }
 
   # Rename code columns: clean up names and add "c_" prefix
