@@ -55,6 +55,8 @@ Imports:
     labelled,
     kableExtra,
     ggraph,
-    igraph
+    igraph,
+    wordcloud2,
+    tidytext
 Suggests:
     testthat (>= 3.0.0)

@@ -89,6 +89,9 @@ plot_counts <- plot_counts(code_counts,
                            exclude_codes = c("c_priority_excerpt", "c_self_efficacy"),
                            metric = "n_media_titles",
                            min_prop = 0.40)
+                           
+# View excerpts in filterable table
+view_excerpts(excerpts)                           
 
 # Set saturation
 saturation <- set_saturation(code_counts, min_count = 10, min_prop_media_titles = 0.25)
@@ -110,11 +113,17 @@ comp_saturation <- compare_saturation(code_counts, excerpts, thresholds_list)
 # Plot saturation comparisons
 plot_saturation_comp <- plot_compare_saturation(comp_saturation, thresholds_list)
 
+# Generate word cloud
+wordcloud(excerpts, "c_knowledge_awareness", 
+         max_words = 100,
+         custom_stopwords = c("racall", "stuff", "everyone's"))
+
 # Create co-occurence matrix
 cooccur_matrix <- create_cooccur_matrix(excerpts, min_bold = 0.25, scale = "proportion", output = "data.frame")
 
 # Create co-occurence network map
 map_cooccur_matrix <- map_cooccur_matrix(cooccur_matrix, edge_min = 15)
+
 
 ```
 

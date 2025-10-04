@@ -1,4 +1,5 @@
 # DedooseR 0.0.4
+* 2025-10-03: Added the wordcloud function to generate wordclouds for chosen codes
 * 2025-10-03: Added the view_excerpts function to create a filterable excerpt viewer
 * 2025-10-03: Added the merge_codes function to collapse codes into others/new ones
 * 2025-10-03: Added the create_cooccur_matrix function allowing for counts and proportions to be tabled
