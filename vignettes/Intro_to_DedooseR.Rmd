@@ -1,0 +1,102 @@
+---
+title: "Introduction to DedooseR - let's get cleaning!"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to DedooseR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(DedooseR)
+library(readxl)
+
+# Look for private test file in inst/raw_data
+private_path <- system.file("raw_data", "test_data.xlsx", package = "DedooseR")
+
+if (file.exists(private_path)) {
+  excerpts <- readxl::read_xlsx(private_path)
+} else {
+  message("Private file not found — using synthetic demo dataset instead.")
+  data("excerpts_demo", package = "DedooseR")
+  excerpts <- excerpts_demo
+}
+
+head(excerpts)
+```
+
+Welcome to DedooseR! **DedooseR** is an R package that connects with 
+[Dedoose](https://www.dedoose.com/) to support the analysis of qualitative data.
+It was built to help researchers streamline workflows, explore qualitative data 
+flexibly,and conduct qualitative coding and analysis with rigor. 
+
+This package can do a few nifty things, but let's get started with cleaning and 
+labelling our data. 
+
+The *clean_data* function does a few cool things:
+* it makes variable names user-friendly
+* it generates a code-book, with all "code" variables starting with "c_"
+* it allows us to list our coder preferences
+
+```{r}
+# First, we look for the test file inside inst/raw_data
+filepath <- system.file("raw_data", "test_data.xlsx", package = "DedooseR")
+
+if (file.exists(filepath)) {
+  excerpts <- readxl::read_xlsx(filepath)
+} else {
+  message("Private file not found — using synthetic demo dataset instead.")
+  data("excerpts_demo", package = "DedooseR")
+  excerpts <- excerpts_demo
+}
+# Often, we have 2 coders blind-coding every transcript. This function assigns 
+# coder ranks according to a preferred coders vector and, for every media title, 
+# selects the coder with the highest rank so we avoid double-counts. If you have 
+# single coders/media title, then list all of them!
+preferred_coders <- c("a", "l", "i", "r", "s", "v", "c", "n", "k")
+
+# Now, we run our function
+clean_data <- clean_data(excerpts, preferred_coders)
+
+# From this function, we can export our dataset with excerpts:
+excerpts <- clean_data$data
+
+# And a codebook with variable names, labels and character types so we have a
+# clearer understanding of all the data we have to play with. 
+codebook <- clean_data$codebook
+```
+
+As we iteratively refine our codebook, we often decide to collapse or merge
+some codes into others. The *merge_codes* function can help us do this:
+
+```{r}
+excerpts <- merge_codes(excerpts, list(
+  c_belonging_connectedness = c( # The variable name you want to merge into
+    "c_sense_of_belonging", # the variables you want to collapse
+    "c_sense_of_belonging_others", "c_sense_of_belonging_self",
+    "c_sense_of_connectedness", "c_sense_of_connectedness_family",
+    "c_sense_of_connectedness_peers", "c_sense_of_connectedness_staff"),
+  c_salience = c("c_salience", # You can do this for multiple codes
+                 "c_salience_personal_development", 
+                 "c_salience_relevance")))
+```
+
+"Hey, remember when you spoke to 50 kids 5 years ago about program impact. 
+Do you remember if the *Long-term impact* theme captured just academic 
+impact or emotional, too?"
+
+I do not. But this function let's us easily filter through our rich data to
+help us answer that:
+
+```{r}
+view_excerpts(excerpts)
+```
+
+

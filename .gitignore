@@ -13,3 +13,4 @@ docs
 # Testing all functions script
 ^inst/scripts$
 inst/scripts/testing_all_functions.R
+inst/doc

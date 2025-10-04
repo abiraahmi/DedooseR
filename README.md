@@ -6,8 +6,8 @@
 
 **DedooseR** is an R package that connects with 
 [Dedoose](https://www.dedoose.com/) to support the analysis of qualitative data.
-It was built to help researchers streamline workflows and improve transparency 
-and rigor in qualitative coding and analysis.
+It was built to help researchers streamline workflows, explore qualitative data flexibly,
+and conduct qualitative coding and analysis with rigor. 
 
 ## Key Features
 
