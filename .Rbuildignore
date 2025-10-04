@@ -6,3 +6,4 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+^inst/raw_data/~\$test_data\.xlsx$

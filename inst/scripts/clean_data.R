@@ -1,4 +1,6 @@
-clean_data <- function(excerpts, preferred_coders) {
+clean_data <- function(excerpts, preferred_coders,
+                       rename_vars = NULL,
+                       relabel_vars = NULL) {
   if (missing(preferred_coders) || is.null(preferred_coders)) {
     stop("Please provide a vector of preferred_coders in order of preference.")
   }
@@ -32,7 +34,7 @@ clean_data <- function(excerpts, preferred_coders) {
   clean_names <- paste0("c_", clean_names)
 
   excerpts <- dplyr::rename_with(excerpts,
-                                 .cols = all_of(code_cols),
+                                 .cols = dplyr::all_of(code_cols),
                                  .fn = ~ clean_names)
 
   # --- (7) Save final code column names ---
@@ -46,7 +48,7 @@ clean_data <- function(excerpts, preferred_coders) {
     dplyr::filter(coder_rank == min(coder_rank)) %>%
     dplyr::ungroup()
 
-  # --- (9) Add variable labels ---
+  # --- (9) Add default variable labels ---
   if ("media_title" %in% names(excerpts))
     labelled::var_label(excerpts$media_title) <- "transcript/media title"
   if ("excerpt_creator" %in% names(excerpts))
@@ -67,7 +69,24 @@ clean_data <- function(excerpts, preferred_coders) {
     labelled::var_label(excerpts[[col]]) <- col
   }
 
-  # --- (10) Save codebook in global environment ---
+  # --- (10) Optional variable renaming ---
+  if (!is.null(rename_vars)) {
+    excerpts <- dplyr::rename(excerpts, !!!rename_vars)
+  }
+
+  # --- (11) Optional variable relabeling ---
+  if (!is.null(relabel_vars)) {
+    for (col in names(relabel_vars)) {
+      if (col %in% names(excerpts)) {
+        labelled::var_label(excerpts[[col]]) <- relabel_vars[[col]]
+      }
+    }
+  }
+
+  # --- (12) Drop columns that are entirely NA ---
+  excerpts <- dplyr::select(excerpts, where(~ !all(is.na(.))))
+
+  # --- (13) Save codebook in global environment ---
   codebook <- data.frame(
     variable = names(excerpts),
     label = sapply(names(excerpts), function(col) {
@@ -77,7 +96,28 @@ clean_data <- function(excerpts, preferred_coders) {
     type = sapply(excerpts, function(x) class(x)[1]),
     stringsAsFactors = FALSE
   )
-  assign("codebook", codebook, envir = .GlobalEnv)
 
-  return(excerpts)
+  return(list(
+    data = excerpts,
+    codebook = codebook
+  ))
 }
+
+# test_script.R
+
+# Load libraries
+library(DedooseR)
+library(tidyverse)
+library(dplyr)
+library(readxl)
+library(stringr)
+
+# Clean data
+filepath <- read_xlsx("inst/raw_data/test_data.xlsx")
+preferred_coders <- c("a", "l", "i", "r", "s", "v", "c", "n", "k")
+clean_data <- clean_data(filepath,
+           preferred_coders,
+           rename_vars = list(memo_destigmatization = "...274"),
+           relabel_vars = list(title = "Memo: Destigmatization"))
+excerpts <- clean_data$data
+codebook <- clean_data$excerpts

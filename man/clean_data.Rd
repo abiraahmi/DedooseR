@@ -2,61 +2,79 @@
 % Please edit documentation in R/clean_data.R
 \name{clean_data}
 \alias{clean_data}
-\title{Clean and prepare excerpt-level coding data}
+\title{Clean and standardize coded qualitative excerpts}
 \usage{
-clean_data(excerpts, preferred_coders)
+clean_data(excerpts, preferred_coders, rename_vars = NULL, relabel_vars = NULL)
 }
 \arguments{
-\item{excerpts}{A data frame containing raw excerpt-level coding data.
-Must include at least the columns \code{media_title} and \code{excerpt_creator}.}
+\item{excerpts}{A data frame containing coded excerpts (e.g., exported from Dedoose).}
 
-\item{preferred_coders}{A character vector of coder IDs in order of
-preference (e.g., \code{c("a", "l", "i", "r")}).}
+\item{preferred_coders}{A character vector listing coders in order of preference (e.g.,
+\code{c("coder1", "coder2")}). Used to select the preferred version of each excerpt.}
+
+\item{rename_vars}{Optional named list or vector of variables to rename, in the format
+\code{c(oldname = "newname")}.}
+
+\item{relabel_vars}{Optional named list of new variable labels, in the format
+\code{list(varname = "new label")}.}
 }
 \value{
 A list with two elements:
 \describe{
-\item{\code{data}}{The cleaned data frame of excerpts with standardized columns,
-filtered to the preferred coder, and with labeled variables.}
-\item{\code{codebook}}{A data frame containing variable names, labels, and types.}
+\item{data}{The cleaned and filtered excerpt dataset.}
+\item{codebook}{A data frame listing variable names, labels, and data types.}
 }
 }
 \description{
-This function cleans a dataset of coded excerpts exported from Dedoose (or a
-similar qualitative coding platform). It standardizes variable names,
-converts code columns to logicals, filters to the preferred coder per
-transcript, and assigns variable labels. A codebook is also generated and
-returned along with the cleaned dataset.
+Cleans, standardizes, and labels a dataset of coded qualitative excerpts
+(e.g., exported from Dedoose or a similar platform). The function performs
+the following key operations:
+\enumerate{
+\item Standardizes column names to lowercase and replaces spaces with underscores.
+\item Renames \code{excerpt_copy} to \code{excerpt} if present.
+\item Removes columns ending with "range" or "weight".
+\item Converts all code columns (those starting with "code" and ending with "applied")
+into logical (\code{TRUE}/\code{FALSE}) variables.
+\item Cleans and renames code variables using a \code{c_} prefix.
+\item Filters the dataset to retain excerpts from a preferred coder (based on rank order).
+\item Adds descriptive variable labels using the \code{labelled} package.
+\item Optionally renames or relabels variables.
+\item Removes columns that are entirely \code{NA}.
+\item Generates a codebook summarizing variable names, labels, and types.
+}
 }
 \details{
-The cleaning steps performed are:
-\enumerate{
-\item Standardize all column names to lowercase and replace spaces with underscores.
-\item Rename \code{excerpt_copy} to \code{excerpt} if present.
-\item Drop columns ending in "range" or "weight".
-\item Identify code columns (names starting with "code" and ending with "applied").
-\item Convert code columns from text to logical (\code{TRUE} if "true", otherwise \code{FALSE}).
-\item Clean and rename code column names by stripping prefixes/suffixes and
-adding a \code{c_} prefix.
-\item Filter to the preferred coder for each \code{media_title}, based on the
-order of \code{preferred_coders}.
-\item Apply human-readable variable labels for common metadata fields and
-all code columns.
-\item Generate a codebook (variable, label, and type).
-}
+The function standardizes and cleans a coded excerpt dataset while preserving
+coder priority and metadata. It returns both the cleaned dataset and its
+associated codebook for easy reference or export.
 }
 \examples{
-\dontrun{
-# Example usage
-raw_excerpts <- readxl::read_xlsx("inst/raw_data/test_data.xlsx")
-preferred <- c("a", "l", "i", "r", "s")
-result <- clean_data(raw_excerpts, preferred)
+# Example data frame
+excerpts <- data.frame(
+  media_title = c("Transcript 1", "Transcript 1", "Transcript 2"),
+  excerpt_creator = c("alice", "bob", "alice"),
+  excerpt_copy = c("It was a good day.", "It was a good day.", "We learned a lot."),
+  code_emotion_applied = c("TRUE", "FALSE", "TRUE"),
+  code_learning_applied = c("FALSE", "TRUE", "TRUE"),
+  weight = c(1, 2, 3)
+)
 
-# Extract cleaned data
-cleaned <- result$data
+# Preferred coders (in order)
+preferred_coders <- c("alice", "bob")
 
-# View the generated codebook
-head(result$codebook)
-}
+# Run cleaning function
+result <- clean_data(
+  excerpts = excerpts,
+  preferred_coders = preferred_coders,
+  relabel_vars = list(c_emotion = "Emotion expressed", c_learning = "Learning mentioned")
+)
+
+# Extract cleaned data and codebook
+cleaned_excerpts <- result$data
+codebook <- result$codebook
+
+# View results
+head(cleaned_excerpts)
+head(codebook)
 
 }
