@@ -19,11 +19,13 @@ DedooseR currently allows you to:
 - Set a saturation criteria and plot it
 - Plot and play with saturation thresholds
 - Produce and plot code co-occurrence heatmaps  
+- Create network maps between codes
+- Generate word clouds
+- Run topic models to understand the distribution of topics and top terms within them for selected codes
 
 ### Coming Soon
 
-- Viewing and organizing excerpts in an interactive table
-- Calculating reliability per coder (Cohen's kappa) and between coders 
+- Creating reliability tests and calculating reliability per coder (Cohen's kappa) and between coders 
 (Fleiss' kappa)
 
 ## Why This Package?
