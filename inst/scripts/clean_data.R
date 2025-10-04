@@ -33,11 +33,18 @@ clean_data <- function(excerpts, preferred_coders,
   clean_names <- gsub("[^a-z0-9]+", "_", clean_names)
   clean_names <- paste0("c_", clean_names)
 
+  # Rename columns
   excerpts <- dplyr::rename_with(excerpts,
                                  .cols = dplyr::all_of(code_cols),
                                  .fn = ~ clean_names)
 
-  # --- (7) Save final code column names ---
+  # --- (7) Save mapping of original to cleaned names ---
+  name_map <- data.frame(
+    clean = clean_names,
+    original = code_cols,
+    stringsAsFactors = FALSE
+  )
+
   final_code_cols <- clean_names
 
   # --- (8) Filter to preferred coder per media_title ---
@@ -64,17 +71,26 @@ clean_data <- function(excerpts, preferred_coders,
   if ("coder_rank" %in% names(excerpts))
     labelled::var_label(excerpts$coder_rank) <- "rank of coder, according to listed coder preference"
 
-  # Auto-label code columns
-  for (col in final_code_cols) {
-    labelled::var_label(excerpts[[col]]) <- col
+  # --- (10) Auto-label code columns with pretty names ---
+  for (i in seq_along(final_code_cols)) {
+    col_clean <- name_map$clean[i]
+    original <- name_map$original[i]
+
+    # Create a pretty label: remove "code" prefix, "applied" suffix, replace underscores with spaces
+    label_pretty <- gsub("^code[:_ ]*", "", original, ignore.case = TRUE)
+    label_pretty <- gsub("_*applied$", "", label_pretty, ignore.case = TRUE)
+    label_pretty <- gsub("_", " ", label_pretty)
+    label_pretty <- trimws(label_pretty)
+
+    labelled::var_label(excerpts[[col_clean]]) <- label_pretty
   }
 
-  # --- (10) Optional variable renaming ---
+  # --- (11) Optional variable renaming ---
   if (!is.null(rename_vars)) {
     excerpts <- dplyr::rename(excerpts, !!!rename_vars)
   }
 
-  # --- (11) Optional variable relabeling ---
+  # --- (12) Optional variable relabeling ---
   if (!is.null(relabel_vars)) {
     for (col in names(relabel_vars)) {
       if (col %in% names(excerpts)) {
@@ -83,10 +99,10 @@ clean_data <- function(excerpts, preferred_coders,
     }
   }
 
-  # --- (12) Drop columns that are entirely NA ---
+  # --- (13) Drop columns that are entirely NA ---
   excerpts <- dplyr::select(excerpts, where(~ !all(is.na(.))))
 
-  # --- (13) Save codebook in global environment ---
+  # --- (14) Create codebook ---
   codebook <- data.frame(
     variable = names(excerpts),
     label = sapply(names(excerpts), function(col) {
@@ -102,7 +118,6 @@ clean_data <- function(excerpts, preferred_coders,
     codebook = codebook
   ))
 }
-
 # test_script.R
 
 # Load libraries

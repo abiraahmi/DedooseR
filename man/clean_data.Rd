@@ -37,44 +37,10 @@ the following key operations:
 into logical (\code{TRUE}/\code{FALSE}) variables.
 \item Cleans and renames code variables using a \code{c_} prefix.
 \item Filters the dataset to retain excerpts from a preferred coder (based on rank order).
-\item Adds descriptive variable labels using the \code{labelled} package.
+\item Adds descriptive variable labels using the \code{labelled} package — including restoring
+code labels to their original names (without prefixes and underscores).
 \item Optionally renames or relabels variables.
 \item Removes columns that are entirely \code{NA}.
 \item Generates a codebook summarizing variable names, labels, and types.
 }
-}
-\details{
-The function standardizes and cleans a coded excerpt dataset while preserving
-coder priority and metadata. It returns both the cleaned dataset and its
-associated codebook for easy reference or export.
-}
-\examples{
-# Example data frame
-excerpts <- data.frame(
-  media_title = c("Transcript 1", "Transcript 1", "Transcript 2"),
-  excerpt_creator = c("alice", "bob", "alice"),
-  excerpt_copy = c("It was a good day.", "It was a good day.", "We learned a lot."),
-  code_emotion_applied = c("TRUE", "FALSE", "TRUE"),
-  code_learning_applied = c("FALSE", "TRUE", "TRUE"),
-  weight = c(1, 2, 3)
-)
-
-# Preferred coders (in order)
-preferred_coders <- c("alice", "bob")
-
-# Run cleaning function
-result <- clean_data(
-  excerpts = excerpts,
-  preferred_coders = preferred_coders,
-  relabel_vars = list(c_emotion = "Emotion expressed", c_learning = "Learning mentioned")
-)
-
-# Extract cleaned data and codebook
-cleaned_excerpts <- result$data
-codebook <- result$codebook
-
-# View results
-head(cleaned_excerpts)
-head(codebook)
-
 }
