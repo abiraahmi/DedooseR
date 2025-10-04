@@ -124,6 +124,9 @@ cooccur_matrix <- create_cooccur_matrix(excerpts, min_bold = 0.25, scale = "prop
 # Create co-occurence network map
 map_cooccur_matrix <- map_cooccur_matrix(cooccur_matrix, edge_min = 15)
 
+# Topic model
+topicmodel(excerpts, "c_emerging_leader", n_topics = 2, n_terms = 25,
+           custom_stopwords = c("na", "bruh", "theyre", "yeah"))
 
 ```
 
