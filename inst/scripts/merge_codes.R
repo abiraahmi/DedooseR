@@ -2,23 +2,29 @@ merge_codes <- function(data, merges) {
   # data: a data.frame or tibble
   # merges: a named list, where names are new vars, values are character vectors of old vars
 
+  all_from_vars <- c()
+
   for (new_var in names(merges)) {
     from_vars <- merges[[new_var]]
 
-    # check inputs
+    # check that all source variables exist
     if (!all(from_vars %in% names(data))) {
       stop(paste("Some variables for", new_var, "not found in dataset"))
     }
 
-    # create the new variable: TRUE if any of the from_vars are TRUE
+    # create the new variable (TRUE if any source is TRUE)
     data[[new_var]] <- apply(data[from_vars], 1, function(x) any(x == TRUE, na.rm = TRUE))
 
-    # drop the old vars
-    data <- data[, !names(data) %in% from_vars, drop = FALSE]
+    # collect old vars for dropping (but NOT the new_var itself, in case it was also in from_vars)
+    all_from_vars <- c(all_from_vars, setdiff(from_vars, new_var))
   }
+
+  # drop all old vars at once
+  data <- data[, !names(data) %in% all_from_vars, drop = FALSE]
 
   return(data)
 }
+
 
 # Test
 # Load libraries

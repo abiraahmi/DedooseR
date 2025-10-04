@@ -1,57 +1,52 @@
-#' Merge multiple Boolean code variables into new collapsed codes
+#' Merge multiple binary code variables into new composite variables
 #'
-#' This function takes a dataset with Boolean (logical) code variables and
-#' collapses groups of them into new variables. For each new code, the function
-#' assigns `TRUE` if any of the specified source variables are `TRUE` (ignoring `NA`),
-#' and then removes the original source variables from the dataset.
+#' This function merges sets of binary (TRUE/FALSE or 0/1) variables into new composite
+#' variables. Each new variable is created as \code{TRUE} if any of its corresponding
+#' source variables are \code{TRUE}. The original source variables are dropped after merging.
 #'
-#' @param data A `data.frame` or tibble containing the code variables.
-#' @param merges A named list, where each element name is the name of a new
-#'   variable to create, and the value is a character vector of variable names
-#'   to merge together.
+#' @param data A \code{data.frame} or \code{tibble} containing the variables to merge.
+#' @param merges A named list where each name corresponds to the name of a new variable
+#'   to create, and each value is a character vector of existing variable names to merge.
+#'   For example: \code{list(themeA = c("code1", "code2"), themeB = c("code3", "code4"))}.
 #'
-#' @return A `data.frame` with the new collapsed variables added and the original
-#'   source variables removed.
+#' @return A \code{data.frame} with the new merged variables added and the original
+#' source variables removed.
+#'
+#' @details
+#' The function checks that all variables specified in \code{merges} exist in the dataset.
+#' For each merge group, it creates a new variable that is \code{TRUE} if any of the
+#' source variables are \code{TRUE}, ignoring \code{NA} values. After merging,
+#' the source variables are dropped from the dataset.
 #'
 #' @examples
-#' library(dplyr)
+#' df <- data.frame(a = c(TRUE, FALSE, TRUE),
+#'                  b = c(FALSE, FALSE, TRUE),
+#'                  c = c(TRUE, TRUE, FALSE))
 #'
-#' # Example dataset
-#' excerpts <- tibble(
-#'   Destigmatization = c(TRUE, FALSE, FALSE),
-#'   `Shift in MH/S norms` = c(FALSE, TRUE, FALSE),
-#'   c_sense_of_belonging = c(FALSE, FALSE, TRUE),
-#'   c_sense_of_connectedness = c(TRUE, FALSE, FALSE),
-#'   c__suicide_comfort_directing_change = c(TRUE, FALSE, TRUE),
-#'   c__suicide_comfort_general = c(FALSE, TRUE, FALSE)
-#' )
-#'
-#' # Collapse multiple groups of codes into new variables
-#' merged <- merge_codes(excerpts, list(
-#'   Destigmatization = c("Destigmatization", "Shift in MH/S norms"),
-#'   Belonging_and_Connectedness = c("c_sense_of_belonging", "c_sense_of_connectedness"),
-#'   c__suicide_comfort = c("c__suicide_comfort_directing_change", "c__suicide_comfort_general")
-#' ))
-#'
-#' merged
-#'
+#' merges <- list(new1 = c("a", "b"), new2 = c("c"))
+#' merge_codes(df, merges)
 #'
 #' @export
 merge_codes <- function(data, merges) {
+  all_from_vars <- c()
+
   for (new_var in names(merges)) {
     from_vars <- merges[[new_var]]
 
-    # check inputs
+    # check that all source variables exist
     if (!all(from_vars %in% names(data))) {
       stop(paste("Some variables for", new_var, "not found in dataset"))
     }
 
-    # create the new variable: TRUE if any of the from_vars are TRUE
+    # create the new variable (TRUE if any source is TRUE)
     data[[new_var]] <- apply(data[from_vars], 1, function(x) any(x == TRUE, na.rm = TRUE))
 
-    # drop the old vars
-    data <- data[, !names(data) %in% from_vars, drop = FALSE]
+    # collect old vars for dropping (but NOT the new_var itself)
+    all_from_vars <- c(all_from_vars, setdiff(from_vars, new_var))
   }
+
+  # drop all old vars at once
+  data <- data[, !names(data) %in% all_from_vars, drop = FALSE]
 
   return(data)
 }
