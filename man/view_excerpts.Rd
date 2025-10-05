@@ -2,38 +2,62 @@
 % Please edit documentation in R/view_excerpts.R
 \name{view_excerpts}
 \alias{view_excerpts}
-\title{Interactive excerpts table}
+\title{View Qualitative Excerpts by Code}
 \usage{
 view_excerpts(data)
 }
 \arguments{
-\item{data}{A data.frame or tibble with one column called \code{excerpt}
-and multiple code columns starting with \code{"c_"}.}
+\item{data}{A data frame containing at least one text column named \code{excerpt} and
+one or more logical code columns prefixed with \code{"c_"}. Each logical column
+represents whether a code was applied (\code{TRUE}/\code{FALSE}).}
 }
 \value{
-A DT datatable widget.
+A \code{\link[DT:datatable]{DT::datatable()}} object that displays:
+\itemize{
+\item \strong{Code:} readable code label or variable name
+\item \strong{Excerpt:} associated qualitative text
+}
+
+The output table includes:
+\itemize{
+\item A dropdown filter for selecting specific codes
+\item Search boxes for column-wise filtering
+\item Responsive column widths and formatted text wrapping
+}
 }
 \description{
-Creates an interactive datatable where users can filter excerpts by code.
-Automatically detects all code columns starting with "c_".
+Displays qualitative excerpts interactively in a searchable, filterable data table.
+Each row represents an excerpt associated with one or more qualitative codes.
+Code columns are automatically detected as those starting with \code{"c_"}, and their
+variable labels (if available) are used as readable code names.
+
+This function is primarily designed for exploring and reviewing coded qualitative data,
+allowing users to filter by code and quickly browse the corresponding excerpts.
+}
+\details{
+\itemize{
+\item Variable labels are extracted from the \code{"label"} attribute of each code column
+(e.g., assigned via \code{haven::labelled} or \code{attr(x, "label") <- "Label"}).
+\item Only excerpts where a code is marked as \code{TRUE} are displayed.
+\item The table uses custom styling with a purple header and automatic text wrapping.
+}
 }
 \examples{
 library(dplyr)
-library(tidyr)
-library(DT)
 
 df <- tibble::tibble(
   excerpt = c(
-    "I felt connected to peers.",
-    "We should normalize conversations about MH.",
-    "My teachers helped me belong.",
-    "I am comfortable asking for help when I need it."
+    "I felt supported by my peers.",
+    "Teachers really listened to us.",
+    "I learned a lot about myself."
   ),
-  c_belonging = c(TRUE, FALSE, TRUE, FALSE),
-  c_destigmatization = c(FALSE, TRUE, FALSE, FALSE),
-  c_suicide_comfort = c(FALSE, FALSE, FALSE, TRUE)
+  c_support = c(TRUE, TRUE, FALSE),
+  c_growth = c(FALSE, FALSE, TRUE)
 )
+attr(df$c_support, "label") <- "Peer/Teacher Support"
+attr(df$c_growth, "label") <- "Personal Growth"
 
-view_excerpts(df)
+# View excerpts interactively
+if (interactive()) view_excerpts(df)
 
 }

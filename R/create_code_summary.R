@@ -69,7 +69,8 @@
 #' @importFrom purrr map_chr
 #' @importFrom knitr kable
 #' @importFrom DT datatable
-#' @importFrom ggplot2 ggplot aes geom_col coord_flip labs theme_minimal reorder
+#' @importFrom ggplot2 ggplot aes geom_col coord_flip labs theme_minimal
+#' @importFrom stats reorder
 #' @export
 create_code_summary <- function(
     excerpts,

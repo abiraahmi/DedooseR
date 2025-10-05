@@ -1,32 +1,56 @@
-#' Interactive excerpts table
+#' View Qualitative Excerpts by Code
 #'
-#' Creates an interactive datatable where users can filter excerpts by code.
-#' Automatically detects all code columns starting with "c_".
+#' @description
+#' Displays qualitative excerpts interactively in a searchable, filterable data table.
+#' Each row represents an excerpt associated with one or more qualitative codes.
+#' Code columns are automatically detected as those starting with `"c_"`, and their
+#' variable labels (if available) are used as readable code names.
 #'
-#' @param data A data.frame or tibble with one column called `excerpt`
-#'   and multiple code columns starting with `"c_"`.
+#' This function is primarily designed for exploring and reviewing coded qualitative data,
+#' allowing users to filter by code and quickly browse the corresponding excerpts.
 #'
-#' @return A DT datatable widget.
+#' @param data A data frame containing at least one text column named `excerpt` and
+#'   one or more logical code columns prefixed with `"c_"`. Each logical column
+#'   represents whether a code was applied (`TRUE`/`FALSE`).
+#'
+#' @return
+#' A [`DT::datatable()`][DT::datatable] object that displays:
+#' - **Code:** readable code label or variable name
+#' - **Excerpt:** associated qualitative text
+#'
+#' The output table includes:
+#' - A dropdown filter for selecting specific codes
+#' - Search boxes for column-wise filtering
+#' - Responsive column widths and formatted text wrapping
+#'
+#' @details
+#' - Variable labels are extracted from the `"label"` attribute of each code column
+#'   (e.g., assigned via `haven::labelled` or `attr(x, "label") <- "Label"`).
+#' - Only excerpts where a code is marked as `TRUE` are displayed.
+#' - The table uses custom styling with a purple header and automatic text wrapping.
 #'
 #' @examples
 #' library(dplyr)
-#' library(tidyr)
-#' library(DT)
 #'
 #' df <- tibble::tibble(
 #'   excerpt = c(
-#'     "I felt connected to peers.",
-#'     "We should normalize conversations about MH.",
-#'     "My teachers helped me belong.",
-#'     "I am comfortable asking for help when I need it."
+#'     "I felt supported by my peers.",
+#'     "Teachers really listened to us.",
+#'     "I learned a lot about myself."
 #'   ),
-#'   c_belonging = c(TRUE, FALSE, TRUE, FALSE),
-#'   c_destigmatization = c(FALSE, TRUE, FALSE, FALSE),
-#'   c_suicide_comfort = c(FALSE, FALSE, FALSE, TRUE)
+#'   c_support = c(TRUE, TRUE, FALSE),
+#'   c_growth = c(FALSE, FALSE, TRUE)
 #' )
+#' attr(df$c_support, "label") <- "Peer/Teacher Support"
+#' attr(df$c_growth, "label") <- "Personal Growth"
 #'
-#' view_excerpts(df)
+#' # View excerpts interactively
+#' if (interactive()) view_excerpts(df)
 #'
+#' @importFrom purrr map_chr
+#' @importFrom dplyr select filter mutate all_of
+#' @importFrom tidyr pivot_longer
+#' @importFrom DT datatable formatStyle JS
 #' @export
 view_excerpts <- function(data) {
   stopifnot(requireNamespace("DT", quietly = TRUE))
@@ -37,6 +61,13 @@ view_excerpts <- function(data) {
   code_cols <- grep("^c_", names(data), value = TRUE)
   if (length(code_cols) == 0) stop("No code columns found (must start with 'c_').")
 
+  # name → label lookup
+  label_lookup <- purrr::map_chr(code_cols, function(x) {
+    lbl <- attr(data[[x]], "label")
+    if (is.null(lbl) || lbl == "") x else lbl
+  })
+  names(label_lookup) <- code_cols
+
   # reshape to long: one row per excerpt per code (TRUE only)
   long_data <- tidyr::pivot_longer(
     data,
@@ -44,24 +75,25 @@ view_excerpts <- function(data) {
     names_to = "code",
     values_to = "applied"
   ) %>%
-    dplyr::filter(applied == TRUE) %>%
+    dplyr::filter(.data$applied == TRUE) %>%
+    dplyr::mutate(code = unname(label_lookup[as.character(.data$code)])) %>%
     dplyr::select(code, excerpt)
 
   # interactive datatable
   DT::datatable(
     long_data,
     escape = FALSE,
-    filter = "top",   # only filter on "code"
+    filter = "top",
     options = list(
       pageLength = 10,
       autoWidth = FALSE,
       columnDefs = list(
-        list(width = '150px', targets = 0),   # code
-        list(width = '600px', targets = 1)    # excerpt
+        list(width = '150px', targets = 0),
+        list(width = '600px', targets = 1)
       ),
       initComplete = DT::JS(
         "function(settings, json) {",
-        "  this.api().columns([0]).every(function() {",  # filter only code column
+        "  this.api().columns([0]).every(function() {",
         "    var column = this;",
         "    var select = $('<select><option value=\"\"></option></select>')",
         "      .css('margin-top', '5px')",
