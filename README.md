@@ -21,10 +21,9 @@ while defining min frequencies and proportions to table and plot!
 - Produce and plot code co-occurrence heatmaps  
 - Create network maps between codes
 - Generate word clouds
-- Run topic models to understand the distribution of topics and top terms within them for selected codes
 
 ### Coming Soon
-
+- Run topic models to understand the distribution of topics and top terms within them for selected codes
 - Creating reliability tests and calculating reliability per coder (Cohen's kappa) and between coders 
 (Fleiss' kappa)
 
@@ -137,7 +136,7 @@ cooccur_01 <- cooccur(data_merged,
 cooccur_01$matrix
 cooccur_01$plot
 
-# Topic model
+# COMING SOON: Topic models
 topicmodel(excerpts, "c_emerging_leader", n_topics = 2, n_terms = 25,
            custom_stopwords = c("na", "bruh", "theyre", "yeah"))
 
