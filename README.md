@@ -107,19 +107,24 @@ plot = TRUE,
 plot_metric = "both") # Plot both metrics on the same graph
 out$plot
 
+
 # Compare saturation
 
-# Define thresholds
+# Define thresholds list
 thresholds_list <- list(
-  Set1 = list(code_count = 20, prop_media_title = 0.2),
-  Set2 = list(code_count = 40, prop_media_title = 0.4)
+  "Liberal" = list(code_count = 40, prop_media_title = 0.2),
+  "Strict"  = list(code_count = 60, prop_media_title = 0.6)
 )
 
-# Apply thresholds
-comp_saturation <- compare_saturation(code_counts, excerpts, thresholds_list)
+# Compare against thresholds
+saturation_comparison <- compare_saturation(code_summary, thresholds_list,
+                                            plot = TRUE,
+                                            plot_metric = "both")
+# View table
+saturation_comparison$results
 
-# Plot saturation comparisons
-plot_saturation_comp <- plot_compare_saturation(comp_saturation, thresholds_list)
+# View plot
+saturation_comparison$plot
 
 # Generate word cloud
 wordcloud(excerpts, "c_knowledge_awareness", 
