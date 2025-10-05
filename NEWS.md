@@ -1,3 +1,6 @@
+# DedooseR 0.0.5
+* 2025-10-04: We have our first 10 functions 🥳
+
 # DedooseR 0.0.4
 * 2025-10-04: Pushed all cooccur functions into one
 * 2025-10-04: Pushed plot_saturation into set_saturation
