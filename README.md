@@ -131,11 +131,11 @@ wordcloud(excerpts, "c_knowledge_awareness",
          max_words = 100,
          custom_stopwords = c("racall", "stuff", "everyone's"))
 
-# Create co-occurence matrix
-cooccur_matrix <- create_cooccur_matrix(excerpts, min_bold = 0.25, scale = "proportion", output = "data.frame")
-
-# Create co-occurence network map
-map_cooccur_matrix <- map_cooccur_matrix(cooccur_matrix, edge_min = 15)
+# Create matrix, set threshold and plot
+cooccur_01 <- cooccur(data_merged,
+              matrix_threshold = 15)
+cooccur_01$matrix
+cooccur_01$plot
 
 # Topic model
 topicmodel(excerpts, "c_emerging_leader", n_topics = 2, n_terms = 25,

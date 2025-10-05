@@ -171,19 +171,24 @@
 <span>plot_metric <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span> <span class="co"># Plot both metrics on the same graph</span></span>
 <span><span class="va">out</span><span class="op">$</span><span class="va">plot</span></span>
 <span></span>
+<span></span>
 <span><span class="co"># Compare saturation</span></span>
 <span></span>
-<span><span class="co"># Define thresholds</span></span>
+<span><span class="co"># Define thresholds list</span></span>
 <span><span class="va">thresholds_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  Set1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>code_count <span class="op">=</span> <span class="fl">20</span>, prop_media_title <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span>,</span>
-<span>  Set2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>code_count <span class="op">=</span> <span class="fl">40</span>, prop_media_title <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span>
+<span>  <span class="st">"Liberal"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>code_count <span class="op">=</span> <span class="fl">40</span>, prop_media_title <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span>,</span>
+<span>  <span class="st">"Strict"</span>  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>code_count <span class="op">=</span> <span class="fl">60</span>, prop_media_title <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Apply thresholds</span></span>
-<span><span class="va">comp_saturation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/compare_saturation.html">compare_saturation</a></span><span class="op">(</span><span class="va">code_counts</span>, <span class="va">excerpts</span>, <span class="va">thresholds_list</span><span class="op">)</span></span>
+<span><span class="co"># Compare against thresholds</span></span>
+<span><span class="va">saturation_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/compare_saturation.html">compare_saturation</a></span><span class="op">(</span><span class="va">code_summary</span>, <span class="va">thresholds_list</span>,</span>
+<span>                                            plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                            plot_metric <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span>
+<span><span class="co"># View table</span></span>
+<span><span class="va">saturation_comparison</span><span class="op">$</span><span class="va">results</span></span>
 <span></span>
-<span><span class="co"># Plot saturation comparisons</span></span>
-<span><span class="va">plot_saturation_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/plot_compare_saturation.html">plot_compare_saturation</a></span><span class="op">(</span><span class="va">comp_saturation</span>, <span class="va">thresholds_list</span><span class="op">)</span></span>
+<span><span class="co"># View plot</span></span>
+<span><span class="va">saturation_comparison</span><span class="op">$</span><span class="va">plot</span></span>
 <span></span>
 <span><span class="co"># Generate word cloud</span></span>
 <span><span class="fu"><a href="reference/wordcloud.html">wordcloud</a></span><span class="op">(</span><span class="va">excerpts</span>, <span class="st">"c_knowledge_awareness"</span>, </span>
