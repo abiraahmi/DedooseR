@@ -2,7 +2,7 @@
 % Please edit documentation in R/create_code_summary.R
 \name{create_code_summary}
 \alias{create_code_summary}
-\title{Create and Visualize a Code Frequency Summary}
+\title{Create a Code Frequency Summary and Optional Plot}
 \usage{
 create_code_summary(
   excerpts,
@@ -13,86 +13,91 @@ create_code_summary(
   plot_min_prop = NULL,
   output_type = c("tibble", "kable", "datatable"),
   exclude = NULL,
-  plot_metric = c("count", "n_media_titles"),
+  plot_metric = c("count", "prop", "both"),
   fill_color = "steelblue"
 )
 }
 \arguments{
-\item{excerpts}{A data frame containing at least one logical column representing codes
-and a column named \code{media_title}.}
+\item{excerpts}{A data frame containing at least a \code{media_title} column and one or more logical columns
+representing coded excerpts (e.g., \code{c_help}, \code{c_stigma}).}
 
-\item{table_min_count}{Minimum count threshold for including codes in the summary table.
+\item{table_min_count}{Minimum number of excerpts required for a code to be included in the summary table.
 Defaults to \code{1}.}
 
-\item{table_min_prop}{Minimum proportion of the maximum count (0–1) for including codes
-in the summary table. Defaults to \code{NULL}.}
+\item{table_min_prop}{Optional numeric threshold (0–1) specifying the minimum proportion of the
+most frequent code required for inclusion in the summary table.}
 
-\item{plot}{Logical; if \code{TRUE}, also generates a bar plot of code frequencies.}
+\item{plot}{Logical. If \code{TRUE}, generates a bar plot of code frequencies.
+Defaults to \code{FALSE}.}
 
-\item{plot_min_count}{Minimum count threshold for including codes in the plot. Defaults to \code{NULL}.}
+\item{plot_min_count}{Minimum number of excerpts required for a code to be included in the plot.
+If \code{NULL}, defaults to \code{table_min_count}.}
 
-\item{plot_min_prop}{Minimum proportion of the maximum count (0–1) for including codes in the plot.
-Defaults to \code{NULL}.}
+\item{plot_min_prop}{Optional numeric threshold (0–1) specifying the minimum proportion
+of the maximum frequency required for inclusion in the plot.
+If \code{NULL}, defaults to \code{table_min_prop}.}
 
-\item{output_type}{Output format for the summary table: \code{"tibble"}, \code{"kable"}, or \code{"datatable"}.
+\item{output_type}{Type of output for the summary table: one of \code{"tibble"}, \code{"kable"}, or \code{"datatable"}.
 Defaults to \code{"tibble"}.}
 
-\item{exclude}{Character vector of code variable names to exclude from both table and plot.}
+\item{exclude}{Optional character vector of code variable names to exclude from the summary.}
 
-\item{plot_metric}{Which metric to plot: \code{"count"} or \code{"n_media_titles"}. Defaults to \code{"count"}.}
+\item{plot_metric}{Character string specifying which metric to plot:
+\itemize{
+\item \code{"count"} – excerpt frequencies,
+\item \code{"prop"} – proportions of unique media titles, or
+\item \code{"both"} – dual-axis plot with counts (bottom) and proportions (top).
+Defaults to \code{"count"}.
+}}
 
-\item{fill_color}{Bar fill color for the plot. Defaults to \code{"steelblue"}.}
+\item{fill_color}{Character string specifying the fill color for bars in the plot.
+Defaults to \code{"steelblue"}.}
 }
 \value{
-\itemize{
-\item If \code{plot = FALSE}: returns a tibble, kable, or datatable (depending on \code{output_type}).
-\item If \code{plot = TRUE}: returns a list with two elements:
-\itemize{
-\item \verb{$table} – the summary table (tibble)
-\item \verb{$plot} – a \code{ggplot2} object showing code frequencies
-}
+If \code{plot = FALSE}, returns a summary table as a tibble, \code{knitr::kable}, or \code{DT::datatable}
+depending on \code{output_type}.
+If \code{plot = TRUE}, returns a list with two elements:
+\describe{
+\item{\code{table}}{A tibble of summarized code counts and proportions.}
+\item{\code{plot}}{A \code{ggplot2} object showing the frequency and/or proportion of codes.}
 }
 }
 \description{
-Summarizes and optionally visualizes the frequency of each logical (TRUE/FALSE)
-code variable in a qualitative dataset. Each logical column is assumed to represent
-whether a code was applied to an excerpt (e.g., TRUE = applied).
-
-The function produces a summary table showing how often each code appears across
-all excerpts and across unique \code{media_title} sources. Optionally, a bar plot can
-be generated to visualize code frequencies.
-
-Users can filter which codes are displayed in the table or plot based on absolute
-count thresholds (\verb{*_min_count}) or relative proportions of the most frequent code
-(\verb{*_min_prop}).
+Summarizes the frequency and coverage of logical code variables in a dataset of excerpts.
+The function produces a summary table (as a tibble, \code{knitr::kable}, or \code{DT::datatable})
+and, optionally, a bar plot showing code frequencies or proportions.
 }
 \details{
-Variable labels (stored as the \code{"label"} attribute, e.g. via \code{haven::labelled}) are displayed
-in place of variable names when available. If no label is found, the variable name is used.
+Logical columns in \code{excerpts} are treated as binary code indicators.
+Variable labels (if defined via \code{attr(x, "label")}) are used as code names in the output.
 }
 \examples{
-library(dplyr)
-library(tidyr)
-library(purrr)
-
+# Example dataset
 df <- data.frame(
-  media_title = c("A", "B", "C", "D"),
-  code1 = c(TRUE, FALSE, TRUE, TRUE),
-  code2 = c(FALSE, TRUE, TRUE, FALSE),
-  code3 = c(FALSE, TRUE, FALSE, FALSE)
+  media_title = rep(paste0("Transcript_", 1:5), each = 3),
+  c_help = sample(c(TRUE, FALSE), 15, replace = TRUE),
+  c_stigma = sample(c(TRUE, FALSE), 15, replace = TRUE),
+  c_hope = sample(c(TRUE, FALSE), 15, replace = TRUE)
 )
-attr(df$code1, "label") <- "Emotional Support"
-attr(df$code2, "label") <- "Academic Support"
-attr(df$code3, "label") <- "Family Relationships"
 
-# Default (table only)
-create_code_summary(df)
+# Add variable labels
+attr(df$c_help, "label") <- "Help-Seeking"
+attr(df$c_stigma, "label") <- "Stigma"
+attr(df$c_hope, "label") <- "Hope"
 
-# Include plot
-res <- create_code_summary(df, plot = TRUE)
-res$plot
+# Summarize codes (tibble output)
+create_code_summary(df, table_min_count = 2)
 
-# Exclude codes and adjust thresholds
-create_code_summary(df, exclude = "code3", table_min_count = 2, plot = TRUE)
+# Display as formatted table
+create_code_summary(df, table_min_count = 2, output_type = "kable")
+
+# Plot excerpt frequencies
+create_code_summary(df, table_min_count = 1, plot = TRUE, plot_metric = "count")
+
+# Plot proportions of media titles
+create_code_summary(df, table_min_count = 1, plot = TRUE, plot_metric = "prop")
+
+# Plot both frequency and proportion on dual axes
+create_code_summary(df, table_min_count = 1, plot = TRUE, plot_metric = "both")
 
 }

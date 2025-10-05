@@ -7,13 +7,13 @@ create_code_summary <- function(
     plot_min_prop = NULL,
     output_type = c("tibble", "kable", "datatable"),
     exclude = NULL,
-    plot_metric = c("count", "n_media_titles"),
+    plot_metric = c("count", "prop", "both"),
     fill_color = "steelblue"
 ) {
   output_type <- match.arg(output_type)
   plot_metric <- match.arg(plot_metric)
 
-  # Validate inputs
+  # --- Validate inputs ---
   if (!is.data.frame(excerpts)) stop("`excerpts` must be a data frame.")
   if (!"media_title" %in% names(excerpts)) stop("`excerpts` must contain a `media_title` column.")
 
@@ -26,18 +26,18 @@ create_code_summary <- function(
   }
   if (length(code_columns) == 0) stop("No logical (code) columns found after exclusions.")
 
-  # Create name → label lookup
+  # --- Create name → label lookup ---
   label_lookup <- purrr::map_chr(code_columns, function(x) {
     lbl <- attr(excerpts[[x]], "label")
     if (is.null(lbl) || lbl == "") x else lbl
   })
   names(label_lookup) <- code_columns
 
-  # Summarize code frequencies
+  # --- Summarize code frequencies ---
   total_counts <- excerpts %>%
-    dplyr::select(media_title, all_of(code_columns)) %>%
+    dplyr::select("media_title", dplyr::all_of(code_columns)) %>%
     tidyr::pivot_longer(
-      cols = all_of(code_columns),
+      cols = dplyr::all_of(code_columns),
       names_to = "code",
       values_to = "applied"
     ) %>%
@@ -48,55 +48,98 @@ create_code_summary <- function(
       n_media_titles = dplyr::n_distinct(media_title),
       .groups = "drop"
     ) %>%
-    dplyr::arrange(desc(count)) %>%
-    dplyr::mutate(code_label = label_lookup[as.character(code)] |> unname()) %>%
-    dplyr::select(code = code_label, count, n_media_titles)
+    dplyr::mutate(
+      prop_media_titles = round(n_media_titles / max(n_media_titles, na.rm = TRUE), 2),
+      code_label = label_lookup[as.character(code)] |> unname()
+    ) %>%
+    dplyr::select("code" = "code_label", "count", "n_media_titles", "prop_media_titles")
 
-  # Apply table filters
+  # --- Apply table filters ---
   if (!is.null(table_min_prop)) {
     max_val <- max(total_counts$count, na.rm = TRUE)
     total_counts <- dplyr::filter(total_counts, count >= table_min_prop * max_val)
   }
   total_counts <- dplyr::filter(total_counts, count >= table_min_count)
 
-  # Output table
+  # --- Output table ---
   caption_text <- paste("Total Code Counts (min_count =", table_min_count, ")")
   table_out <- switch(
     output_type,
     tibble = total_counts,
     kable = knitr::kable(total_counts, caption = caption_text),
-    datatable = DT::datatable(total_counts,
-                              caption = caption_text,
-                              options = list(pageLength = 30, autoWidth = TRUE))
+    datatable = DT::datatable(
+      total_counts,
+      caption = caption_text,
+      options = list(pageLength = 30, autoWidth = TRUE)
+    )
   )
 
-  # Generate plot if requested
+  # --- Plot section ---
   if (plot) {
+    # Default plot mins to table mins if not provided
+    if (is.null(plot_min_count)) plot_min_count <- table_min_count
+    if (is.null(plot_min_prop)) plot_min_prop <- table_min_prop
+
     plot_df <- total_counts
+    plot_df <- dplyr::filter(plot_df, count >= plot_min_count)
 
-    # Apply plot thresholds
-    if (!is.null(plot_min_count)) {
-      plot_df <- dplyr::filter(plot_df, .data[[plot_metric]] >= plot_min_count)
-    }
     if (!is.null(plot_min_prop)) {
-      max_val <- max(plot_df[[plot_metric]], na.rm = TRUE)
-      plot_df <- dplyr::filter(plot_df, .data[[plot_metric]] >= plot_min_prop * max_val)
+      max_val <- max(plot_df$count, na.rm = TRUE)
+      plot_df <- dplyr::filter(plot_df, count >= plot_min_prop * max_val)
     }
 
-    # Order and plot
-    plot_df <- dplyr::arrange(plot_df, .data[[plot_metric]])
-    p <- ggplot2::ggplot(plot_df, ggplot2::aes(
-      x = reorder(code, .data[[plot_metric]]),
-      y = .data[[plot_metric]]
-    )) +
-      ggplot2::geom_col(fill = fill_color) +
-      ggplot2::coord_flip() +
-      ggplot2::labs(
-        x = "Code",
-        y = ifelse(plot_metric == "count", "Excerpt Frequency", "Media Title Coverage"),
-        title = paste("Code Frequencies by", ifelse(plot_metric == "count", "Excerpts", "Media Titles"))
-      ) +
-      ggplot2::theme_minimal()
+    plot_df <- dplyr::arrange(plot_df, dplyr::desc(count))
+
+    # --- Plot by selected metric ---
+    if (plot_metric == "count") {
+      p <- ggplot2::ggplot(plot_df, ggplot2::aes(
+        x = reorder(code, count),
+        y = count
+      )) +
+        ggplot2::geom_col(fill = fill_color) +
+        ggplot2::coord_flip() +
+        ggplot2::labs(
+          x = "Code",
+          y = "Excerpt Frequency",
+          title = "Code Counts"
+        ) +
+        ggplot2::theme_minimal()
+
+    } else if (plot_metric == "prop") {
+      p <- ggplot2::ggplot(plot_df, ggplot2::aes(
+        x = reorder(code, prop_media_titles),
+        y = prop_media_titles
+      )) +
+        ggplot2::geom_col(fill = fill_color) +
+        ggplot2::coord_flip() +
+        ggplot2::labs(
+          x = "Code",
+          y = "Proportion of Media Titles",
+          title = "Code Frequencies by Media Title Coverage"
+        ) +
+        ggplot2::theme_minimal()
+
+    } else if (plot_metric == "both") {
+      scale_factor <- max(plot_df$count, na.rm = TRUE) /
+        max(plot_df$prop_media_titles, na.rm = TRUE)
+
+      p <- ggplot2::ggplot(plot_df, ggplot2::aes(
+        x = reorder(code, count),
+        y = count
+      )) +
+        ggplot2::geom_col(fill = fill_color) +
+        ggplot2::coord_flip() +
+        ggplot2::scale_y_continuous(
+          name = "Excerpt Frequency",
+          sec.axis = ggplot2::sec_axis(~ . / scale_factor,
+                                       name = "Proportion of Media Titles")
+        ) +
+        ggplot2::labs(
+          x = "Code",
+          title = "Code Frequencies: Counts and Proportions"
+        ) +
+        ggplot2::theme_minimal()
+    }
 
     return(list(table = total_counts, plot = p))
   }
@@ -145,4 +188,6 @@ codebook_merged <- merge_codes$codebook
 # Create code summary
 create_code_summary <- create_code_summary(data_merged,
                                     table_min_count = 40,
-                                    plot = TRUE)
+                                    table_min_prop = 0.25,
+                                    plot = TRUE,
+                                    plot_metric = "prop")

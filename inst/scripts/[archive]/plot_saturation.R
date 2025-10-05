@@ -1,65 +1,63 @@
-plot_saturation <- function(saturation_output,
-                            metric = c("count", "prop_media_titles"),
-                            top_n = NULL,
-                            exclude_codes = NULL) {
-  metric <- match.arg(metric)
+#' Plot Code Saturation
+#'
+#' `plot_saturation()` creates a bar chart of codes that meet saturation
+#' thresholds defined by \code{set_saturation()}. Bars represent code counts,
+#' and the fill color indicates the proportion of media titles in which each
+#' code appears.
+#'
+#' @param saturation_df A tibble returned by \code{set_saturation()} containing
+#'   columns \code{code}, \code{count}, and \code{prop_media_titles}.
+#' @param sort_by Whether to sort codes by \code{"count"} or by
+#'   \code{"prop_media_titles"} (default = \code{"count"}).
+#'
+#' @return A \code{ggplot2} object showing a horizontal bar plot of code counts,
+#'   with fill color corresponding to the proportion of media titles.
+#'
+#' @examples
+#' \dontrun{
+#' library(readxl)
+#' library(dplyr)
+#' library(tidyverse)
+#'
+#' # Load excerpts and clean
+#' excerpts <- read_xlsx("inst/raw_data/test_data.xlsx")
+#' preferred_coders <- c("a", "l", "i", "r", "s", "v", "c", "n", "k")
+#' excerpts <- clean_data(excerpts, preferred_coders)
+#'
+#' # Count codes
+#' code_counts <- count_codes(excerpts, min_count = 10, output = "tibble")
+#'
+#' # Apply saturation filter
+#' saturation <- set_saturation(code_counts, min_count = 10, min_prop_media_titles = 0.25)
+#'
+#' # Plot results
+#' plot_saturation(saturation, sort_by = "count")
+#' }
+#'
+#' @export
+plot_saturation <- function(saturation_df,
+                            sort_by = c("count", "prop_media_titles")) {
 
-  # Ensure tibble input (not kable)
-  if (!is.data.frame(saturation_output)) {
-    stop("Input must be a tibble from set_saturation(output_type = 'tibble').")
-  }
+  sort_by <- match.arg(sort_by)
 
-  df <- saturation_output
+  df <- saturation_df
 
-  # Exclude codes if requested
-  if (!is.null(exclude_codes)) {
-    df <- df %>%
-      dplyr::filter(!code %in% exclude_codes)
-  }
-
-  # Optional: select top_n codes
-  if (!is.null(top_n)) {
-    df <- df %>%
-      dplyr::slice_max(order_by = .data[[metric]], n = top_n)
+  # Reorder factor levels for plotting
+  if (sort_by == "count") {
+    df <- df %>% dplyr::arrange(count)
+    df$code <- factor(df$code, levels = df$code)
+  } else {
+    df <- df %>% dplyr::arrange(prop_media_titles)
+    df$code <- factor(df$code, levels = df$code)
   }
 
   # Plot
-  ggplot(df, aes(x = reorder(code, .data[[metric]]),
-                 y = .data[[metric]])) +
-    geom_col(fill = "steelblue") +
+  ggplot(df, aes(x = code, y = count, fill = prop_media_titles)) +
+    geom_col() +
     coord_flip() +
+    scale_fill_gradient(low = "lightblue", high = "darkblue") +
     labs(
       x = "Code",
-      y = ifelse(metric == "count", "Frequency", "Proportion of Media Titles"),
-      title = paste("Code Saturation by", metric)
-    ) +
-    theme_minimal(base_size = 14)
+      y = "Count",
+      title = "Code Saturation Plot")
 }
-
-# test_script.R
-
-library(DedooseR)
-library(tidyverse)
-library(dplyr)
-library(readxl)
-
-# Clean data
-excerpts <- read_xlsx("inst/raw_data/test_data.xlsx")
-preferred_coders <- c("a", "l", "i", "r", "s", "v", "c", "n", "k")
-excerpts <- clean_data(excerpts, preferred_coders)
-
-# Count codes
-code_counts <- count_codes(excerpts, min_count = 10, output = "tibble")
-
-# Plot codes
-plot_counts <- plot_counts(code_counts,
-                           exclude_codes = c("c_priority_excerpt", "c_self_efficacy"),
-                           metric = "n_media_titles",
-                           min_prop = 0.40)
-
-# Set saturation
-saturation <- set_saturation(code_counts,
-                             min_count = 40)
-
-# Plot saturation
-plot_saturation <- plot_saturation(saturation, metric = "prop_media_titles", exclude_codes = c("c_knowledge_awareness", "c_self_efficacy"))

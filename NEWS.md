@@ -1,6 +1,7 @@
 # DedooseR 0.0.4
-* 2025-10-04: Updated existing functions to output cleaned variable labels instead of names
+* 2025-10-04: Pushed plot_saturation into set_saturation
 * 2025-10-04: Pushed count_codes and plot_counts into one function: create_code_summary
+* 2025-10-04: Updated existing functions to output cleaned variable labels instead of names
 * 2025-10-03: Added the topicmodel function to select code and populate topic distributions
 * 2025-10-03: Added the wordcloud function to generate wordclouds for chosen codes
 * 2025-10-03: Added the view_excerpts function to create a filterable excerpt viewer

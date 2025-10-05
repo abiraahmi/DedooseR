@@ -1,75 +1,82 @@
-#' Create and Visualize a Code Frequency Summary
+#' Create a Code Frequency Summary and Optional Plot
 #'
 #' @description
-#' Summarizes and optionally visualizes the frequency of each logical (TRUE/FALSE)
-#' code variable in a qualitative dataset. Each logical column is assumed to represent
-#' whether a code was applied to an excerpt (e.g., TRUE = applied).
+#' Summarizes the frequency and coverage of logical code variables in a dataset of excerpts.
+#' The function produces a summary table (as a tibble, `knitr::kable`, or `DT::datatable`)
+#' and, optionally, a bar plot showing code frequencies or proportions.
 #'
-#' The function produces a summary table showing how often each code appears across
-#' all excerpts and across unique `media_title` sources. Optionally, a bar plot can
-#' be generated to visualize code frequencies.
-#'
-#' Users can filter which codes are displayed in the table or plot based on absolute
-#' count thresholds (`*_min_count`) or relative proportions of the most frequent code
-#' (`*_min_prop`).
-#'
-#' @param excerpts A data frame containing at least one logical column representing codes
-#'   and a column named `media_title`.
-#' @param table_min_count Minimum count threshold for including codes in the summary table.
+#' @param excerpts A data frame containing at least a `media_title` column and one or more logical columns
+#'   representing coded excerpts (e.g., `c_help`, `c_stigma`).
+#' @param table_min_count Minimum number of excerpts required for a code to be included in the summary table.
 #'   Defaults to `1`.
-#' @param table_min_prop Minimum proportion of the maximum count (0–1) for including codes
-#'   in the summary table. Defaults to `NULL`.
-#' @param plot Logical; if `TRUE`, also generates a bar plot of code frequencies.
-#' @param plot_min_count Minimum count threshold for including codes in the plot. Defaults to `NULL`.
-#' @param plot_min_prop Minimum proportion of the maximum count (0–1) for including codes in the plot.
-#'   Defaults to `NULL`.
-#' @param output_type Output format for the summary table: `"tibble"`, `"kable"`, or `"datatable"`.
+#' @param table_min_prop Optional numeric threshold (0–1) specifying the minimum proportion of the
+#'   most frequent code required for inclusion in the summary table.
+#' @param plot Logical. If `TRUE`, generates a bar plot of code frequencies.
+#'   Defaults to `FALSE`.
+#' @param plot_min_count Minimum number of excerpts required for a code to be included in the plot.
+#'   If `NULL`, defaults to `table_min_count`.
+#' @param plot_min_prop Optional numeric threshold (0–1) specifying the minimum proportion
+#'   of the maximum frequency required for inclusion in the plot.
+#'   If `NULL`, defaults to `table_min_prop`.
+#' @param output_type Type of output for the summary table: one of `"tibble"`, `"kable"`, or `"datatable"`.
 #'   Defaults to `"tibble"`.
-#' @param exclude Character vector of code variable names to exclude from both table and plot.
-#' @param plot_metric Which metric to plot: `"count"` or `"n_media_titles"`. Defaults to `"count"`.
-#' @param fill_color Bar fill color for the plot. Defaults to `"steelblue"`.
+#' @param exclude Optional character vector of code variable names to exclude from the summary.
+#' @param plot_metric Character string specifying which metric to plot:
+#'   * `"count"` – excerpt frequencies,
+#'   * `"prop"` – proportions of unique media titles, or
+#'   * `"both"` – dual-axis plot with counts (bottom) and proportions (top).
+#'   Defaults to `"count"`.
+#' @param fill_color Character string specifying the fill color for bars in the plot.
+#'   Defaults to `"steelblue"`.
 #'
 #' @return
-#' - If `plot = FALSE`: returns a tibble, kable, or datatable (depending on `output_type`).
-#' - If `plot = TRUE`: returns a list with two elements:
-#'   * `$table` – the summary table (tibble)
-#'   * `$plot` – a `ggplot2` object showing code frequencies
+#' If `plot = FALSE`, returns a summary table as a tibble, `knitr::kable`, or `DT::datatable`
+#' depending on `output_type`.
+#' If `plot = TRUE`, returns a list with two elements:
+#' \describe{
+#'   \item{`table`}{A tibble of summarized code counts and proportions.}
+#'   \item{`plot`}{A `ggplot2` object showing the frequency and/or proportion of codes.}
+#' }
 #'
 #' @details
-#' Variable labels (stored as the `"label"` attribute, e.g. via `haven::labelled`) are displayed
-#' in place of variable names when available. If no label is found, the variable name is used.
+#' Logical columns in `excerpts` are treated as binary code indicators.
+#' Variable labels (if defined via `attr(x, "label")`) are used as code names in the output.
 #'
 #' @examples
-#' library(dplyr)
-#' library(tidyr)
-#' library(purrr)
-#'
+#' # Example dataset
 #' df <- data.frame(
-#'   media_title = c("A", "B", "C", "D"),
-#'   code1 = c(TRUE, FALSE, TRUE, TRUE),
-#'   code2 = c(FALSE, TRUE, TRUE, FALSE),
-#'   code3 = c(FALSE, TRUE, FALSE, FALSE)
+#'   media_title = rep(paste0("Transcript_", 1:5), each = 3),
+#'   c_help = sample(c(TRUE, FALSE), 15, replace = TRUE),
+#'   c_stigma = sample(c(TRUE, FALSE), 15, replace = TRUE),
+#'   c_hope = sample(c(TRUE, FALSE), 15, replace = TRUE)
 #' )
-#' attr(df$code1, "label") <- "Emotional Support"
-#' attr(df$code2, "label") <- "Academic Support"
-#' attr(df$code3, "label") <- "Family Relationships"
 #'
-#' # Default (table only)
-#' create_code_summary(df)
+#' # Add variable labels
+#' attr(df$c_help, "label") <- "Help-Seeking"
+#' attr(df$c_stigma, "label") <- "Stigma"
+#' attr(df$c_hope, "label") <- "Hope"
 #'
-#' # Include plot
-#' res <- create_code_summary(df, plot = TRUE)
-#' res$plot
+#' # Summarize codes (tibble output)
+#' create_code_summary(df, table_min_count = 2)
 #'
-#' # Exclude codes and adjust thresholds
-#' create_code_summary(df, exclude = "code3", table_min_count = 2, plot = TRUE)
+#' # Display as formatted table
+#' create_code_summary(df, table_min_count = 2, output_type = "kable")
+#'
+#' # Plot excerpt frequencies
+#' create_code_summary(df, table_min_count = 1, plot = TRUE, plot_metric = "count")
+#'
+#' # Plot proportions of media titles
+#' create_code_summary(df, table_min_count = 1, plot = TRUE, plot_metric = "prop")
+#'
+#' # Plot both frequency and proportion on dual axes
+#' create_code_summary(df, table_min_count = 1, plot = TRUE, plot_metric = "both")
 #'
 #' @importFrom dplyr select filter group_by summarise n n_distinct arrange mutate all_of
 #' @importFrom tidyr pivot_longer
 #' @importFrom purrr map_chr
 #' @importFrom knitr kable
 #' @importFrom DT datatable
-#' @importFrom ggplot2 ggplot aes geom_col coord_flip labs theme_minimal
+#' @importFrom ggplot2 ggplot aes geom_col coord_flip labs theme_minimal scale_y_continuous sec_axis
 #' @importFrom stats reorder
 #' @export
 create_code_summary <- function(
@@ -81,17 +88,15 @@ create_code_summary <- function(
     plot_min_prop = NULL,
     output_type = c("tibble", "kable", "datatable"),
     exclude = NULL,
-    plot_metric = c("count", "n_media_titles"),
+    plot_metric = c("count", "prop", "both"),
     fill_color = "steelblue"
 ) {
   output_type <- match.arg(output_type)
   plot_metric <- match.arg(plot_metric)
 
-  # Validate inputs
-  if (!is.data.frame(excerpts))
-    stop("`excerpts` must be a data frame.")
-  if (!"media_title" %in% names(excerpts))
-    stop("`excerpts` must contain a `media_title` column.")
+  # --- Validate inputs ---
+  if (!is.data.frame(excerpts)) stop("`excerpts` must be a data frame.")
+  if (!"media_title" %in% names(excerpts)) stop("`excerpts` must contain a `media_title` column.")
 
   # Identify logical columns (codes)
   code_columns <- colnames(excerpts)[vapply(excerpts, is.logical, logical(1))]
@@ -100,19 +105,18 @@ create_code_summary <- function(
     exclude <- intersect(exclude, code_columns)
     code_columns <- setdiff(code_columns, exclude)
   }
-  if (length(code_columns) == 0)
-    stop("No logical (code) columns found after exclusions.")
+  if (length(code_columns) == 0) stop("No logical (code) columns found after exclusions.")
 
-  # Create name → label lookup
+  # --- Create name → label lookup ---
   label_lookup <- purrr::map_chr(code_columns, function(x) {
     lbl <- attr(excerpts[[x]], "label")
     if (is.null(lbl) || lbl == "") x else lbl
   })
   names(label_lookup) <- code_columns
 
-  # Summarize code frequencies
+  # --- Summarize code frequencies ---
   total_counts <- excerpts %>%
-    dplyr::select(media_title, dplyr::all_of(code_columns)) %>%
+    dplyr::select("media_title", dplyr::all_of(code_columns)) %>%
     tidyr::pivot_longer(
       cols = dplyr::all_of(code_columns),
       names_to = "code",
@@ -125,18 +129,20 @@ create_code_summary <- function(
       n_media_titles = dplyr::n_distinct(media_title),
       .groups = "drop"
     ) %>%
-    dplyr::arrange(dplyr::desc(count)) %>%
-    dplyr::mutate(code_label = unname(label_lookup[as.character(code)])) %>%
-    dplyr::select(code = code_label, count, n_media_titles)
+    dplyr::mutate(
+      prop_media_titles = round(n_media_titles / max(n_media_titles, na.rm = TRUE), 2),
+      code_label = label_lookup[as.character(code)] |> unname()
+    ) %>%
+    dplyr::select("code" = "code_label", "count", "n_media_titles", "prop_media_titles")
 
-  # Apply table filters
+  # --- Apply table filters ---
   if (!is.null(table_min_prop)) {
     max_val <- max(total_counts$count, na.rm = TRUE)
     total_counts <- dplyr::filter(total_counts, count >= table_min_prop * max_val)
   }
   total_counts <- dplyr::filter(total_counts, count >= table_min_count)
 
-  # Output table
+  # --- Output table ---
   caption_text <- paste("Total Code Counts (min_count =", table_min_count, ")")
   table_out <- switch(
     output_type,
@@ -149,33 +155,72 @@ create_code_summary <- function(
     )
   )
 
-  # Generate plot if requested
+  # --- Plot section ---
   if (plot) {
+    # Default plot mins to table mins if not provided
+    if (is.null(plot_min_count)) plot_min_count <- table_min_count
+    if (is.null(plot_min_prop)) plot_min_prop <- table_min_prop
+
     plot_df <- total_counts
+    plot_df <- dplyr::filter(plot_df, count >= plot_min_count)
 
-    # Apply plot thresholds
-    if (!is.null(plot_min_count)) {
-      plot_df <- dplyr::filter(plot_df, .data[[plot_metric]] >= plot_min_count)
-    }
     if (!is.null(plot_min_prop)) {
-      max_val <- max(plot_df[[plot_metric]], na.rm = TRUE)
-      plot_df <- dplyr::filter(plot_df, .data[[plot_metric]] >= plot_min_prop * max_val)
+      max_val <- max(plot_df$count, na.rm = TRUE)
+      plot_df <- dplyr::filter(plot_df, count >= plot_min_prop * max_val)
     }
 
-    # Order and plot
-    plot_df <- dplyr::arrange(plot_df, .data[[plot_metric]])
-    p <- ggplot2::ggplot(plot_df, ggplot2::aes(
-      x = reorder(code, .data[[plot_metric]]),
-      y = .data[[plot_metric]]
-    )) +
-      ggplot2::geom_col(fill = fill_color) +
-      ggplot2::coord_flip() +
-      ggplot2::labs(
-        x = "Code",
-        y = ifelse(plot_metric == "count", "Excerpt Frequency", "Media Title Coverage"),
-        title = paste("Code Frequencies by", ifelse(plot_metric == "count", "Excerpts", "Media Titles"))
-      ) +
-      ggplot2::theme_minimal()
+    plot_df <- dplyr::arrange(plot_df, dplyr::desc(count))
+
+    # --- Plot by selected metric ---
+    if (plot_metric == "count") {
+      p <- ggplot2::ggplot(plot_df, ggplot2::aes(
+        x = reorder(code, count),
+        y = count
+      )) +
+        ggplot2::geom_col(fill = fill_color) +
+        ggplot2::coord_flip() +
+        ggplot2::labs(
+          x = "Code",
+          y = "Excerpt Frequency",
+          title = "Code Counts"
+        ) +
+        ggplot2::theme_minimal()
+
+    } else if (plot_metric == "prop") {
+      p <- ggplot2::ggplot(plot_df, ggplot2::aes(
+        x = reorder(code, prop_media_titles),
+        y = prop_media_titles
+      )) +
+        ggplot2::geom_col(fill = fill_color) +
+        ggplot2::coord_flip() +
+        ggplot2::labs(
+          x = "Code",
+          y = "Proportion of Media Titles",
+          title = "Code Frequencies by Media Title Coverage"
+        ) +
+        ggplot2::theme_minimal()
+
+    } else if (plot_metric == "both") {
+      scale_factor <- max(plot_df$count, na.rm = TRUE) /
+        max(plot_df$prop_media_titles, na.rm = TRUE)
+
+      p <- ggplot2::ggplot(plot_df, ggplot2::aes(
+        x = reorder(code, count),
+        y = count
+      )) +
+        ggplot2::geom_col(fill = fill_color) +
+        ggplot2::coord_flip() +
+        ggplot2::scale_y_continuous(
+          name = "Excerpt Frequency",
+          sec.axis = ggplot2::sec_axis(~ . / scale_factor,
+                                       name = "Proportion of Media Titles")
+        ) +
+        ggplot2::labs(
+          x = "Code",
+          title = "Code Frequencies: Counts and Proportions"
+        ) +
+        ggplot2::theme_minimal()
+    }
 
     return(list(table = total_counts, plot = p))
   }

@@ -1,16 +1,20 @@
 set_saturation <- function(code_counts,
                            total_media_titles = NULL,
-                           min_count = 1,
-                           min_prop_media_titles = NULL,
-                           output_type = c("tibble", "kable")) {
+                           table_min_count = 1,
+                           table_min_prop_media_titles = NULL,
+                           output_type = c("tibble", "kable"),
+                           plot = FALSE,
+                           plot_min_count = NULL,
+                           plot_min_prop_media_titles = NULL,
+                           plot_metric = c("prop", "count", "both"),
+                           fill_color = "steelblue") {
   output_type <- match.arg(output_type)
+  plot_metric <- match.arg(plot_metric)
 
-  # Handle both tibble or list input from create_code_summary()
   if (is.list(code_counts) && "table" %in% names(code_counts)) {
     code_counts <- code_counts$table
   }
 
-  # Input validation
   if (!is.data.frame(code_counts)) {
     stop("`code_counts` must be a tibble or data frame (from create_code_summary()).")
   }
@@ -18,42 +22,102 @@ set_saturation <- function(code_counts,
     stop("`code_counts` must contain columns `code`, `count`, and `n_media_titles`.")
   }
 
-  # Determine denominator for proportions
   if (is.null(total_media_titles)) {
     total_media_titles <- max(code_counts$n_media_titles, na.rm = TRUE)
   }
 
-  # Filter by count first
+  # --- Compute proportions and filter for table ---
   df <- code_counts %>%
-    dplyr::filter(.data$count >= min_count) %>%
+    dplyr::filter(count >= table_min_count) %>%
     dplyr::mutate(
-      prop_media_titles = round(.data$n_media_titles / total_media_titles, 2)
+      prop_media_titles = round(n_media_titles / total_media_titles, 2)
     ) %>%
-    dplyr::select(.data$code, .data$count, .data$prop_media_titles)
+    dplyr::select("code", "count", "prop_media_titles")
 
-  # Filter by proportion if requested
-  if (!is.null(min_prop_media_titles)) {
-    df <- df %>%
-      dplyr::filter(.data$prop_media_titles >= min_prop_media_titles)
+  if (!is.null(table_min_prop_media_titles)) {
+    df <- df %>% dplyr::filter(prop_media_titles >= table_min_prop_media_titles)
   }
 
-  # Arrange
-  df <- df %>%
-    dplyr::arrange(dplyr::desc(.data$count))
+  df <- df %>% dplyr::arrange(dplyr::desc(count))
 
-  # Return in requested format
   caption_text <- paste(
-    "Code Counts with Transcript Proportions (min_count =", min_count,
-    ", min_prop_media_titles =",
-    ifelse(is.null(min_prop_media_titles), "none", min_prop_media_titles),
+    "Code Counts with Transcript Proportions (table_min_count =", table_min_count,
+    ", table_min_prop_media_titles =",
+    ifelse(is.null(table_min_prop_media_titles), "none", table_min_prop_media_titles),
     ")"
   )
 
-  if (output_type == "kable") {
+  table_out <- if (output_type == "kable") {
     knitr::kable(df, caption = caption_text, digits = 2)
   } else {
     df
   }
+
+  # --- Plot output ---
+  if (plot) {
+    if (is.null(plot_min_count)) plot_min_count <- table_min_count
+    if (is.null(plot_min_prop_media_titles)) plot_min_prop_media_titles <- table_min_prop_media_titles
+
+    plot_df <- df %>% dplyr::filter(count >= plot_min_count)
+    if (!is.null(plot_min_prop_media_titles)) {
+      plot_df <- plot_df %>% dplyr::filter(prop_media_titles >= plot_min_prop_media_titles)
+    }
+
+    plot_df <- plot_df %>% dplyr::arrange(prop_media_titles)
+
+    if (plot_metric == "prop") {
+      p <- ggplot2::ggplot(plot_df, ggplot2::aes(
+        x = reorder(code, prop_media_titles),
+        y = prop_media_titles
+      )) +
+        ggplot2::geom_col(fill = fill_color) +
+        ggplot2::coord_flip() +
+        ggplot2::labs(
+          x = "Code",
+          y = "Proportion of Media Titles",
+          title = "Proportion of Media Titles"
+        ) +
+        ggplot2::theme_minimal()
+
+    } else if (plot_metric == "count") {
+      p <- ggplot2::ggplot(plot_df, ggplot2::aes(
+        x = reorder(code, count),
+        y = count
+      )) +
+        ggplot2::geom_col(fill = fill_color) +
+        ggplot2::coord_flip() +
+        ggplot2::labs(
+          x = "Code",
+          y = "Excerpt Frequency",
+          title = "Code Counts"
+        ) +
+        ggplot2::theme_minimal()
+
+    } else if (plot_metric == "both") {
+      scale_factor <- max(plot_df$count, na.rm = TRUE) / max(plot_df$prop_media_titles, na.rm = TRUE)
+
+      p <- ggplot2::ggplot(plot_df, ggplot2::aes(
+        x = reorder(code, count),
+        y = count
+      )) +
+        ggplot2::geom_col(fill = fill_color) +
+        ggplot2::coord_flip() +
+        ggplot2::scale_y_continuous(
+          name = "Excerpt Frequency",
+          sec.axis = ggplot2::sec_axis(~ . / scale_factor,
+                                       name = "Proportion of Media Titles")
+        ) +
+        ggplot2::labs(
+          x = "Code",
+          title = "Code Saturation"
+        ) +
+        ggplot2::theme_minimal()
+    }
+
+    return(list(table = df, plot = p))
+  }
+
+  return(table_out)
 }
 
 # test_script.R
@@ -64,15 +128,42 @@ library(dplyr)
 library(readxl)
 
 # Clean data
-excerpts <- read_xlsx("inst/raw_data/test_data.xlsx")
+filepath <- read_xlsx("inst/raw_data/test_data.xlsx")
 preferred_coders <- c("a", "l", "i", "r", "s", "v", "c", "n", "k")
-excerpts <- clean_data(excerpts, preferred_coders)
+df <- clean_data(filepath,
+                 preferred_coders,
+                 rename_vars = list(memo_destigmatization = "...274"),
+                 relabel_vars = list(title = "Memo: Destigmatization"))
+data <- df$data
+codebook <- df$codebook
+
+# Merge codes
+excerpts_merged <- merge_codes(data,
+                               merges = list(
+                                 c_belonging_connectedness = c(
+                                   "c_sense_of_belonging", "c_sense_of_belonging_others", "c_sense_of_belonging_self",
+                                   "c_sense_of_connectedness", "c_sense_of_connectedness_family",
+                                   "c_sense_of_connectedness_peers", "c_sense_of_connectedness_school_community",
+                                   "c_sense_of_connectedness_staff"
+                                 ),
+                                 c_suicide_comfort = c("c__suicide_comfort_directing_change", "c__suicide_comfort_general")
+                               ),
+                               relabel_vars = list(
+                                 c_belonging_connectedness = "Sense of Belonging & Connectedness",
+                                 c_suicide_comfort = "Suicide Comfort Conversing"
+                               ))
+
+data_merged <- excerpts_merged$data
+codebook_merged <- excerpts_merged$codebook
+
 
 # Create code summary
-code_summary <- create_code_summary(data_merged,
+create_code_summary <- create_code_summary(data_merged,
                                            table_min_count = 40,
-                                           output = "tibble",
-                                           plot = FALSE)
+                                           plot = TRUE,
+                                           output_type = "tibble")
 
-# Set saturation
-saturation <- set_saturation(create_code_summary, min_count = 10, min_prop_media_titles = 0.25)
+
+# Plot both metrics on the same graph
+out <- set_saturation(create_code_summary, plot = TRUE, plot_metric = "both")
+out$plot

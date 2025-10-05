@@ -92,16 +92,20 @@ codebook_merged <- excerpts_merged$codebook
 # Create code summary
 create_code_summary <- create_code_summary(data_merged,
                                     table_min_count = 40,
-                                    plot = TRUE)
+                                    table_min_prop = 0.25,
+                                    plot = TRUE,
+                                    plot_metric = "prop")
                            
 # View excerpts in filterable table
 view_excerpts(excerpts)                           
 
-# Set saturation
-saturation <- set_saturation(code_counts, min_count = 10, min_prop_media_titles = 0.25)
-
-# Plot saturation
-plot_saturation <- plot_saturation(saturation)
+# Set saturation 
+out <- set_saturation(create_code_summary, 
+table_min_count = 40,
+table_min_n_media_titles = 0.25,
+plot = TRUE, 
+plot_metric = "both") # Plot both metrics on the same graph
+out$plot
 
 # Compare saturation
 
