@@ -57,7 +57,8 @@ Imports:
     ggraph,
     igraph,
     wordcloud2,
-    tidytext
+    tidytext,
+    purrr
 Suggests:
     rmarkdown,
     testthat (>= 3.0.0)

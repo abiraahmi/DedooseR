@@ -2,7 +2,7 @@
 % Please edit documentation in R/set_saturation.R
 \name{set_saturation}
 \alias{set_saturation}
-\title{Set saturation thresholds for codes}
+\title{Compute Code Saturation Metrics}
 \usage{
 set_saturation(
   code_counts,
@@ -13,65 +13,43 @@ set_saturation(
 )
 }
 \arguments{
-\item{code_counts}{A tibble or data frame output from \code{\link[=count_codes]{count_codes()}}. Must
-contain at least the columns \code{code}, \code{count}, and \code{n_media_titles}.}
+\item{code_counts}{A tibble or list output from \code{\link[=create_code_summary]{create_code_summary()}}.
+If a list is provided (e.g., when \code{plot = TRUE}), the \verb{$table} element will be used.}
 
-\item{total_media_titles}{Optional integer giving the total number of unique
-media titles in the dataset. If \code{NULL} (default), this is inferred as the
-maximum observed \code{n_media_titles}.}
+\item{total_media_titles}{Optional numeric. The total number of media sources
+across which codes were applied. If \code{NULL}, the function uses the maximum
+\code{n_media_titles} value in the input.}
 
-\item{min_count}{An integer specifying the minimum excerpt frequency required
-for a code to be included. Defaults to \code{1}.}
+\item{min_count}{Minimum excerpt count required for a code to be included.
+Defaults to \code{1}.}
 
-\item{min_prop_media_titles}{A numeric value between 0 and 1 specifying the
-minimum transcript coverage proportion required for a code to be included.
-Defaults to \code{NULL} (no filter).}
+\item{min_prop_media_titles}{Minimum proportion (0–1) of media titles in which a code
+appears for inclusion. Defaults to \code{NULL}.}
 
-\item{output_type}{Output format. One of:
-\itemize{
-\item \code{"tibble"} (default): returns a tibble.
-\item \code{"kable"}: returns a formatted table with \code{knitr::kable()}.
-}}
+\item{output_type}{Output format: \code{"tibble"} or \code{"kable"}. Defaults to \code{"tibble"}.}
 }
 \value{
-A tibble (or kable table) with three columns:
-\describe{
-\item{code}{The code name.}
-\item{count}{Total number of excerpts where the code was applied.}
-\item{prop}{Proportion of unique media titles containing the code,
-rounded to two decimals.}
-}
+A tibble (or \code{knitr::kable}) summarizing each code’s excerpt count and
+the proportion of media titles in which it appears.
 }
 \description{
-This function processes the output of \code{\link[=count_codes]{count_codes()}} and allows the user to:
-(1) apply a minimum excerpt count threshold for codes, and
-(2) compute transcript coverage as a proportion of all media titles
-(rounded to two decimals). The output contains only \code{code}, \code{count},
-and the coverage proportion.
+Calculates the proportion of media sources (\code{media_title}s) associated with each code,
+as a measure of saturation. This function builds on the output of
+\code{\link[=create_code_summary]{create_code_summary()}}, and can accept either a tibble of code counts or
+the full list output (when \code{plot = TRUE}).
 }
 \examples{
-# Example dataset
+library(dplyr)
+
 df <- data.frame(
-  media_title = c("Doc1", "Doc1", "Doc2", "Doc2", "Doc3"),
-  c_theme1 = c(TRUE, FALSE, TRUE, FALSE, TRUE),
-  c_theme2 = c(FALSE, TRUE, TRUE, TRUE, FALSE),
-  c_theme3 = c(FALSE, FALSE, FALSE, TRUE, TRUE)
+  media_title = c("A", "B", "C", "D"),
+  code1 = c(TRUE, FALSE, TRUE, TRUE),
+  code2 = c(FALSE, TRUE, TRUE, FALSE)
 )
+attr(df$code1, "label") <- "Emotional Support"
+attr(df$code2, "label") <- "Academic Support"
 
-code_counts <- count_codes(df)
-
-# Default saturation (keep all codes)
-set_saturation(code_counts)
-
-# Require codes to appear in at least 2 excerpts
-set_saturation(code_counts, min_count = 2)
-
-# Require codes to appear in at least 50\% of media titles
-set_saturation(code_counts, min_prop_media_titles = 0.5)
-
-# Return formatted as kable
-if (requireNamespace("knitr", quietly = TRUE)) {
-  set_saturation(code_counts, min_count = 2, output_type = "kable")
-}
+code_summary <- create_code_summary(df)
+set_saturation(code_summary)
 
 }

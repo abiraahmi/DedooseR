@@ -5,9 +5,14 @@ set_saturation <- function(code_counts,
                            output_type = c("tibble", "kable")) {
   output_type <- match.arg(output_type)
 
-  # Check input
+  # Handle both tibble or list input from create_code_summary()
+  if (is.list(code_counts) && "table" %in% names(code_counts)) {
+    code_counts <- code_counts$table
+  }
+
+  # Input validation
   if (!is.data.frame(code_counts)) {
-    stop("`code_counts` must be a tibble or data frame (from count_codes()).")
+    stop("`code_counts` must be a tibble or data frame (from create_code_summary()).")
   }
   if (!all(c("code", "count", "n_media_titles") %in% names(code_counts))) {
     stop("`code_counts` must contain columns `code`, `count`, and `n_media_titles`.")
@@ -20,37 +25,34 @@ set_saturation <- function(code_counts,
 
   # Filter by count first
   df <- code_counts %>%
-    dplyr::filter(count >= min_count) %>%
+    dplyr::filter(.data$count >= min_count) %>%
     dplyr::mutate(
-      prop_media_titles = round(n_media_titles / total_media_titles, 2)
+      prop_media_titles = round(.data$n_media_titles / total_media_titles, 2)
     ) %>%
-    dplyr::select(code, count, prop_media_titles)   # keep only these columns
+    dplyr::select(.data$code, .data$count, .data$prop_media_titles)
 
   # Filter by proportion if requested
   if (!is.null(min_prop_media_titles)) {
     df <- df %>%
-      dplyr::filter(prop_media_titles >= min_prop_media_titles)
+      dplyr::filter(.data$prop_media_titles >= min_prop_media_titles)
   }
 
   # Arrange
   df <- df %>%
-    dplyr::arrange(dplyr::desc(count))
+    dplyr::arrange(dplyr::desc(.data$count))
 
   # Return in requested format
+  caption_text <- paste(
+    "Code Counts with Transcript Proportions (min_count =", min_count,
+    ", min_prop_media_titles =",
+    ifelse(is.null(min_prop_media_titles), "none", min_prop_media_titles),
+    ")"
+  )
+
   if (output_type == "kable") {
-    return(knitr::kable(
-      df,
-      caption = paste(
-        "Code Counts with Transcript Proportions (min_count =",
-        min_count,
-        ", min_prop_media_titles =",
-        ifelse(is.null(min_prop_media_titles), "none", min_prop_media_titles),
-        ")"
-      ),
-      digits = 2
-    ))
+    knitr::kable(df, caption = caption_text, digits = 2)
   } else {
-    return(df)
+    df
   }
 }
 
@@ -66,16 +68,11 @@ excerpts <- read_xlsx("inst/raw_data/test_data.xlsx")
 preferred_coders <- c("a", "l", "i", "r", "s", "v", "c", "n", "k")
 excerpts <- clean_data(excerpts, preferred_coders)
 
-# Count codes
-code_counts <- count_codes(excerpts, min_count = 10, output = "tibble")
-
-
-# Plot codes
-plot_counts <- plot_counts(code_counts,
-                           exclude_codes = c("c_priority_excerpt", "c_self_efficacy"),
-                           metric = "n_media_titles",
-                           min_prop = 0.40)
-plot_counts
+# Create code summary
+code_summary <- create_code_summary(data_merged,
+                                           table_min_count = 40,
+                                           output = "tibble",
+                                           plot = FALSE)
 
 # Set saturation
-saturation <- set_saturation(code_counts, min_count = 10, min_prop_media_titles = 0.25)
+saturation <- set_saturation(create_code_summary, min_count = 10, min_prop_media_titles = 0.25)

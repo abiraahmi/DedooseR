@@ -14,8 +14,8 @@ and conduct qualitative coding and analysis with rigor.
 DedooseR currently allows you to:
 
 - Clean data exported from Dedoose and populate a codebook
-- Summarize code frquencies with one coder/media title in order of coder preference
-- Plot raw frequencies or proportions of codes applied to codes, define min frequency to visualize  and/or exclude codes
+- Create code summaries with code counts and proportions across transcripts 
+while defining min frequencies and proportions to table and plot!
 - Set a saturation criteria and plot it
 - Plot and play with saturation thresholds
 - Produce and plot code co-occurrence heatmaps  
@@ -63,34 +63,36 @@ library(DedooseR)
 # Clean data
 filepath <- read_xlsx("inst/raw_data/test_data.xlsx")
 preferred_coders <- c("a", "l", "i", "r", "s", "v", "c", "n", "k")
-clean_data <- clean_data(filepath, preferred_coders)
+clean_data <- clean_data(filepath,
+           preferred_coders,
+           rename_vars = list(memo_destigmatization = "...274"),
+           relabel_vars = list(title = "Memo: Destigmatization"))
 excerpts <- clean_data$data
 codebook <- clean_data$codebook
 
 # Merge codes
-excerpts <- merge_codes(excerpts, list(
-  c_belonging_connectedness = c(
-    "c_sense_of_belonging", "c_sense_of_belonging_others", "c_sense_of_belonging_self",
-    "c_sense_of_connectedness", "c_sense_of_connectedness_family",
-    "c_sense_of_connectedness_peers", "c_sense_of_connectedness_school_community",
-    "c_sense_of_connectedness_staff"
-  ),
-  c_suicide_comfort = c("c__suicide_comfort_directing_change", "c__suicide_comfort_general")
-))
+excerpts_merged <- merge_codes(data,
+                               merges = list(
+                                 c_belonging_connectedness = c(
+                                   "c_sense_of_belonging", "c_sense_of_belonging_others", "c_sense_of_belonging_self",
+                                   "c_sense_of_connectedness", "c_sense_of_connectedness_family",
+                                   "c_sense_of_connectedness_peers", "c_sense_of_connectedness_school_community",
+                                   "c_sense_of_connectedness_staff"
+                                 ),
+                                 c_suicide_comfort = c("c__suicide_comfort_directing_change", "c__suicide_comfort_general")
+                               ),
+                               relabel_vars = list(
+                                 c_belonging_connectedness = "Sense of Belonging & Connectedness",
+                                 c_suicide_comfort = "Suicide Comfort Conversing"
+                               ))
 
+data_merged <- excerpts_merged$data
+codebook_merged <- excerpts_merged$codebook
 
-# Count codes
-code_counts <- count_codes(excerpts,
-                           min_count = 10,
-                           exclude = c("c_priority_excerpt", "c_heterogeneity", "c_program_implementation_unique_value_opportunity_from_dc",
-                                       "c_ripple_impact_ripple_impact_who", "c_ripple_impact_ripple_missed"),
-                           output = "tibble")
-
-# Plot codes
-plot_counts <- plot_counts(code_counts,
-                           exclude_codes = c("c_priority_excerpt", "c_self_efficacy"),
-                           metric = "n_media_titles",
-                           min_prop = 0.40)
+# Create code summary
+create_code_summary <- create_code_summary(data_merged,
+                                    table_min_count = 40,
+                                    plot = TRUE)
                            
 # View excerpts in filterable table
 view_excerpts(excerpts)                           
