@@ -1,11 +1,11 @@
 set_saturation <- function(code_counts,
                            total_media_titles = NULL,
                            table_min_count = 1,
-                           table_min_prop_media_titles = NULL,
+                           table_min_prop = NULL,
                            output_type = c("tibble", "kable"),
                            plot = FALSE,
                            plot_min_count = NULL,
-                           plot_min_prop_media_titles = NULL,
+                           plot_min_prop = NULL,
                            plot_metric = c("prop", "count", "both"),
                            fill_color = "steelblue") {
   output_type <- match.arg(output_type)
@@ -34,16 +34,16 @@ set_saturation <- function(code_counts,
     ) %>%
     dplyr::select("code", "count", "prop_media_titles")
 
-  if (!is.null(table_min_prop_media_titles)) {
-    df <- df %>% dplyr::filter(prop_media_titles >= table_min_prop_media_titles)
+  if (!is.null(table_min_prop)) {
+    df <- df %>% dplyr::filter(prop_media_titles >= table_min_prop)
   }
 
   df <- df %>% dplyr::arrange(dplyr::desc(count))
 
   caption_text <- paste(
     "Code Counts with Transcript Proportions (table_min_count =", table_min_count,
-    ", table_min_prop_media_titles =",
-    ifelse(is.null(table_min_prop_media_titles), "none", table_min_prop_media_titles),
+    ", table_min_prop =",
+    ifelse(is.null(table_min_prop), "none", table_min_prop),
     ")"
   )
 
@@ -56,11 +56,11 @@ set_saturation <- function(code_counts,
   # --- Plot output ---
   if (plot) {
     if (is.null(plot_min_count)) plot_min_count <- table_min_count
-    if (is.null(plot_min_prop_media_titles)) plot_min_prop_media_titles <- table_min_prop_media_titles
+    if (is.null(plot_min_prop)) plot_min_prop <- table_min_prop
 
     plot_df <- df %>% dplyr::filter(count >= plot_min_count)
-    if (!is.null(plot_min_prop_media_titles)) {
-      plot_df <- plot_df %>% dplyr::filter(prop_media_titles >= plot_min_prop_media_titles)
+    if (!is.null(plot_min_prop)) {
+      plot_df <- plot_df %>% dplyr::filter(prop_media_titles >= plot_min_prop)
     }
 
     plot_df <- plot_df %>% dplyr::arrange(prop_media_titles)
@@ -120,6 +120,7 @@ set_saturation <- function(code_counts,
   return(table_out)
 }
 
+
 # test_script.R
 
 library(DedooseR)
@@ -165,5 +166,5 @@ create_code_summary <- create_code_summary(data_merged,
 
 
 # Plot both metrics on the same graph
-out <- set_saturation(create_code_summary, plot = TRUE, plot_metric = "both")
+out <- set_saturation(create_code_summary, table_min_count = 100, plot = TRUE, plot_metric = "count")
 out$plot
