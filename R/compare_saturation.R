@@ -45,7 +45,8 @@
 #'
 #' @importFrom dplyr n_distinct select all_of filter mutate group_by summarise desc arrange
 #' @importFrom tidyr pivot_longer
-#' @importFrom ggplot2 ggplot aes geom_col coord_flip facet_wrap labs theme_minimal scale_y_continuous sec_axis reorder
+#' @importFrom ggplot2 ggplot aes geom_col coord_flip facet_wrap labs theme_minimal scale_y_continuous sec_axis
+#' @importFrom stats reorder
 #' @importFrom knitr kable
 #'
 #' @examples
