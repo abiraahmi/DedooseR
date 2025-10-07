@@ -57,8 +57,10 @@ Imports:
     wordcloud2,
     tidytext,
     purrr,
-    haven
+    haven,
+    openxlsx
 Suggests:
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    readxl
 VignetteBuilder: knitr

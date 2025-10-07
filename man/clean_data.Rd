@@ -2,45 +2,82 @@
 % Please edit documentation in R/clean_data.R
 \name{clean_data}
 \alias{clean_data}
-\title{Clean and standardize coded qualitative excerpts}
+\title{Clean and prepare qualitative excerpts for export}
 \usage{
-clean_data(excerpts, preferred_coders, rename_vars = NULL, relabel_vars = NULL)
+clean_data(
+  excerpts,
+  preferred_coders,
+  rename_vars = NULL,
+  relabel_vars = NULL,
+  output_path = NULL,
+  output_type = c("none", "xlsx", "dta")
+)
 }
 \arguments{
-\item{excerpts}{A data frame containing coded excerpts (e.g., exported from Dedoose).}
+\item{excerpts}{A data frame containing excerpt-level data exported from Dedoose or a similar coding platform.}
 
-\item{preferred_coders}{A character vector listing coders in order of preference (e.g.,
-\code{c("coder1", "coder2")}). Used to select the preferred version of each excerpt.}
+\item{preferred_coders}{A character vector of coder names in order of preference. The function keeps the
+highest-preference coder for each unique \code{media_title}.}
 
-\item{rename_vars}{Optional named list or vector of variables to rename, in the format
-\code{c(oldname = "newname")}.}
+\item{rename_vars}{An optional named list or \code{dplyr::rename()}-style mapping of variables to rename.
+For example, \code{list(old_name = "new_name")}.}
 
-\item{relabel_vars}{Optional named list of new variable labels, in the format
-\code{list(varname = "new label")}.}
+\item{relabel_vars}{An optional named list of new variable labels. For example,
+\code{list(var1 = "New label for var1", var2 = "Updated label for var2")}.}
+
+\item{output_path}{Optional file path to save the cleaned dataset. If \code{NULL}, the data will not be saved to disk.}
+
+\item{output_type}{A string specifying the export format. Must be one of:
+\itemize{
+\item \code{"none"} – no file is written (default)
+\item \code{"xlsx"} – save as Excel file via \code{openxlsx::write.xlsx()}
+\item \code{"dta"} – save as Stata file via \code{haven::write_dta()}
+}}
 }
 \value{
 A list with two elements:
 \describe{
-\item{data}{The cleaned and filtered excerpt dataset.}
-\item{codebook}{A data frame listing variable names, labels, and data types.}
+\item{\code{data}}{A cleaned data frame with standardized names, filtered coders, and labelled variables.}
+\item{\code{codebook}}{A data frame with columns: \code{variable}, \code{label}, and \code{type}.}
 }
 }
 \description{
-Cleans, standardizes, and labels a dataset of coded qualitative excerpts
-(e.g., exported from Dedoose or a similar platform). The function performs
-the following key operations:
-\enumerate{
-\item Standardizes column names to lowercase and replaces spaces with underscores.
-\item Renames \code{excerpt_copy} to \code{excerpt} if present.
-\item Removes columns ending with "range" or "weight".
-\item Converts all code columns (those starting with "code" and ending with "applied")
-into logical (\code{TRUE}/\code{FALSE}) variables.
-\item Cleans and renames code variables using a \code{c_} prefix.
-\item Filters the dataset to retain excerpts from a preferred coder (based on rank order).
-\item Adds descriptive variable labels using the \code{labelled} package — including restoring
-code labels to their original names (without prefixes and underscores).
-\item Optionally renames or relabels variables.
-\item Removes columns that are entirely \code{NA}.
-\item Generates a codebook summarizing variable names, labels, and types.
+This function standardizes and cleans a dataset of qualitative excerpts coded by multiple coders.
+It standardizes column names, filters excerpts by a preferred coder hierarchy, converts code columns
+to logical (TRUE/FALSE), assigns descriptive variable labels, and optionally exports the cleaned data
+to Excel (\code{.xlsx}) or Stata (\code{.dta}) format. The function also returns a codebook containing
+variable names, labels, and data types.
 }
+\details{
+The function performs the following steps:
+\enumerate{
+\item Standardizes variable names (lowercase, underscores instead of spaces).
+\item Renames \code{excerpt_copy} to \code{excerpt} if present.
+\item Removes columns ending with \code{"range"} or \code{"weight"}.
+\item Detects code columns matching the pattern \code{"^code.*applied$"} and converts them to logicals.
+\item Renames code columns with a \code{c_} prefix and assigns human-readable variable labels.
+\item Filters to the preferred coder per \code{media_title}.
+\item Applies default labels to key metadata variables (e.g., \code{excerpt_creator}, \code{media_title}).
+\item Optionally renames or relabels variables via user-supplied arguments.
+\item Drops columns that are entirely \code{NA}.
+\item Generates a codebook summarizing variables, labels, and types.
+}
+
+When exporting to \code{.dta}, logicals remain stored as \code{TRUE}/\code{FALSE} rather than being coerced to 0/1.
+Variable labels are preserved in Stata format using the \code{labelled} and \code{haven} packages.
+}
+\examples{
+\dontrun{
+result <- clean_data(
+  excerpts = excerpts_raw,
+  preferred_coders = c("CoderA", "CoderB"),
+  output_path = "cleaned_excerpts.dta",
+  output_type = "dta"
+)
+
+# Access cleaned data and codebook
+head(result$data)
+head(result$codebook)
+}
+
 }
