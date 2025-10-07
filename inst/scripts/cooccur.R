@@ -1,16 +1,17 @@
 cooccur <- function(excerpts = NULL,
                     coccur_matrix = NULL,
                     min_bold = 10,
+                    scale = c("count", "prop"),
                     output = c("kable", "tibble", "data.frame"),
                     plot = TRUE,
-                    matrix_threshold = 5,
+                    edge_min = 10,
                     plot_threshold = 0,
                     layout = "circle",
                     edge_color_low = "lightgray",
                     edge_color_high = "purple",
                     node_color = "lightblue") {
-
   # --- Argument validation ---
+  scale <- match.arg(scale)
   output <- match.arg(output)
 
   # --- Case 1: Build co-occurrence matrix from excerpts ---
@@ -34,6 +35,17 @@ cooccur <- function(excerpts = NULL,
     # Build co-occurrence matrix
     code_matrix <- as.matrix(code_by_transcript[,-1])
     coccur_matrix <- t(code_matrix) %*% code_matrix
+
+    # Drop all-zero rows/cols
+    keep <- which(rowSums(coccur_matrix) > 0 | colSums(coccur_matrix) > 0)
+    coccur_matrix <- coccur_matrix[keep, keep, drop = FALSE]
+
+    # Scale if needed
+    if (scale == "prop") {
+      marginals <- diag(coccur_matrix)
+      coccur_matrix <- sweep(coccur_matrix, 2, marginals, "/")
+      coccur_matrix <- round(coccur_matrix, 3)
+    }
   }
   # --- Case 2: Use existing co-occurrence matrix ---
   else if (!is.null(coccur_matrix)) {
@@ -42,13 +54,6 @@ cooccur <- function(excerpts = NULL,
     stop("You must provide either `excerpts` or `coccur_matrix`.")
   }
 
-  # --- Apply matrix_threshold ---
-  coccur_matrix[coccur_matrix < matrix_threshold] <- 0
-
-  # Drop all-zero rows/cols
-  keep <- which(rowSums(coccur_matrix) > 0 | colSums(coccur_matrix) > 0)
-  coccur_matrix <- coccur_matrix[keep, keep, drop = FALSE]
-
   # --- Convert to data frame ---
   coccur_df <- as.data.frame(coccur_matrix)
   rownames(coccur_df) <- rownames(coccur_matrix)
@@ -56,28 +61,33 @@ cooccur <- function(excerpts = NULL,
   # --- Format output ---
   if (output == "tibble") {
     matrix_out <- tibble::as_tibble(coccur_df, rownames = "code")
-
   } else if (output == "data.frame") {
     matrix_out <- coccur_df
-
   } else if (output == "kable") {
-    coccur_df_fmt <- coccur_df %>%
-      dplyr::mutate(across(
-        everything(),
-        ~ ifelse(. >= min_bold,
-                 kableExtra::cell_spec(., bold = TRUE),
-                 as.character(.))
-      ))
+    if (scale == "count") {
+      coccur_df_fmt <- coccur_df %>%
+        dplyr::mutate(across(
+          everything(),
+          ~ ifelse(. >= min_bold,
+                   kableExtra::cell_spec(., bold = TRUE),
+                   as.character(.))
+        ))
+    } else {
+      coccur_df_fmt <- coccur_df %>%
+        dplyr::mutate(across(
+          everything(),
+          ~ ifelse(. >= min_bold,
+                   kableExtra::cell_spec(sprintf("%.3f", .), bold = TRUE),
+                   sprintf("%.3f", .))
+        ))
+    }
     rownames(coccur_df_fmt) <- rownames(coccur_df)
-
     matrix_out <- knitr::kable(coccur_df_fmt,
                                format = "html",
                                escape = FALSE,
                                caption = paste(
-                                 "Code Co-occurrence Matrix (≥ ",
-                                 matrix_threshold,
-                                 " counts)",
-                                 sep = ""
+                                 "Code Co-occurrence Matrix (Within Transcript)",
+                                 ifelse(scale == "count", "Counts", "Proportions")
                                ),
                                align = "c") %>%
       kableExtra::kable_styling(full_width = FALSE,
@@ -87,23 +97,38 @@ cooccur <- function(excerpts = NULL,
   # --- Optional plot ---
   plot_out <- NULL
   if (plot) {
-    # Build igraph
     g <- igraph::graph_from_adjacency_matrix(coccur_matrix,
                                              mode = "undirected",
                                              weighted = TRUE,
                                              diag = FALSE)
 
-    # --- Node frequencies (diagonal = total appearances) ---
+    # --- Filter edges based on scale type ---
+    if (scale == "count") {
+      g <- igraph::delete_edges(g, igraph::E(g)[weight < edge_min])
+    } else if (scale == "prop") {
+      if (edge_min < 0 || edge_min > 1) {
+        stop("When scale = 'prop', `edge_min` must be between 0 and 1.")
+      }
+      g <- igraph::delete_edges(g, igraph::E(g)[weight < edge_min])
+    }
+
+    # --- Filter nodes below plot_threshold ---
     freq <- diag(coccur_matrix)
     igraph::V(g)$freq <- freq[igraph::V(g)$name]
 
-    # --- Filter low-frequency nodes ---
-    g <- igraph::delete_vertices(g, igraph::V(g)[freq < plot_threshold])
+    if (scale == "count") {
+      g <- igraph::delete_vertices(g, igraph::V(g)[freq < plot_threshold])
+    } else if (scale == "prop") {
+      if (plot_threshold < 0 || plot_threshold > 1) {
+        stop("When scale = 'prop', `plot_threshold` must be between 0 and 1.")
+      }
+      g <- igraph::delete_vertices(g, igraph::V(g)[freq < plot_threshold])
+    }
 
     # --- Drop isolated nodes ---
     g <- igraph::delete_vertices(g, which(igraph::degree(g) == 0))
 
-    # --- Attach haven labels if available ---
+    # --- Attach haven variable labels if available ---
     if (!is.null(excerpts)) {
       var_labels <- sapply(excerpts, function(x) attr(x, "label"))
       var_labels <- var_labels[!is.na(var_labels)]
@@ -117,23 +142,32 @@ cooccur <- function(excerpts = NULL,
       }
     }
 
-    # --- Node label selection ---
-    label_var <- if ("label" %in% names(igraph::vertex_attr(g))) igraph::V(g)$label else igraph::V(g)$name
+    # --- Use node label instead of name, if available ---
+    if ("label" %in% names(igraph::vertex_attr(g))) {
+      label_var <- igraph::V(g)$label
+    } else {
+      label_var <- igraph::V(g)$name
+    }
 
     # --- Plot ---
     plot_out <- ggraph::ggraph(g, layout = layout) +
       ggraph::geom_edge_link(aes(width = weight, color = weight), alpha = 0.6) +
       ggraph::scale_edge_width(range = c(0.2, 2), guide = "none") +
-      ggraph::scale_edge_color_gradient(low = edge_color_low, high = edge_color_high, guide = "none") +
+      ggraph::scale_edge_color_gradient(low = edge_color_low,
+                                        high = edge_color_high,
+                                        guide = "none") +
       ggraph::geom_node_point(aes(size = freq), color = node_color) +
-      ggraph::geom_node_text(aes(label = label_var), repel = TRUE, max.overlaps = Inf) +
+      ggraph::geom_node_text(aes(label = label_var),
+                             repel = TRUE,
+                             max.overlaps = Inf) +
       ggplot2::theme_void()
   }
 
-  # --- Return both objects ---
+  # --- Return both objects as a named list ---
   output_list <- list(matrix = matrix_out, plot = plot_out)
   return(output_list)
 }
+
 
 
 # Testing
@@ -173,12 +207,10 @@ excerpts_merged <- merge_codes(data,
 data_merged <- excerpts_merged$data
 codebook_merged <- excerpts_merged$codebook
 
-# Plot
-library(haven)
+# Return kable and plot network
+cooccur_results <- cooccur(data_merged, output = "tibble", plot)
 
-# Create matrix, set threshold and plot
-cooccur_01 <- cooccur(data_merged,
-              matrix_threshold = 15)
-cooccur_01$matrix
-cooccur_01$plot
+# View results
+cooccur_results$matrix  # tibble or table of co-occurrence values
+cooccur_results$plot    # ggplot2/ggraph object
 

@@ -26,10 +26,10 @@ create_code_summary <- function(
   }
   if (length(code_columns) == 0) stop("No logical (code) columns found after exclusions.")
 
-  # --- Create name → label lookup ---
+  # --- Create name → label lookup (via haven labels) ---
   label_lookup <- purrr::map_chr(code_columns, function(x) {
     lbl <- attr(excerpts[[x]], "label")
-    if (is.null(lbl) || lbl == "") x else lbl
+    if (is.null(lbl) || is.na(lbl) || lbl == "") x else lbl
   })
   names(label_lookup) <- code_columns
 
@@ -50,9 +50,15 @@ create_code_summary <- function(
     ) %>%
     dplyr::mutate(
       prop_media_titles = round(n_media_titles / max(n_media_titles, na.rm = TRUE), 2),
-      code_label = label_lookup[as.character(code)] |> unname()
+      code_label = dplyr::recode(code, !!!label_lookup)
     ) %>%
-    dplyr::select("code" = "code_label", "count", "n_media_titles", "prop_media_titles")
+    dplyr::select(
+      code_label,
+      count,
+      n_media_titles,
+      prop_media_titles
+    ) %>%
+    dplyr::rename(code = code_label)
 
   # --- Apply table filters ---
   if (!is.null(table_min_prop)) {
@@ -76,21 +82,16 @@ create_code_summary <- function(
 
   # --- Plot section ---
   if (plot) {
-    # Default plot mins to table mins if not provided
     if (is.null(plot_min_count)) plot_min_count <- table_min_count
     if (is.null(plot_min_prop)) plot_min_prop <- table_min_prop
 
-    plot_df <- total_counts
-    plot_df <- dplyr::filter(plot_df, count >= plot_min_count)
-
+    plot_df <- dplyr::filter(total_counts, count >= plot_min_count)
     if (!is.null(plot_min_prop)) {
       max_val <- max(plot_df$count, na.rm = TRUE)
       plot_df <- dplyr::filter(plot_df, count >= plot_min_prop * max_val)
     }
-
     plot_df <- dplyr::arrange(plot_df, dplyr::desc(count))
 
-    # --- Plot by selected metric ---
     if (plot_metric == "count") {
       p <- ggplot2::ggplot(plot_df, ggplot2::aes(
         x = reorder(code, count),
@@ -99,7 +100,7 @@ create_code_summary <- function(
         ggplot2::geom_col(fill = fill_color) +
         ggplot2::coord_flip() +
         ggplot2::labs(
-          x = "Code",
+          x = "Code (Label)",
           y = "Excerpt Frequency",
           title = "Code Counts"
         ) +
@@ -113,7 +114,7 @@ create_code_summary <- function(
         ggplot2::geom_col(fill = fill_color) +
         ggplot2::coord_flip() +
         ggplot2::labs(
-          x = "Code",
+          x = "Code (Label)",
           y = "Proportion of Media Titles",
           title = "Code Frequencies by Media Title Coverage"
         ) +
@@ -135,18 +136,21 @@ create_code_summary <- function(
                                        name = "Proportion of Media Titles")
         ) +
         ggplot2::labs(
-          x = "Code",
+          x = "Code (Label)",
           title = "Code Frequencies: Counts and Proportions"
         ) +
         ggplot2::theme_minimal()
     }
 
-    return(list(table = total_counts, plot = p))
+    # --- Return formatted table + plot ---
+    print(table_out)  # ensure the chosen table format is displayed
+    return(invisible(list(table = table_out, plot = p)))
   }
 
-  return(table_out)
+  # --- Return correct table format (no plot) ---
+  print(table_out)
+  return(invisible(table_out))
 }
-
 
 # Test
 
@@ -189,5 +193,8 @@ codebook_merged <- merge_codes$codebook
 create_code_summary <- create_code_summary(data_merged,
                                     table_min_count = 40,
                                     table_min_prop = 0.25,
+                                    output_type = "kable",
                                     plot = TRUE,
-                                    plot_metric = "prop")
+                                    plot_metric = "both")
+
+
