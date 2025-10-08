@@ -2,7 +2,7 @@
 % Please edit documentation in R/create_code_summary.R
 \name{create_code_summary}
 \alias{create_code_summary}
-\title{Create a Summary Table and Optional Plot of Coded Excerpts}
+\title{Create a Summary Table and Plot of Code Frequencies}
 \usage{
 create_code_summary(
   excerpts,
@@ -14,85 +14,112 @@ create_code_summary(
   output_type = c("tibble", "kable", "datatable"),
   exclude = NULL,
   plot_metric = c("count", "prop", "both"),
-  fill_color = "steelblue"
+  fill_color = "steelblue",
+  use_labels = FALSE,
+  codebook = NULL
 )
 }
 \arguments{
-\item{excerpts}{A data frame containing a column named \code{media_title} and one or more
-logical (TRUE/FALSE) columns indicating the presence of each code. Each code variable
-may have a \code{label} attribute (e.g., from \code{haven::read_sav()}) used for display instead
-of the variable name.}
+\item{excerpts}{A data frame containing at least one logical or 0/1 variable
+representing a code, and a column named \code{media_title} that identifies the source
+document or excerpt.}
 
-\item{table_min_count}{Minimum number of occurrences required for a code to appear
-in the summary table. Defaults to \code{1}.}
+\item{table_min_count}{Minimum number of excerpts required for a code to appear
+in the summary table. Default is 1.}
 
-\item{table_min_prop}{Optional numeric between 0 and 1 indicating the minimum proportion
-(relative to the most frequent code) required for inclusion in the table.}
+\item{table_min_prop}{Optional proportion threshold (relative to the maximum count)
+for including codes in the table. Default is \code{NULL}.}
 
-\item{plot}{Logical; whether to generate a ggplot2 bar chart summarizing code frequencies.
-Defaults to \code{FALSE}.}
+\item{plot}{Logical; whether to generate a plot visualizing code frequencies.
+Default is \code{FALSE}.}
 
-\item{plot_min_count}{Minimum count threshold for including codes in the plot.
-If \code{NULL}, defaults to the same as \code{table_min_count}.}
+\item{plot_min_count}{Minimum number of excerpts required for a code to appear
+in the plot. Defaults to \code{table_min_count}.}
 
-\item{plot_min_prop}{Optional numeric between 0 and 1 indicating the minimum proportion
-(relative to the maximum count) required for inclusion in the plot. If \code{NULL}, defaults
-to the same as \code{table_min_prop}.}
+\item{plot_min_prop}{Optional proportion threshold (relative to the maximum count)
+for including codes in the plot. Defaults to \code{table_min_prop}.}
 
-\item{output_type}{Character string specifying the output format for the summary table.
-One of \code{"tibble"} (default), \code{"kable"}, or \code{"datatable"}.}
+\item{output_type}{The format for the output table. One of \code{"tibble"},
+\code{"kable"}, or \code{"datatable"}. Default is \code{"tibble"}.}
 
-\item{exclude}{Optional character vector of code variable names to exclude from the summary.}
+\item{exclude}{Optional character vector of variable names to exclude from analysis.}
 
-\item{plot_metric}{Character string specifying what the plot should display:
-\code{"count"} (absolute frequencies), \code{"prop"} (proportion of media titles covered),
-or \code{"both"} (dual-axis plot showing both). Defaults to \code{"count"}.}
+\item{plot_metric}{The metric to visualize. One of \code{"count"}, \code{"prop"}, or \code{"both"}.
+Default is \code{"count"}.}
 
-\item{fill_color}{Character string specifying the fill color for the bars in the plot.
-Defaults to \code{"steelblue"}.}
+\item{fill_color}{Color for plot bars. Default is \code{"steelblue"}.}
+
+\item{use_labels}{Logical; if \code{TRUE}, uses a supplied \code{codebook} to display
+descriptive labels for codes instead of variable names. Default is \code{FALSE}.}
+
+\item{codebook}{Optional data frame with two columns:
+\itemize{
+\item \code{variable}: the variable names in the dataset
+\item \code{label}: the corresponding human-readable label for each code.
+Required when \code{use_labels = TRUE}.
+}}
 }
 \value{
-\itemize{
-\item If \code{plot = FALSE}: the formatted table in the format specified by \code{output_type}
-(tibble, kable, or datatable).
-\item If \code{plot = TRUE}: an invisible list with two elements:
+If \code{plot = FALSE}, returns a table in the selected \code{output_type} format.
+If \code{plot = TRUE}, invisibly returns a list with two elements:
 \describe{
-\item{table}{The formatted summary table.}
-\item{plot}{A \code{ggplot2} object showing code frequencies.}
-}
+\item{table}{A table of summarized code frequencies.}
+\item{plot}{A \code{ggplot} object visualizing the results.}
 }
 }
 \description{
-Summarizes the frequency and coverage of logical (code) variables across a set of
-media excerpts, using variable labels (from \code{haven}) as display names when available.
-Optionally produces a bar plot showing counts, proportions, or both.
+Summarizes how often each qualitative code (represented by logical 0/1 variables)
+appears across excerpts or media titles. Optionally produces a frequency table
+and visualization of code distributions.
+
+This function automatically handles Stata-labelled (\code{haven_labelled}) or numeric 0/1
+variables by converting them to logicals. You can also pass in a custom codebook to
+apply human-readable code labels.
 }
 \details{
-Logical variables in \code{excerpts} are interpreted as binary indicators of whether each
-code applies to a given media item. The function counts the number of excerpts per code
-and computes the number and proportion of unique \code{media_title} values represented.
-Variable labels (if present via \code{attr(x, "label")}) are used for display instead of
-raw variable names.
+The function first identifies all logical (or 0/1 numeric) columns in \code{excerpts}
+and calculates:
+\itemize{
+\item \code{count}: total number of excerpts where the code is applied
+\item \code{n_media_titles}: number of distinct media titles containing the code
+\item \code{prop_media_titles}: proportion of media titles containing the code (relative to max)
+}
 
-The resulting table can be returned as a tibble, formatted with \code{knitr::kable()},
-or displayed as an interactive \code{DT::datatable()}. If \code{plot = TRUE}, both the table
-and a ggplot object are returned invisibly as a list.
+The table can be output as a tibble, formatted table (\code{knitr::kable}), or
+interactive data table (\code{DT::datatable}).
+
+When \code{plot = TRUE}, the function generates a ggplot2 bar chart showing either
+code counts, proportions, or both (dual-axis view).
 }
 \examples{
-\dontrun{
-library(haven)
-library(dplyr)
-
-# Example data frame with haven-style labels
-df <- tibble::tibble(
-  media_title = c("A", "B", "C", "D"),
-  code_01 = c(TRUE, FALSE, TRUE, TRUE),
-  code_02 = c(FALSE, TRUE, TRUE, FALSE)
+# Example 1: Basic usage without a codebook
+df <- data.frame(
+  media_title = c("Doc1", "Doc2", "Doc3", "Doc4"),
+  code_a = c(TRUE, FALSE, TRUE, TRUE),
+  code_b = c(FALSE, TRUE, TRUE, FALSE)
 )
-attr(df$code_01, "label") <- "Empathy"
-attr(df$code_02, "label") <- "Resilience"
 
-create_code_summary(df, plot = TRUE, output_type = "kable")
-}
+create_code_summary(df, plot = TRUE)
+
+# Example 2: Using a codebook for readable labels
+codebook <- data.frame(
+  variable = c("code_a", "code_b"),
+  label = c("Community Engagement", "Policy Support")
+)
+
+create_code_summary(
+  df,
+  use_labels = TRUE,
+  codebook = codebook,
+  plot = TRUE,
+  plot_metric = "both"
+)
+
+# Example 3: Excluding a code and outputting as datatable
+create_code_summary(
+  df,
+  exclude = "code_b",
+  output_type = "datatable"
+)
 
 }

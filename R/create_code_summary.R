@@ -1,76 +1,98 @@
-#' Create a Summary Table and Optional Plot of Coded Excerpts
+#' Create a Summary Table and Plot of Code Frequencies
 #'
-#' Summarizes the frequency and coverage of logical (code) variables across a set of
-#' media excerpts, using variable labels (from `haven`) as display names when available.
-#' Optionally produces a bar plot showing counts, proportions, or both.
+#' @description
+#' Summarizes how often each qualitative code (represented by logical 0/1 variables)
+#' appears across excerpts or media titles. Optionally produces a frequency table
+#' and visualization of code distributions.
 #'
-#' @param excerpts A data frame containing a column named `media_title` and one or more
-#'   logical (TRUE/FALSE) columns indicating the presence of each code. Each code variable
-#'   may have a `label` attribute (e.g., from `haven::read_sav()`) used for display instead
-#'   of the variable name.
-#' @param table_min_count Minimum number of occurrences required for a code to appear
-#'   in the summary table. Defaults to `1`.
-#' @param table_min_prop Optional numeric between 0 and 1 indicating the minimum proportion
-#'   (relative to the most frequent code) required for inclusion in the table.
-#' @param plot Logical; whether to generate a ggplot2 bar chart summarizing code frequencies.
-#'   Defaults to `FALSE`.
-#' @param plot_min_count Minimum count threshold for including codes in the plot.
-#'   If `NULL`, defaults to the same as `table_min_count`.
-#' @param plot_min_prop Optional numeric between 0 and 1 indicating the minimum proportion
-#'   (relative to the maximum count) required for inclusion in the plot. If `NULL`, defaults
-#'   to the same as `table_min_prop`.
-#' @param output_type Character string specifying the output format for the summary table.
-#'   One of `"tibble"` (default), `"kable"`, or `"datatable"`.
-#' @param exclude Optional character vector of code variable names to exclude from the summary.
-#' @param plot_metric Character string specifying what the plot should display:
-#'   `"count"` (absolute frequencies), `"prop"` (proportion of media titles covered),
-#'   or `"both"` (dual-axis plot showing both). Defaults to `"count"`.
-#' @param fill_color Character string specifying the fill color for the bars in the plot.
-#'   Defaults to `"steelblue"`.
+#' This function automatically handles Stata-labelled (`haven_labelled`) or numeric 0/1
+#' variables by converting them to logicals. You can also pass in a custom codebook to
+#' apply human-readable code labels.
+#'
+#' @param excerpts A data frame containing at least one logical or 0/1 variable
+#'   representing a code, and a column named `media_title` that identifies the source
+#'   document or excerpt.
+#' @param table_min_count Minimum number of excerpts required for a code to appear
+#'   in the summary table. Default is 1.
+#' @param table_min_prop Optional proportion threshold (relative to the maximum count)
+#'   for including codes in the table. Default is `NULL`.
+#' @param plot Logical; whether to generate a plot visualizing code frequencies.
+#'   Default is `FALSE`.
+#' @param plot_min_count Minimum number of excerpts required for a code to appear
+#'   in the plot. Defaults to `table_min_count`.
+#' @param plot_min_prop Optional proportion threshold (relative to the maximum count)
+#'   for including codes in the plot. Defaults to `table_min_prop`.
+#' @param output_type The format for the output table. One of `"tibble"`,
+#'   `"kable"`, or `"datatable"`. Default is `"tibble"`.
+#' @param exclude Optional character vector of variable names to exclude from analysis.
+#' @param plot_metric The metric to visualize. One of `"count"`, `"prop"`, or `"both"`.
+#'   Default is `"count"`.
+#' @param fill_color Color for plot bars. Default is `"steelblue"`.
+#' @param use_labels Logical; if `TRUE`, uses a supplied `codebook` to display
+#'   descriptive labels for codes instead of variable names. Default is `FALSE`.
+#' @param codebook Optional data frame with two columns:
+#'   - `variable`: the variable names in the dataset
+#'   - `label`: the corresponding human-readable label for each code.
+#'   Required when `use_labels = TRUE`.
 #'
 #' @details
-#' Logical variables in `excerpts` are interpreted as binary indicators of whether each
-#' code applies to a given media item. The function counts the number of excerpts per code
-#' and computes the number and proportion of unique `media_title` values represented.
-#' Variable labels (if present via `attr(x, "label")`) are used for display instead of
-#' raw variable names.
+#' The function first identifies all logical (or 0/1 numeric) columns in `excerpts`
+#' and calculates:
+#' - `count`: total number of excerpts where the code is applied
+#' - `n_media_titles`: number of distinct media titles containing the code
+#' - `prop_media_titles`: proportion of media titles containing the code (relative to max)
 #'
-#' The resulting table can be returned as a tibble, formatted with `knitr::kable()`,
-#' or displayed as an interactive `DT::datatable()`. If `plot = TRUE`, both the table
-#' and a ggplot object are returned invisibly as a list.
+#' The table can be output as a tibble, formatted table (`knitr::kable`), or
+#' interactive data table (`DT::datatable`).
+#'
+#' When `plot = TRUE`, the function generates a ggplot2 bar chart showing either
+#' code counts, proportions, or both (dual-axis view).
 #'
 #' @return
-#' - If `plot = FALSE`: the formatted table in the format specified by `output_type`
-#'   (tibble, kable, or datatable).
-#' - If `plot = TRUE`: an invisible list with two elements:
-#'   \describe{
-#'     \item{table}{The formatted summary table.}
-#'     \item{plot}{A `ggplot2` object showing code frequencies.}
-#'   }
-#'
-#' @examples
-#' \dontrun{
-#' library(haven)
-#' library(dplyr)
-#'
-#' # Example data frame with haven-style labels
-#' df <- tibble::tibble(
-#'   media_title = c("A", "B", "C", "D"),
-#'   code_01 = c(TRUE, FALSE, TRUE, TRUE),
-#'   code_02 = c(FALSE, TRUE, TRUE, FALSE)
-#' )
-#' attr(df$code_01, "label") <- "Empathy"
-#' attr(df$code_02, "label") <- "Resilience"
-#'
-#' create_code_summary(df, plot = TRUE, output_type = "kable")
+#' If `plot = FALSE`, returns a table in the selected `output_type` format.
+#' If `plot = TRUE`, invisibly returns a list with two elements:
+#' \describe{
+#'   \item{table}{A table of summarized code frequencies.}
+#'   \item{plot}{A `ggplot` object visualizing the results.}
 #' }
 #'
-#' @importFrom dplyr select all_of filter group_by summarise mutate n n_distinct arrange desc recode
+#' @examples
+#' # Example 1: Basic usage without a codebook
+#' df <- data.frame(
+#'   media_title = c("Doc1", "Doc2", "Doc3", "Doc4"),
+#'   code_a = c(TRUE, FALSE, TRUE, TRUE),
+#'   code_b = c(FALSE, TRUE, TRUE, FALSE)
+#' )
+#'
+#' create_code_summary(df, plot = TRUE)
+#'
+#' # Example 2: Using a codebook for readable labels
+#' codebook <- data.frame(
+#'   variable = c("code_a", "code_b"),
+#'   label = c("Community Engagement", "Policy Support")
+#' )
+#'
+#' create_code_summary(
+#'   df,
+#'   use_labels = TRUE,
+#'   codebook = codebook,
+#'   plot = TRUE,
+#'   plot_metric = "both"
+#' )
+#'
+#' # Example 3: Excluding a code and outputting as datatable
+#' create_code_summary(
+#'   df,
+#'   exclude = "code_b",
+#'   output_type = "datatable"
+#' )
+#'
+#' @importFrom dplyr select all_of filter group_by summarise mutate arrange desc n n_distinct
 #' @importFrom tidyr pivot_longer
-#' @importFrom purrr map_chr
 #' @importFrom ggplot2 ggplot aes geom_col coord_flip labs theme_minimal scale_y_continuous sec_axis
 #' @importFrom knitr kable
 #' @importFrom DT datatable
+#' @importFrom purrr map_chr
 #' @export
 create_code_summary <- function(
     excerpts,
@@ -82,7 +104,9 @@ create_code_summary <- function(
     output_type = c("tibble", "kable", "datatable"),
     exclude = NULL,
     plot_metric = c("count", "prop", "both"),
-    fill_color = "steelblue"
+    fill_color = "steelblue",
+    use_labels = FALSE,
+    codebook = NULL # dataframe with columns: variable, label
 ) {
   output_type <- match.arg(output_type)
   plot_metric <- match.arg(plot_metric)
@@ -91,21 +115,55 @@ create_code_summary <- function(
   if (!is.data.frame(excerpts)) stop("`excerpts` must be a data frame.")
   if (!"media_title" %in% names(excerpts)) stop("`excerpts` must contain a `media_title` column.")
 
-  # Identify logical columns (codes)
+  # --- Validate codebook if labels are to be used ---
+  if (use_labels) {
+    if (is.null(codebook)) stop("You must provide a `codebook` dataframe when `use_labels = TRUE`.")
+    required_cols <- c("variable", "label")
+    if (!all(required_cols %in% names(codebook))) {
+      stop("`codebook` must contain columns named `variable` and `label`.")
+    }
+  }
+
+  # --- Safeguard: Convert 0/1 numerics or labelled to logical ---
+  for (col in names(excerpts)) {
+    x <- excerpts[[col]]
+    if (inherits(x, "haven_labelled")) {
+      vals <- unique(na.omit(as.numeric(x)))
+      if (all(vals %in% c(0, 1))) excerpts[[col]] <- as.logical(as.numeric(x))
+    } else if (is.numeric(x) && all(na.omit(x) %in% c(0, 1))) {
+      excerpts[[col]] <- as.logical(x)
+    }
+  }
+
+  # --- Identify logical columns (codes) ---
   code_columns <- colnames(excerpts)[vapply(excerpts, is.logical, logical(1))]
 
+  # --- Apply exclusions ---
   if (!is.null(exclude)) {
     exclude <- intersect(exclude, code_columns)
     code_columns <- setdiff(code_columns, exclude)
   }
   if (length(code_columns) == 0) stop("No logical (code) columns found after exclusions.")
 
-  # --- Create name → label lookup (via haven labels) ---
-  label_lookup <- purrr::map_chr(code_columns, function(x) {
-    lbl <- attr(excerpts[[x]], "label")
-    if (is.null(lbl) || is.na(lbl) || lbl == "") x else lbl
-  })
-  names(label_lookup) <- code_columns
+  # --- Create name → label lookup ---
+  if (use_labels) {
+    # Merge from codebook
+    label_lookup <- setNames(codebook$label, codebook$variable)
+    label_lookup <- label_lookup[names(label_lookup) %in% code_columns]
+    # fallback: variables not in codebook use their names
+    missing_codes <- setdiff(code_columns, names(label_lookup))
+    if (length(missing_codes) > 0) {
+      warning("Some codes missing from codebook: ", paste(missing_codes, collapse = ", "))
+      label_lookup[missing_codes] <- missing_codes
+    }
+  } else {
+    # fallback to haven labels if available
+    label_lookup <- purrr::map_chr(code_columns, function(x) {
+      lbl <- attr(excerpts[[x]], "label")
+      if (is.null(lbl) || is.na(lbl) || lbl == "") x else lbl
+    })
+    names(label_lookup) <- code_columns
+  }
 
   # --- Summarize code frequencies ---
   total_counts <- excerpts %>%
@@ -174,7 +232,7 @@ create_code_summary <- function(
         ggplot2::geom_col(fill = fill_color) +
         ggplot2::coord_flip() +
         ggplot2::labs(
-          x = "Code (Label)",
+          x = "Code",
           y = "Excerpt Frequency",
           title = "Code Counts"
         ) +
@@ -188,7 +246,7 @@ create_code_summary <- function(
         ggplot2::geom_col(fill = fill_color) +
         ggplot2::coord_flip() +
         ggplot2::labs(
-          x = "Code (Label)",
+          x = "Code",
           y = "Proportion of Media Titles",
           title = "Code Frequencies by Media Title Coverage"
         ) +
@@ -210,18 +268,16 @@ create_code_summary <- function(
                                        name = "Proportion of Media Titles")
         ) +
         ggplot2::labs(
-          x = "Code (Label)",
+          x = "Code",
           title = "Code Frequencies: Counts and Proportions"
         ) +
         ggplot2::theme_minimal()
     }
 
-    # --- Return formatted table + plot ---
-    print(table_out)  # ensure the chosen table format is displayed
+    print(table_out)
     return(invisible(list(table = table_out, plot = p)))
   }
 
-  # --- Return correct table format (no plot) ---
   print(table_out)
   return(invisible(table_out))
 }

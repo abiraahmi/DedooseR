@@ -8,7 +8,9 @@ create_code_summary <- function(
     output_type = c("tibble", "kable", "datatable"),
     exclude = NULL,
     plot_metric = c("count", "prop", "both"),
-    fill_color = "steelblue"
+    fill_color = "steelblue",
+    use_labels = FALSE,
+    codebook = NULL # dataframe with columns: variable, label
 ) {
   output_type <- match.arg(output_type)
   plot_metric <- match.arg(plot_metric)
@@ -17,21 +19,55 @@ create_code_summary <- function(
   if (!is.data.frame(excerpts)) stop("`excerpts` must be a data frame.")
   if (!"media_title" %in% names(excerpts)) stop("`excerpts` must contain a `media_title` column.")
 
-  # Identify logical columns (codes)
+  # --- Validate codebook if labels are to be used ---
+  if (use_labels) {
+    if (is.null(codebook)) stop("You must provide a `codebook` dataframe when `use_labels = TRUE`.")
+    required_cols <- c("variable", "label")
+    if (!all(required_cols %in% names(codebook))) {
+      stop("`codebook` must contain columns named `variable` and `label`.")
+    }
+  }
+
+  # --- Safeguard: Convert 0/1 numerics or labelled to logical ---
+  for (col in names(excerpts)) {
+    x <- excerpts[[col]]
+    if (inherits(x, "haven_labelled")) {
+      vals <- unique(na.omit(as.numeric(x)))
+      if (all(vals %in% c(0, 1))) excerpts[[col]] <- as.logical(as.numeric(x))
+    } else if (is.numeric(x) && all(na.omit(x) %in% c(0, 1))) {
+      excerpts[[col]] <- as.logical(x)
+    }
+  }
+
+  # --- Identify logical columns (codes) ---
   code_columns <- colnames(excerpts)[vapply(excerpts, is.logical, logical(1))]
 
+  # --- Apply exclusions ---
   if (!is.null(exclude)) {
     exclude <- intersect(exclude, code_columns)
     code_columns <- setdiff(code_columns, exclude)
   }
   if (length(code_columns) == 0) stop("No logical (code) columns found after exclusions.")
 
-  # --- Create name → label lookup (via haven labels) ---
-  label_lookup <- purrr::map_chr(code_columns, function(x) {
-    lbl <- attr(excerpts[[x]], "label")
-    if (is.null(lbl) || is.na(lbl) || lbl == "") x else lbl
-  })
-  names(label_lookup) <- code_columns
+  # --- Create name → label lookup ---
+  if (use_labels) {
+    # Merge from codebook
+    label_lookup <- setNames(codebook$label, codebook$variable)
+    label_lookup <- label_lookup[names(label_lookup) %in% code_columns]
+    # fallback: variables not in codebook use their names
+    missing_codes <- setdiff(code_columns, names(label_lookup))
+    if (length(missing_codes) > 0) {
+      warning("Some codes missing from codebook: ", paste(missing_codes, collapse = ", "))
+      label_lookup[missing_codes] <- missing_codes
+    }
+  } else {
+    # fallback to haven labels if available
+    label_lookup <- purrr::map_chr(code_columns, function(x) {
+      lbl <- attr(excerpts[[x]], "label")
+      if (is.null(lbl) || is.na(lbl) || lbl == "") x else lbl
+    })
+    names(label_lookup) <- code_columns
+  }
 
   # --- Summarize code frequencies ---
   total_counts <- excerpts %>%
@@ -100,7 +136,7 @@ create_code_summary <- function(
         ggplot2::geom_col(fill = fill_color) +
         ggplot2::coord_flip() +
         ggplot2::labs(
-          x = "Code (Label)",
+          x = "Code",
           y = "Excerpt Frequency",
           title = "Code Counts"
         ) +
@@ -114,7 +150,7 @@ create_code_summary <- function(
         ggplot2::geom_col(fill = fill_color) +
         ggplot2::coord_flip() +
         ggplot2::labs(
-          x = "Code (Label)",
+          x = "Code",
           y = "Proportion of Media Titles",
           title = "Code Frequencies by Media Title Coverage"
         ) +
@@ -136,18 +172,16 @@ create_code_summary <- function(
                                        name = "Proportion of Media Titles")
         ) +
         ggplot2::labs(
-          x = "Code (Label)",
+          x = "Code",
           title = "Code Frequencies: Counts and Proportions"
         ) +
         ggplot2::theme_minimal()
     }
 
-    # --- Return formatted table + plot ---
-    print(table_out)  # ensure the chosen table format is displayed
+    print(table_out)
     return(invisible(list(table = table_out, plot = p)))
   }
 
-  # --- Return correct table format (no plot) ---
   print(table_out)
   return(invisible(table_out))
 }
@@ -195,6 +229,8 @@ create_code_summary <- create_code_summary(data_merged,
                                     table_min_prop = 0.25,
                                     output_type = "kable",
                                     plot = TRUE,
-                                    plot_metric = "both")
+                                    plot_metric = "both",
+                                    use_labels = TRUE,
+                                    codebook = codebook_merged)
 
 
