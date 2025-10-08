@@ -2,94 +2,139 @@
 % Please edit documentation in R/cooccur.R
 \name{cooccur}
 \alias{cooccur}
-\title{Generate a Code Co-Occurrence Matrix and Network Plot}
+\title{Create a Code Co-occurrence Matrix and Network Plot}
 \usage{
 cooccur(
   excerpts = NULL,
   coccur_matrix = NULL,
   min_bold = 10,
+  scale = c("count", "prop"),
   output = c("kable", "tibble", "data.frame"),
   plot = TRUE,
-  matrix_threshold = 5,
+  edge_min = 10,
   plot_threshold = 0,
   layout = "circle",
   edge_color_low = "lightgray",
   edge_color_high = "purple",
-  node_color = "lightblue"
+  node_color = "lightblue",
+  use_labels = FALSE,
+  codebook = NULL
 )
 }
 \arguments{
-\item{excerpts}{A data frame containing a \code{media_title} column and code columns (prefixed with \code{"c_"}).}
+\item{excerpts}{Optional data frame containing coded excerpts, with a column
+named \code{media_title} and code columns prefixed with \code{"c_"}.}
 
-\item{coccur_matrix}{Optional. A pre-computed co-occurrence matrix (alternative to providing \code{excerpts}).}
+\item{coccur_matrix}{Optional existing co-occurrence matrix to use instead of computing
+one from \code{excerpts}. Must be a numeric square matrix or coercible to one.}
 
-\item{min_bold}{Integer. Minimum co-occurrence count for bolding cells in the \code{kable} output. Default = 10.}
+\item{min_bold}{Minimum value for bold highlighting in HTML table output (if \code{output = "kable"}).
+Default is \code{10}.}
 
-\item{output}{Character. Output format for the matrix: \code{"kable"}, \code{"tibble"}, or \code{"data.frame"}. Default = \code{"kable"}.}
+\item{scale}{Whether to display raw counts (\code{"count"}) or conditional proportions (\code{"prop"}).
+Default is \code{"count"}.}
 
-\item{plot}{Logical. Whether to produce a \code{ggraph} network plot. Default = \code{TRUE}.}
+\item{output}{The format of the co-occurrence matrix output.
+One of \code{"kable"}, \code{"tibble"}, or \code{"data.frame"}. Default is \code{"kable"}.}
 
-\item{matrix_threshold}{Integer. Minimum co-occurrence count required to retain a code pair. Default = 5.}
+\item{plot}{Logical; whether to produce a network visualization. Default is \code{TRUE}.}
 
-\item{plot_threshold}{Integer. Minimum code frequency (diagonal value) required for inclusion in the plot. Default = 0.}
+\item{edge_min}{Minimum edge weight for displaying connections in the plot.
+When \code{scale = "count"}, this is a frequency threshold; when \code{scale = "prop"},
+it must be between 0 and 1. Default is \code{10}.}
 
-\item{layout}{Character. Layout for \code{ggraph}. Options include \code{"circle"}, \code{"fr"}, \code{"kk"}, etc. Default = \code{"circle"}.}
+\item{plot_threshold}{Minimum node frequency required to display a code in the network plot.
+When \code{scale = "prop"}, must be between 0 and 1. Default is \code{0}.}
 
-\item{edge_color_low}{Character. Color for weakest edges. Default = \code{"lightgray"}.}
+\item{layout}{Graph layout for network visualization (passed to \code{ggraph::ggraph}).
+Common options include \code{"circle"}, \code{"fr"}, or \code{"kk"}. Default is \code{"circle"}.}
 
-\item{edge_color_high}{Character. Color for strongest edges. Default = \code{"purple"}.}
+\item{edge_color_low, edge_color_high}{Color gradient for edge weights in the plot.
+Default is \code{"lightgray"} to \code{"purple"}.}
 
-\item{node_color}{Character. Color for nodes in the network. Default = \code{"lightblue"}.}
+\item{node_color}{Color for node points in the network plot. Default is \code{"lightblue"}.}
+
+\item{use_labels}{Logical; if \code{TRUE}, replaces code variable names with descriptive labels
+from a provided \code{codebook}. Default is \code{FALSE}.}
+
+\item{codebook}{Optional data frame with columns:
+\itemize{
+\item \code{variable}: the code variable name (e.g., \code{"c_family"})
+\item \code{label}: the descriptive name for the code (e.g., \code{"Family Connectedness"}).
+Required when \code{use_labels = TRUE}.
+}}
 }
 \value{
 A named list with two elements:
-\itemize{
-\item \code{matrix} - A formatted co-occurrence matrix (as a \code{kable}, \code{tibble}, or \code{data.frame}).
-\item \code{plot} - A \code{ggraph} network plot object (if \code{plot = TRUE}), or \code{NULL} otherwise.
+\describe{
+\item{matrix}{A tibble, data frame, or formatted HTML table of the co-occurrence matrix.}
+\item{plot}{A \code{ggplot} object visualizing the co-occurrence network (if \code{plot = TRUE}).}
 }
 }
 \description{
-This function computes a co-occurrence matrix of qualitative codes based on
-transcript-level data (e.g., each transcript coded with multiple binary \code{c_} variables),
-filters the matrix based on a minimum co-occurrence threshold, and optionally visualizes
-the network of code co-occurrences using \code{ggraph}.
+Builds a co-occurrence matrix showing how often qualitative codes appear together
+within the same unit (e.g., transcript, document, or media title).
+The function can take either a coded dataset (\code{excerpts}) or an existing
+co-occurrence matrix, returning both a formatted matrix and (optionally)
+a network visualization.
 }
 \details{
-The function expects an input data frame (\code{excerpts}) that includes a column called
-\code{media_title} identifying transcript or participant names, and one or more binary
-code columns whose names start with \code{"c_"}. It aggregates codes at the transcript level
-and computes a symmetric co-occurrence matrix using the cross-product of code columns.
+The function identifies columns beginning with \code{"c_"} as code variables.
+It computes co-occurrences by summing pairwise intersections of codes across
+all unique \code{media_title} units. The diagonal represents the marginal frequencies
+(the number of transcripts where each code appears).
 
-Rows and columns with all zeros are dropped, and you can control how many co-occurrences
-are required to be included in the matrix and plot using \code{matrix_threshold}.
+When \code{scale = "prop"}, the matrix entries are normalized by the marginal frequency
+of each column, yielding conditional probabilities (e.g., P(B | A)).
 
-If variable labels are attached (e.g., via \code{haven::labelled()}), these will automatically
-be used for the node labels in the plot.
+The resulting matrix can be output as a tibble, a simple data frame,
+or a formatted HTML table via \code{knitr::kable}. If \code{plot = TRUE}, the function also
+returns a network visualization of code co-occurrences using \code{ggraph} and \code{igraph}.
 }
 \examples{
-\dontrun{
-# Example data frame
-library(dplyr)
-excerpts <- data.frame(
-  media_title = rep(c("A", "B", "C", "D"), each = 2),
-  c_selfesteem = c(1,0,1,1,0,1,1,0),
-  c_helpseeking = c(0,1,1,0,1,1,0,0),
-  c_belonging = c(1,1,0,1,0,1,1,1)
+# Example 1: Basic co-occurrence matrix from excerpts
+df <- data.frame(
+  media_title = c("Doc1", "Doc2", "Doc3"),
+  c_hope = c(1, 0, 1),
+  c_family = c(1, 1, 0),
+  c_school = c(0, 1, 1)
 )
 
-# Compute and plot
-co <- cooccur(
-  excerpts = excerpts,
-  matrix_threshold = 2,
-  plot_threshold = 1,
-  output = "kable"
+result <- cooccur(
+  excerpts = df,
+  scale = "count",
+  output = "tibble",
+  plot = TRUE
 )
 
-# View formatted matrix
-co$matrix
+result$matrix  # Co-occurrence matrix
+result$plot    # Network plot
 
-# Show network plot
-co$plot
-}
+# Example 2: Use descriptive labels from a codebook
+codebook <- data.frame(
+  variable = c("c_hope", "c_family", "c_school"),
+  label = c("Hope & Optimism", "Family Connectedness", "School Belonging")
+)
+
+labeled_result <- cooccur(
+  excerpts = df,
+  use_labels = TRUE,
+  codebook = codebook,
+  scale = "prop",
+  output = "kable",
+  plot = TRUE,
+  edge_min = 0.3
+)
+
+labeled_result$matrix
+labeled_result$plot
+
+# Example 3: Provide an existing co-occurrence matrix
+m <- matrix(c(3, 2, 1,
+              2, 3, 1,
+              1, 1, 2),
+            nrow = 3, dimnames = list(c("A", "B", "C"), c("A", "B", "C")))
+
+cooccur(coccur_matrix = m, scale = "count", plot = FALSE)
 
 }

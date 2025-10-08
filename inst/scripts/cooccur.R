@@ -9,7 +9,10 @@ cooccur <- function(excerpts = NULL,
                     layout = "circle",
                     edge_color_low = "lightgray",
                     edge_color_high = "purple",
-                    node_color = "lightblue") {
+                    node_color = "lightblue",
+                    use_labels = FALSE,
+                    codebook = NULL # dataframe with columns: variable, label
+) {
   # --- Argument validation ---
   scale <- match.arg(scale)
   output <- match.arg(output)
@@ -52,6 +55,26 @@ cooccur <- function(excerpts = NULL,
     coccur_matrix <- as.matrix(coccur_matrix)
   } else {
     stop("You must provide either `excerpts` or `coccur_matrix`.")
+  }
+
+  # --- Apply code labels if requested ---
+  if (use_labels) {
+    if (is.null(codebook)) {
+      stop("You must provide a `codebook` dataframe when `use_labels = TRUE`.")
+    }
+    if (!all(c("variable", "label") %in% names(codebook))) {
+      stop("`codebook` must have columns named `variable` and `label`.")
+    }
+
+    # Create lookup vector
+    label_lookup <- setNames(codebook$label, codebook$variable)
+
+    # Replace row and column names with labels if available
+    matched_rows <- rownames(coccur_matrix) %in% names(label_lookup)
+    matched_cols <- colnames(coccur_matrix) %in% names(label_lookup)
+
+    rownames(coccur_matrix)[matched_rows] <- label_lookup[rownames(coccur_matrix)[matched_rows]]
+    colnames(coccur_matrix)[matched_cols] <- label_lookup[colnames(coccur_matrix)[matched_cols]]
   }
 
   # --- Convert to data frame ---
@@ -102,54 +125,28 @@ cooccur <- function(excerpts = NULL,
                                              weighted = TRUE,
                                              diag = FALSE)
 
-    # --- Filter edges based on scale type ---
+    # --- Filter edges ---
     if (scale == "count") {
       g <- igraph::delete_edges(g, igraph::E(g)[weight < edge_min])
-    } else if (scale == "prop") {
-      if (edge_min < 0 || edge_min > 1) {
-        stop("When scale = 'prop', `edge_min` must be between 0 and 1.")
-      }
+    } else {
+      if (edge_min < 0 || edge_min > 1) stop("When scale = 'prop', `edge_min` must be between 0 and 1.")
       g <- igraph::delete_edges(g, igraph::E(g)[weight < edge_min])
     }
 
-    # --- Filter nodes below plot_threshold ---
+    # --- Filter nodes ---
     freq <- diag(coccur_matrix)
     igraph::V(g)$freq <- freq[igraph::V(g)$name]
-
     if (scale == "count") {
       g <- igraph::delete_vertices(g, igraph::V(g)[freq < plot_threshold])
-    } else if (scale == "prop") {
-      if (plot_threshold < 0 || plot_threshold > 1) {
+    } else {
+      if (plot_threshold < 0 || plot_threshold > 1)
         stop("When scale = 'prop', `plot_threshold` must be between 0 and 1.")
-      }
       g <- igraph::delete_vertices(g, igraph::V(g)[freq < plot_threshold])
     }
 
-    # --- Drop isolated nodes ---
     g <- igraph::delete_vertices(g, which(igraph::degree(g) == 0))
 
-    # --- Attach haven variable labels if available ---
-    if (!is.null(excerpts)) {
-      var_labels <- sapply(excerpts, function(x) attr(x, "label"))
-      var_labels <- var_labels[!is.na(var_labels)]
-      matching_labels <- var_labels[names(var_labels) %in% igraph::V(g)$name]
-
-      if (length(matching_labels) > 0) {
-        igraph::V(g)$label[match(names(matching_labels), igraph::V(g)$name)] <- matching_labels
-        message("✅ Using variable labels from dataset for node labels.")
-      } else {
-        message("ℹ No variable labels found; using variable names instead.")
-      }
-    }
-
-    # --- Use node label instead of name, if available ---
-    if ("label" %in% names(igraph::vertex_attr(g))) {
-      label_var <- igraph::V(g)$label
-    } else {
-      label_var <- igraph::V(g)$name
-    }
-
-    # --- Plot ---
+    label_var <- igraph::V(g)$name
     plot_out <- ggraph::ggraph(g, layout = layout) +
       ggraph::geom_edge_link(aes(width = weight, color = weight), alpha = 0.6) +
       ggraph::scale_edge_width(range = c(0.2, 2), guide = "none") +
@@ -163,11 +160,10 @@ cooccur <- function(excerpts = NULL,
       ggplot2::theme_void()
   }
 
-  # --- Return both objects as a named list ---
+  # --- Return ---
   output_list <- list(matrix = matrix_out, plot = plot_out)
   return(output_list)
 }
-
 
 
 # Testing
@@ -208,7 +204,8 @@ data_merged <- excerpts_merged$data
 codebook_merged <- excerpts_merged$codebook
 
 # Return kable and plot network
-cooccur_results <- cooccur(data_merged, output = "tibble", plot)
+cooccur_results <- cooccur(data_merged, output = "tibble", plot = TRUE,
+                           use_labels = TRUE, codebook = codebook_merged)
 
 # View results
 cooccur_results$matrix  # tibble or table of co-occurrence values
