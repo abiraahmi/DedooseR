@@ -42,7 +42,7 @@ test_that("clean_data() names to lowercase,
           })
 
           
-# Test 2: rename_vars option
+# Test 2: rename_vars and rename labels options
 test_that("rename_vars and relabel_vars correctly rename variables and update labels", {
   raw <- dplyr::tibble(
     "Excerpt Copy" = c("Text A", "Text B", "Text C"),
@@ -76,9 +76,36 @@ test_that("rename_vars and relabel_vars correctly rename variables and update la
   expect_equal(label_value, "source document")
 })
 
-
-# Test 3: rename_labels option
-
-# Test 4: output_type option
+# Test 3: output_type option
+test_that("output_type writes requested file formats", {
+  testthat::skip_if_not_installed("openxlsx")
+  testthat::skip_if_not_installed("haven")
+  raw <- dplyr::tibble(
+    "Excerpt Copy" = c("Text A", "Text B"),
+    "Code Theme Applied" = c(TRUE, FALSE),
+    "Excerpt Creator" = c("Coder A", "Coder B"),
+    "Media Title" = c("Transcript A", "Transcript B")
+  )
+  preferred_coders <- c("Coder A", "Coder B")
+  tmp_xlsx <- tempfile(fileext = ".xlsx")
+  tmp_dta <- tempfile(fileext = ".dta")
+  on.exit(unlink(c(tmp_xlsx, tmp_dta)), add = TRUE)
+  invisible(clean_data(
+    excerpts = raw,
+    preferred_coders = preferred_coders,
+    output_path = tmp_xlsx,
+    output_type = "xlsx"
+  ))
+  expect_true(file.exists(tmp_xlsx))
+  expect_gt(file.info(tmp_xlsx)$size, 0)
+  invisible(clean_data(
+    excerpts = raw,
+    preferred_coders = preferred_coders,
+    output_path = tmp_dta,
+    output_type = "dta"
+  ))
+  expect_true(file.exists(tmp_dta))
+  expect_gt(file.info(tmp_dta)$size, 0)
+})
 
 

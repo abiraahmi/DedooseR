@@ -1,5 +1,5 @@
 ---
-title: "Introduction to DedooseR - let's get cleaning!"
+title: "Introduction to DedooseR"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to DedooseR}
@@ -84,6 +84,10 @@ codebook <- cleaned$codebook
 
 ```
 
+Please note: In your dataset, every theme or code is prefixed with "c_". The variable labels 
+drop this so your outputs are user-friendly, but to call specific codes, you need to include this "c_".
+To familiarize yourself with the variables in your dataset, review the codebook.
+
 As we iteratively refine our codebook, we often decide to collapse or merge
 some codes into others. The *merge_codes* function can help us do this, while 
 allowing us to relabel the variables:
@@ -124,6 +128,4 @@ if ("excerpt" %in% names(data)) {
   message("Tip: This chunk runs fully when the private test_data.xlsx is available.")
 }
 ```
-
-
 
