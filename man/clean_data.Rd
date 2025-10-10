@@ -20,10 +20,10 @@ clean_data(
 highest-preference coder for each unique \code{media_title}.}
 
 \item{rename_vars}{An optional named list or \code{dplyr::rename()}-style mapping of variables to rename.
-For example, \code{list(old_name = "new_name")}.}
+For example, \code{list(new_name = "old_name")}.}
 
 \item{relabel_vars}{An optional named list of new variable labels. For example,
-\code{list(var1 = "New label for var1", var2 = "Updated label for var2")}.}
+\code{list(old_name = "New label for var1", var2 = "Updated label for var2")}.}
 
 \item{output_path}{Optional file path to save the cleaned dataset. If \code{NULL}, the data will not be saved to disk.}
 
@@ -71,6 +71,8 @@ Variable labels are preserved in Stata format using the \code{labelled} and \cod
 result <- clean_data(
   excerpts = excerpts_raw,
   preferred_coders = c("CoderA", "CoderB"),
+  rename_vars = list(new_name = "old_name"),
+  relabel_vars = list(old_name = "new variable label"),
   output_path = "cleaned_excerpts.dta",
   output_type = "dta"
 )
