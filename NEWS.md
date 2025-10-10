@@ -1,4 +1,5 @@
 # DedooseR 0.0.5
+* 2025-10-04: Adding tests for each of the functions just to make extra sure its ready for y'all!
 * 2025-10-04: We have our first 8 functions 🥳
 
 # DedooseR 0.0.4

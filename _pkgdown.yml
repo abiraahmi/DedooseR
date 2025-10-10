@@ -23,9 +23,10 @@ template:
   params:
     bootswatch: flatly
     logo: reference/figures/sticker.png
+build:
+  vignettes: false
 navbar:
   right:
     - icon: fa-github fa-lg
       href: https://github.com/abiraahmi/DedooseR
       aria-label: "GitHub repository"
-
