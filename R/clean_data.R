@@ -11,9 +11,9 @@
 #' @param preferred_coders A character vector of coder names in order of preference. The function keeps the
 #'   highest-preference coder for each unique `media_title`.
 #' @param rename_vars An optional named list or `dplyr::rename()`-style mapping of variables to rename.
-#'   For example, `list(old_name = "new_name")`.
+#'   For example, `list(new_name = "old_name")`.
 #' @param relabel_vars An optional named list of new variable labels. For example,
-#'   `list(var1 = "New label for var1", var2 = "Updated label for var2")`.
+#'   `list(old_name = "New label for var1", var2 = "Updated label for var2")`.
 #' @param output_path Optional file path to save the cleaned dataset. If `NULL`, the data will not be saved to disk.
 #' @param output_type A string specifying the export format. Must be one of:
 #'   * `"none"` – no file is written (default)
@@ -48,6 +48,8 @@
 #' result <- clean_data(
 #'   excerpts = excerpts_raw,
 #'   preferred_coders = c("CoderA", "CoderB"),
+#'   rename_vars = list(new_name = "old_name"),
+#'   relabel_vars = list(old_name = "new variable label"),
 #'   output_path = "cleaned_excerpts.dta",
 #'   output_type = "dta"
 #' )

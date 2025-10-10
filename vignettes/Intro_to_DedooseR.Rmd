@@ -58,6 +58,7 @@ if (file.exists(filepath)) {
   excerpts <- excerpts_demo
 }
 
+# To run this function you need to call in two things: (1) your raw data and (2) your coder preferences
 
 # Often, we have 2 coders blind-coding every transcript. This function assigns 
 # coder ranks according to a preferred coders vector and, for every media title, 
@@ -70,8 +71,8 @@ preferred_coders <- c("a", "l", "i", "r", "s", "v", "c", "n", "k")
 cleaned <- clean_data(
   excerpts,
   preferred_coders,
-  rename_vars = list(memo_destigmatization = "...274"),  # rename variables
-  relabel_vars = list(title = "Memo: Destigmatization")  # relabel variables
+  rename_vars = list(memo_destigmatization = "...274"),  # optionally rename variables
+  relabel_vars = list(title = "Memo: Destigmatization")  # optioanlly relabel variables
 )
 
 # Extract cleaned dataset
@@ -80,6 +81,7 @@ data <- cleaned$data
 # And a codebook with variable names, labels and character types so we have a
 # clearer understanding of all the data we have to play with. 
 codebook <- cleaned$codebook
+
 ```
 
 As we iteratively refine our codebook, we often decide to collapse or merge
