@@ -21,7 +21,8 @@ utils::globalVariables(c(
   # Additional variables flagged by R CMD check
   "Meets", "Set", "applied", "code", "code_label", "excerpt_copy", "excerpt",
   "excerpt_creator", "media_title", "n_media_titles",
-  "name", "prop_media_titles", "weight", "word", "text", "where",
+  "name", "prop_media_titles", "weight", "word", "text", "where", "setNames",
+  "na.omit", "stats",
 
   # Tidyverse pronouns/placeholders
   ".", ".data", "count"
