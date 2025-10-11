@@ -58,6 +58,11 @@ if (file.exists(filepath)) {
   excerpts <- excerpts_demo
 }
 
+# First, load your libraries
+library(readxl)
+library(tidyverse)
+library(stringr)
+
 # To run this function you need to call in two things: (1) your raw data and (2) your coder preferences
 
 # Often, we have 2 coders blind-coding every transcript. This function assigns 

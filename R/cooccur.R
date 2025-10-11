@@ -2,10 +2,11 @@
 #'
 #' @description
 #' Builds a co-occurrence matrix showing how often qualitative codes appear together
-#' within the same unit (e.g., transcript, document, or media title).
-#' The function can take either a coded dataset (`excerpts`) or an existing
-#' co-occurrence matrix, returning both a formatted matrix and (optionally)
-#' a network visualization.
+#' within the same unit (e.g., transcript, document, or media title). The function
+#' expects a coded dataset (`excerpts`) and returns both a formatted matrix and
+#' (optionally) a network visualization. The returned matrix can be displayed as
+#' raw counts or column-wise proportions, whereas the network plot always reflects
+#' the underlying raw counts.
 #'
 #' @details
 #' The function identifies columns beginning with `"c_"` as code variables.
@@ -13,36 +14,31 @@
 #' all unique `media_title` units. The diagonal represents the marginal frequencies
 #' (the number of transcripts where each code appears).
 #'
-#' When `scale = "prop"`, the matrix entries are normalized by the marginal frequency
-#' of each column, yielding conditional probabilities (e.g., P(B | A)).
-#'
-#' The resulting matrix can be output as a tibble, a simple data frame,
-#' or a formatted HTML table via `knitr::kable`. If `plot = TRUE`, the function also
+#' The resulting matrix can be output as a tibble, a simple data frame, or a
+#' formatted HTML table via `knitr::kable`. If `plot = TRUE`, the function also
 #' returns a network visualization of code co-occurrences using `ggraph` and `igraph`.
+#' Edges are filtered via the `edge_min` threshold, and nodes without any remaining
+#' connections are removed from the plot.
 #'
-#' @param excerpts Optional data frame containing coded excerpts, with a column
-#'   named `media_title` and code columns prefixed with `"c_"`.
-#' @param coccur_matrix Optional existing co-occurrence matrix to use instead of computing
-#'   one from `excerpts`. Must be a numeric square matrix or coercible to one.
-#' @param min_bold Minimum value for bold highlighting in HTML table output (if `output = "kable"`).
-#'   Default is `10`.
-#' @param scale Whether to display raw counts (`"count"`) or conditional proportions (`"prop"`).
-#'   Default is `"count"`.
-#' @param output The format of the co-occurrence matrix output.
-#'   One of `"kable"`, `"tibble"`, or `"data.frame"`. Default is `"kable"`.
+#' @param excerpts Data frame containing coded excerpts, with a column named
+#'   `media_title` and code columns prefixed with `"c_"`.
+#' @param min_bold Minimum value for bold highlighting in HTML table output (if
+#'   `output = "kable"`). Default is `10`.
+#' @param scale Whether to display raw counts (`"count"`) or column-wise conditional
+#'   proportions (`"prop"`) in the returned matrix. The network plot always uses
+#'   raw counts. Default is `"count"`.
+#' @param output The format of the co-occurrence matrix output. One of `"kable"`,
+#'   `"tibble"`, or `"data.frame"`. Default is `"kable"`.
 #' @param plot Logical; whether to produce a network visualization. Default is `TRUE`.
-#' @param edge_min Minimum edge weight for displaying connections in the plot.
-#'   When `scale = "count"`, this is a frequency threshold; when `scale = "prop"`,
-#'   it must be between 0 and 1. Default is `10`.
-#' @param plot_threshold Minimum node frequency required to display a code in the network plot.
-#'   When `scale = "prop"`, must be between 0 and 1. Default is `0`.
+#' @param edge_min Minimum edge weight (in counts) for displaying connections in the plot.
+#'   Default is `10`.
 #' @param layout Graph layout for network visualization (passed to `ggraph::ggraph`).
 #'   Common options include `"circle"`, `"fr"`, or `"kk"`. Default is `"circle"`.
 #' @param edge_color_low,edge_color_high Color gradient for edge weights in the plot.
 #'   Default is `"lightgray"` to `"purple"`.
 #' @param node_color Color for node points in the network plot. Default is `"lightblue"`.
-#' @param use_labels Logical; if `TRUE`, replaces code variable names with descriptive labels
-#'   from a provided `codebook`. Default is `FALSE`.
+#' @param use_labels Logical; if `TRUE`, replaces code variable names with descriptive
+#'   labels from a provided `codebook`. Default is `FALSE`.
 #' @param codebook Optional data frame with columns:
 #'   - `variable`: the code variable name (e.g., `"c_family"`)
 #'   - `label`: the descriptive name for the code (e.g., `"Family Connectedness"`).
@@ -74,7 +70,7 @@
 #' result$matrix  # Co-occurrence matrix
 #' result$plot    # Network plot
 #'
-#' # Example 2: Use descriptive labels from a codebook
+#' # Example 2: Use descriptive labels from a codebook and proportions in the table
 #' codebook <- data.frame(
 #'   variable = c("c_hope", "c_family", "c_school"),
 #'   label = c("Hope & Optimism", "Family Connectedness", "School Belonging")
@@ -86,20 +82,11 @@
 #'   codebook = codebook,
 #'   scale = "prop",
 #'   output = "kable",
-#'   plot = TRUE,
-#'   edge_min = 0.3
+#'   plot = TRUE
 #' )
 #'
 #' labeled_result$matrix
 #' labeled_result$plot
-#'
-#' # Example 3: Provide an existing co-occurrence matrix
-#' m <- matrix(c(3, 2, 1,
-#'               2, 3, 1,
-#'               1, 1, 2),
-#'             nrow = 3, dimnames = list(c("A", "B", "C"), c("A", "B", "C")))
-#'
-#' cooccur(coccur_matrix = m, scale = "count", plot = FALSE)
 #'
 #' @importFrom dplyr group_by summarise across mutate everything
 #' @importFrom tibble as_tibble
@@ -110,66 +97,64 @@
 #'   scale_edge_color_gradient
 #' @importFrom ggplot2 theme_void
 #' @export
-cooccur <- function(excerpts = NULL,
-                    coccur_matrix = NULL,
-                    min_bold = 10,
-                    scale = c("count", "prop"),
-                    output = c("kable", "tibble", "data.frame"),
-                    plot = TRUE,
-                    edge_min = 10,
-                    plot_threshold = 0,
-                    layout = "circle",
-                    edge_color_low = "lightgray",
-                    edge_color_high = "purple",
-                    node_color = "lightblue",
-                    use_labels = FALSE,
-                    codebook = NULL # dataframe with columns: variable, label
+cooccur <- function(
+  excerpts = NULL,
+  min_bold = 10,
+  scale = c("count", "prop"),
+  output = c("kable", "tibble", "data.frame"),
+  plot = TRUE,
+  edge_min = 10,
+  layout = "circle",
+  edge_color_low = "lightgray",
+  edge_color_high = "purple",
+  node_color = "lightblue",
+  use_labels = FALSE,
+  codebook = NULL
 ) {
-  # --- Argument validation ---
+  if (is.null(excerpts)) {
+    stop("You must provide `excerpts`.")
+  }
   scale <- match.arg(scale)
   output <- match.arg(output)
 
-  # --- Case 1: Build co-occurrence matrix from excerpts ---
-  if (!is.null(excerpts)) {
-    if (!"media_title" %in% names(excerpts)) {
-      stop("`excerpts` must contain a `media_title` column.")
-    }
-
-    code_columns <- grep("^c_", names(excerpts), value = TRUE)
-    if (length(code_columns) == 0) {
-      stop("No code columns found (columns must start with 'c_').")
-    }
-
-    # Collapse to transcript-level presence
-    code_by_transcript <- excerpts %>%
-      dplyr::group_by(media_title) %>%
-      dplyr::summarise(across(all_of(code_columns),
-                              ~ as.integer(any(. == 1))),
-                       .groups = "drop")
-
-    # Build co-occurrence matrix
-    code_matrix <- as.matrix(code_by_transcript[,-1])
-    coccur_matrix <- t(code_matrix) %*% code_matrix
-
-    # Drop all-zero rows/cols
-    keep <- which(rowSums(coccur_matrix) > 0 | colSums(coccur_matrix) > 0)
-    coccur_matrix <- coccur_matrix[keep, keep, drop = FALSE]
-
-    # Scale if needed
-    if (scale == "prop") {
-      marginals <- diag(coccur_matrix)
-      coccur_matrix <- sweep(coccur_matrix, 2, marginals, "/")
-      coccur_matrix <- round(coccur_matrix, 3)
-    }
+  if (!"media_title" %in% names(excerpts)) {
+    stop("`excerpts` must contain a `media_title` column.")
   }
-  # --- Case 2: Use existing co-occurrence matrix ---
-  else if (!is.null(coccur_matrix)) {
-    coccur_matrix <- as.matrix(coccur_matrix)
+
+  code_columns <- grep("^c_", names(excerpts), value = TRUE)
+  if (length(code_columns) == 0) {
+    stop("No code columns found (columns must start with 'c_').")
+  }
+
+  # Collapse to transcript-level presence
+  code_by_transcript <- excerpts %>%
+    dplyr::group_by(media_title) %>%
+    dplyr::summarise(
+      across(all_of(code_columns), ~ as.integer(any(. == 1))),
+      .groups = "drop"
+    )
+
+  # Build co-occurrence matrix (counts)
+  code_matrix <- as.matrix(code_by_transcript[, -1, drop = FALSE])
+  coccur_counts <- t(code_matrix) %*% code_matrix
+
+  # Drop all-zero rows/cols
+  keep <- which(rowSums(coccur_counts) > 0 | colSums(coccur_counts) > 0)
+  coccur_counts <- coccur_counts[keep, keep, drop = FALSE]
+
+  # Prepare matrix for output formatting
+  if (scale == "prop") {
+    marginals <- diag(coccur_counts)
+    matrix_values <- sweep(coccur_counts, 2, marginals, "/")
+    matrix_values <- round(matrix_values, 3)
+    matrix_values[!is.finite(matrix_values)] <- 0
   } else {
-    stop("You must provide either `excerpts` or `coccur_matrix`.")
+    matrix_values <- coccur_counts
   }
 
-  # --- Apply code labels if requested ---
+  plot_matrix <- coccur_counts
+
+  # Apply code labels if requested
   if (use_labels) {
     if (is.null(codebook)) {
       stop("You must provide a `codebook` dataframe when `use_labels = TRUE`.")
@@ -178,27 +163,29 @@ cooccur <- function(excerpts = NULL,
       stop("`codebook` must have columns named `variable` and `label`.")
     }
 
-    # Create lookup vector
     label_lookup <- setNames(codebook$label, codebook$variable)
+    relabel_matrix <- function(mat) {
+      matched_rows <- rownames(mat) %in% names(label_lookup)
+      matched_cols <- colnames(mat) %in% names(label_lookup)
+      rownames(mat)[matched_rows] <- label_lookup[rownames(mat)[matched_rows]]
+      colnames(mat)[matched_cols] <- label_lookup[colnames(mat)[matched_cols]]
+      mat
+    }
 
-    # Replace row and column names with labels if available
-    matched_rows <- rownames(coccur_matrix) %in% names(label_lookup)
-    matched_cols <- colnames(coccur_matrix) %in% names(label_lookup)
-
-    rownames(coccur_matrix)[matched_rows] <- label_lookup[rownames(coccur_matrix)[matched_rows]]
-    colnames(coccur_matrix)[matched_cols] <- label_lookup[colnames(coccur_matrix)[matched_cols]]
+    matrix_values <- relabel_matrix(matrix_values)
+    plot_matrix <- relabel_matrix(plot_matrix)
   }
 
-  # --- Convert to data frame ---
-  coccur_df <- as.data.frame(coccur_matrix)
-  rownames(coccur_df) <- rownames(coccur_matrix)
+  # Convert to data frame
+  coccur_df <- as.data.frame(matrix_values)
+  rownames(coccur_df) <- rownames(matrix_values)
 
-  # --- Format output ---
+  # Format output
   if (output == "tibble") {
     matrix_out <- tibble::as_tibble(coccur_df, rownames = "code")
   } else if (output == "data.frame") {
     matrix_out <- coccur_df
-  } else if (output == "kable") {
+  } else {
     if (scale == "count") {
       coccur_df_fmt <- coccur_df %>%
         dplyr::mutate(across(
@@ -217,62 +204,53 @@ cooccur <- function(excerpts = NULL,
         ))
     }
     rownames(coccur_df_fmt) <- rownames(coccur_df)
-    matrix_out <- knitr::kable(coccur_df_fmt,
-                               format = "html",
-                               escape = FALSE,
-                               caption = paste(
-                                 "Code Co-occurrence Matrix (Within Transcript)",
-                                 ifelse(scale == "count", "Counts", "Proportions")
-                               ),
-                               align = "c") %>%
-      kableExtra::kable_styling(full_width = FALSE,
-                                bootstrap_options = c("striped", "hover", "condensed"))
+    matrix_out <- knitr::kable(
+      coccur_df_fmt,
+      format = "html",
+      escape = FALSE,
+      caption = paste(
+        "Code Co-occurrence Matrix (Within Transcript)",
+        ifelse(scale == "count", "Counts", "Proportions")
+      ),
+      align = "c"
+    ) %>%
+      kableExtra::kable_styling(
+        full_width = FALSE,
+        bootstrap_options = c("striped", "hover", "condensed")
+      )
   }
 
-  # --- Optional plot ---
+  # Optional plot (always count-based)
   plot_out <- NULL
   if (plot) {
-    g <- igraph::graph_from_adjacency_matrix(coccur_matrix,
-                                             mode = "undirected",
-                                             weighted = TRUE,
-                                             diag = FALSE)
+    g <- igraph::graph_from_adjacency_matrix(
+      plot_matrix,
+      mode = "undirected",
+      weighted = TRUE,
+      diag = FALSE
+    )
 
-    # --- Filter edges ---
-    if (scale == "count") {
-      g <- igraph::delete_edges(g, igraph::E(g)[weight < edge_min])
-    } else {
-      if (edge_min < 0 || edge_min > 1) stop("When scale = 'prop', `edge_min` must be between 0 and 1.")
-      g <- igraph::delete_edges(g, igraph::E(g)[weight < edge_min])
-    }
+    g <- igraph::delete_edges(g, igraph::E(g)[weight < edge_min])
 
-    # --- Filter nodes ---
-    freq <- diag(coccur_matrix)
+    freq <- diag(plot_matrix)
     igraph::V(g)$freq <- freq[igraph::V(g)$name]
-    if (scale == "count") {
-      g <- igraph::delete_vertices(g, igraph::V(g)[freq < plot_threshold])
-    } else {
-      if (plot_threshold < 0 || plot_threshold > 1)
-        stop("When scale = 'prop', `plot_threshold` must be between 0 and 1.")
-      g <- igraph::delete_vertices(g, igraph::V(g)[freq < plot_threshold])
-    }
 
     g <- igraph::delete_vertices(g, which(igraph::degree(g) == 0))
 
-    label_var <- igraph::V(g)$name
     plot_out <- ggraph::ggraph(g, layout = layout) +
       ggraph::geom_edge_link(aes(width = weight, color = weight), alpha = 0.6) +
       ggraph::scale_edge_width(range = c(0.2, 2), guide = "none") +
-      ggraph::scale_edge_color_gradient(low = edge_color_low,
-                                        high = edge_color_high,
-                                        guide = "none") +
+      ggraph::scale_edge_color_gradient(
+        low = edge_color_low,
+        high = edge_color_high,
+        guide = "none"
+      ) +
       ggraph::geom_node_point(aes(size = freq), color = node_color) +
-      ggraph::geom_node_text(aes(label = label_var),
+      ggraph::geom_node_text(aes(label = igraph::V(g)$name),
                              repel = TRUE,
                              max.overlaps = Inf) +
       ggplot2::theme_void()
   }
 
-  # --- Return ---
-  output_list <- list(matrix = matrix_out, plot = plot_out)
-  return(output_list)
+  list(matrix = matrix_out, plot = plot_out)
 }
