@@ -60,8 +60,6 @@ if (file.exists(filepath)) {
 
 # First, load your libraries
 library(readxl)
-library(tidyverse)
-library(stringr)
 
 # To run this function you need to call in two things: (1) your raw data and (2) your coder preferences
 
@@ -133,4 +131,3 @@ if ("excerpt" %in% names(data)) {
   message("Tip: This chunk runs fully when the private test_data.xlsx is available.")
 }
 ```
-

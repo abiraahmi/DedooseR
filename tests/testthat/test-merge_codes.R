@@ -84,3 +84,17 @@ test_that("merge_codes() drops source variables but preserves overlapping names"
   expect_identical(labelled::var_label(data_merged[["c_positive"]]), "c_positive")
 })
 
+test_that("merge_codes() errors when source variables are missing", {
+  raw <- dplyr::tibble(
+    c_positive = c(TRUE, FALSE)
+  )
+  merges <- list(
+    c_positive = c("c_positive", "c_joy")
+  )
+
+  expect_error(
+    merge_codes(raw, merges),
+    "Some variables for c_positive not found in dataset",
+    fixed = TRUE
+  )
+})
