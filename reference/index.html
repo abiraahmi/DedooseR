@@ -17,7 +17,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DedooseR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,6 +26,10 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/Intro_to_DedooseR.html">Cleaning, Merging, and Exploring Qualitative Data</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/abiraahmi/DedooseR" aria-label="GitHub repository"><span class="fa fa-github fa-lg"></span></a></li>
       </ul></div>
@@ -54,13 +58,7 @@
           <code><a href="clean_data.html">clean_data()</a></code>
 
         </dt>
-        <dd>Clean and prepare excerpt-level coding data</dd>
-      </dl><dl><dt>
-
-          <code><a href="coccur.html">coccur()</a></code>
-
-        </dt>
-        <dd>Plot Code Co-occurrence Heatmap</dd>
+        <dd>Clean and prepare qualitative excerpts for export</dd>
       </dl><dl><dt>
 
           <code><a href="compare_saturation.html">compare_saturation()</a></code>
@@ -69,58 +67,34 @@
         <dd>Compare Code Saturation Across Threshold Sets</dd>
       </dl><dl><dt>
 
-          <code><a href="count_codes.html">count_codes()</a></code>
+          <code><a href="cooccur.html">cooccur()</a></code>
 
         </dt>
-        <dd>Count the frequency of codes across excerpts</dd>
+        <dd>Create a Code Co-occurrence Matrix and Network Plot</dd>
       </dl><dl><dt>
 
-          <code><a href="create_cooccur_matrix.html">create_cooccur_matrix()</a></code>
+          <code><a href="create_code_summary.html">create_code_summary()</a></code>
 
         </dt>
-        <dd>Create a Co-occurrence Matrix Table of Codes</dd>
-      </dl><dl><dt>
-
-          <code><a href="map_cooccur_matrix.html">map_cooccur_matrix()</a></code>
-
-        </dt>
-        <dd>Plot a Code Co-occurrence Network</dd>
+        <dd>Create a Summary Table and Plot of Code Frequencies</dd>
       </dl><dl><dt>
 
           <code><a href="merge_codes.html">merge_codes()</a></code>
 
         </dt>
-        <dd>Merge multiple Boolean code variables into new collapsed codes</dd>
-      </dl><dl><dt>
-
-          <code><a href="plot_compare_saturation.html">plot_compare_saturation()</a></code>
-
-        </dt>
-        <dd>Plot saturation comparison across threshold sets</dd>
-      </dl><dl><dt>
-
-          <code><a href="plot_counts.html">plot_counts()</a></code>
-
-        </dt>
-        <dd>Plot code frequencies</dd>
-      </dl><dl><dt>
-
-          <code><a href="plot_saturation.html">plot_saturation()</a></code>
-
-        </dt>
-        <dd>Plot Code Saturation</dd>
+        <dd>Merge logical code variables and optionally relabel them</dd>
       </dl><dl><dt>
 
           <code><a href="set_saturation.html">set_saturation()</a></code>
 
         </dt>
-        <dd>Set saturation thresholds for codes</dd>
+        <dd>Compute and Visualize Code Saturation</dd>
       </dl><dl><dt>
 
           <code><a href="view_excerpts.html">view_excerpts()</a></code>
 
         </dt>
-        <dd>Interactive excerpts table</dd>
+        <dd>View Qualitative Excerpts by Code</dd>
       </dl><dl><dt>
 
           <code><a href="wordcloud.html">wordcloud()</a></code>

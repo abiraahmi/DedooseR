@@ -41,7 +41,7 @@
 
     <a class="navbar-brand me-2" href="index.html">DedooseR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,6 +51,12 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/Intro_to_DedooseR.html">Cleaning, Merging, and Exploring Qualitative Data</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -69,27 +75,26 @@
 </div>
 <!-- badges: start -->
 <!-- badges: end -->
-<p><strong>DedooseR</strong> is an R package that connects with <a href="https://www.dedoose.com/" class="external-link">Dedoose</a> to support the analysis of qualitative data. It was built to help researchers streamline workflows and improve transparency and rigor in qualitative coding and analysis.</p>
+<p><strong>DedooseR</strong> is an R package that connects with <a href="https://www.dedoose.com/" class="external-link">Dedoose</a> to support the analysis of qualitative data. It was built to help researchers streamline workflows, explore qualitative data flexibly, and conduct qualitative coding and analysis with rigor.</p>
 <div class="section level2">
 <h2 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a>
 </h2>
 <p>DedooseR currently allows you to:</p>
 <ul>
 <li>Clean data exported from Dedoose and populate a codebook</li>
-<li>Summarize code frquencies with one coder/media title in order of coder preference</li>
-<li>Plot raw frequencies or proportions of codes applied to codes, define min frequency to visualize and/or exclude codes</li>
+<li>Create code summaries with code counts and proportions across transcripts while defining min frequencies and proportions to table and plot!</li>
 <li>Set a saturation criteria and plot it</li>
 <li>Plot and play with saturation thresholds</li>
 <li>Produce and plot code co-occurrence heatmaps<br>
 </li>
 <li>Create network maps between codes</li>
 <li>Generate word clouds</li>
-<li>Run topic models to understand the distribution of topics and top terms within them for selected codes</li>
 </ul>
 <div class="section level3">
 <h3 id="coming-soon">Coming Soon<a class="anchor" aria-label="anchor" href="#coming-soon"></a>
 </h3>
 <ul>
+<li>Run topic models to understand the distribution of topics and top terms within them for selected codes</li>
 <li>Creating reliability tests and calculating reliability per coder (Cohen’s kappa) and between coders (Fleiss’ kappa)</li>
 </ul>
 </div>
@@ -122,70 +127,81 @@
 <span><span class="co"># Clean data</span></span>
 <span><span class="va">filepath</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="st">"inst/raw_data/test_data.xlsx"</span><span class="op">)</span></span>
 <span><span class="va">preferred_coders</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"l"</span>, <span class="st">"i"</span>, <span class="st">"r"</span>, <span class="st">"s"</span>, <span class="st">"v"</span>, <span class="st">"c"</span>, <span class="st">"n"</span>, <span class="st">"k"</span><span class="op">)</span></span>
-<span><span class="va">clean_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/clean_data.html">clean_data</a></span><span class="op">(</span><span class="va">filepath</span>, <span class="va">preferred_coders</span><span class="op">)</span></span>
+<span><span class="va">clean_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/clean_data.html">clean_data</a></span><span class="op">(</span><span class="va">filepath</span>,</span>
+<span>           <span class="va">preferred_coders</span>,</span>
+<span>           rename_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>memo_destigmatization <span class="op">=</span> <span class="st">"...274"</span><span class="op">)</span>,</span>
+<span>           relabel_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Memo: Destigmatization"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">excerpts</span> <span class="op">&lt;-</span> <span class="va">clean_data</span><span class="op">$</span><span class="va">data</span></span>
 <span><span class="va">codebook</span> <span class="op">&lt;-</span> <span class="va">clean_data</span><span class="op">$</span><span class="va">codebook</span></span>
 <span></span>
 <span><span class="co"># Merge codes</span></span>
-<span><span class="va">excerpts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/merge_codes.html">merge_codes</a></span><span class="op">(</span><span class="va">excerpts</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  c_belonging_connectedness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"c_sense_of_belonging"</span>, <span class="st">"c_sense_of_belonging_others"</span>, <span class="st">"c_sense_of_belonging_self"</span>,</span>
-<span>    <span class="st">"c_sense_of_connectedness"</span>, <span class="st">"c_sense_of_connectedness_family"</span>,</span>
-<span>    <span class="st">"c_sense_of_connectedness_peers"</span>, <span class="st">"c_sense_of_connectedness_school_community"</span>,</span>
-<span>    <span class="st">"c_sense_of_connectedness_staff"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  c_suicide_comfort <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"c__suicide_comfort_directing_change"</span>, <span class="st">"c__suicide_comfort_general"</span><span class="op">)</span></span>
-<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">excerpts_merged</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/merge_codes.html">merge_codes</a></span><span class="op">(</span><span class="va">data</span>,</span>
+<span>                               merges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>                                 c_belonging_connectedness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>                                   <span class="st">"c_sense_of_belonging"</span>, <span class="st">"c_sense_of_belonging_others"</span>, <span class="st">"c_sense_of_belonging_self"</span>,</span>
+<span>                                   <span class="st">"c_sense_of_connectedness"</span>, <span class="st">"c_sense_of_connectedness_family"</span>,</span>
+<span>                                   <span class="st">"c_sense_of_connectedness_peers"</span>, <span class="st">"c_sense_of_connectedness_school_community"</span>,</span>
+<span>                                   <span class="st">"c_sense_of_connectedness_staff"</span></span>
+<span>                                 <span class="op">)</span>,</span>
+<span>                                 c_suicide_comfort <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"c__suicide_comfort_directing_change"</span>, <span class="st">"c__suicide_comfort_general"</span><span class="op">)</span></span>
+<span>                               <span class="op">)</span>,</span>
+<span>                               relabel_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>                                 c_belonging_connectedness <span class="op">=</span> <span class="st">"Sense of Belonging &amp; Connectedness"</span>,</span>
+<span>                                 c_suicide_comfort <span class="op">=</span> <span class="st">"Suicide Comfort Conversing"</span></span>
+<span>                               <span class="op">)</span><span class="op">)</span></span>
 <span></span>
+<span><span class="va">data_merged</span> <span class="op">&lt;-</span> <span class="va">excerpts_merged</span><span class="op">$</span><span class="va">data</span></span>
+<span><span class="va">codebook_merged</span> <span class="op">&lt;-</span> <span class="va">excerpts_merged</span><span class="op">$</span><span class="va">codebook</span></span>
 <span></span>
-<span><span class="co"># Count codes</span></span>
-<span><span class="va">code_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/count_codes.html">count_codes</a></span><span class="op">(</span><span class="va">excerpts</span>,</span>
-<span>                           min_count <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>                           exclude <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"c_priority_excerpt"</span>, <span class="st">"c_heterogeneity"</span>, <span class="st">"c_program_implementation_unique_value_opportunity_from_dc"</span>,</span>
-<span>                                       <span class="st">"c_ripple_impact_ripple_impact_who"</span>, <span class="st">"c_ripple_impact_ripple_missed"</span><span class="op">)</span>,</span>
-<span>                           output <span class="op">=</span> <span class="st">"tibble"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Plot codes</span></span>
-<span><span class="va">plot_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/plot_counts.html">plot_counts</a></span><span class="op">(</span><span class="va">code_counts</span>,</span>
-<span>                           exclude_codes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"c_priority_excerpt"</span>, <span class="st">"c_self_efficacy"</span><span class="op">)</span>,</span>
-<span>                           metric <span class="op">=</span> <span class="st">"n_media_titles"</span>,</span>
-<span>                           min_prop <span class="op">=</span> <span class="fl">0.40</span><span class="op">)</span></span>
+<span><span class="co"># Create code summary</span></span>
+<span><span class="va">create_code_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_code_summary.html">create_code_summary</a></span><span class="op">(</span><span class="va">data_merged</span>,</span>
+<span>                                    table_min_count <span class="op">=</span> <span class="fl">40</span>,</span>
+<span>                                    table_min_prop <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>                                    plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                    plot_metric <span class="op">=</span> <span class="st">"prop"</span><span class="op">)</span></span>
 <span>                           </span>
 <span><span class="co"># View excerpts in filterable table</span></span>
 <span><span class="fu"><a href="reference/view_excerpts.html">view_excerpts</a></span><span class="op">(</span><span class="va">excerpts</span><span class="op">)</span>                           </span>
 <span></span>
-<span><span class="co"># Set saturation</span></span>
-<span><span class="va">saturation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_saturation.html">set_saturation</a></span><span class="op">(</span><span class="va">code_counts</span>, min_count <span class="op">=</span> <span class="fl">10</span>, min_prop_media_titles <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span>
+<span><span class="co"># Set saturation </span></span>
+<span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_saturation.html">set_saturation</a></span><span class="op">(</span><span class="va">create_code_summary</span>, </span>
+<span>table_min_count <span class="op">=</span> <span class="fl">40</span>,</span>
+<span>table_min_n_media_titles <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>plot <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>plot_metric <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span> <span class="co"># Plot both metrics on the same graph</span></span>
+<span><span class="va">out</span><span class="op">$</span><span class="va">plot</span></span>
 <span></span>
-<span><span class="co"># Plot saturation</span></span>
-<span><span class="va">plot_saturation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/plot_saturation.html">plot_saturation</a></span><span class="op">(</span><span class="va">saturation</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Compare saturation</span></span>
 <span></span>
-<span><span class="co"># Define thresholds</span></span>
+<span><span class="co"># Define thresholds list</span></span>
 <span><span class="va">thresholds_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  Set1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>code_count <span class="op">=</span> <span class="fl">20</span>, prop_media_title <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span>,</span>
-<span>  Set2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>code_count <span class="op">=</span> <span class="fl">40</span>, prop_media_title <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span>
+<span>  <span class="st">"Liberal"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>code_count <span class="op">=</span> <span class="fl">40</span>, prop_media_title <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span>,</span>
+<span>  <span class="st">"Strict"</span>  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>code_count <span class="op">=</span> <span class="fl">60</span>, prop_media_title <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Apply thresholds</span></span>
-<span><span class="va">comp_saturation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/compare_saturation.html">compare_saturation</a></span><span class="op">(</span><span class="va">code_counts</span>, <span class="va">excerpts</span>, <span class="va">thresholds_list</span><span class="op">)</span></span>
+<span><span class="co"># Compare against thresholds</span></span>
+<span><span class="va">saturation_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/compare_saturation.html">compare_saturation</a></span><span class="op">(</span><span class="va">code_summary</span>, <span class="va">thresholds_list</span>,</span>
+<span>                                            plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                            plot_metric <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span>
+<span><span class="co"># View table</span></span>
+<span><span class="va">saturation_comparison</span><span class="op">$</span><span class="va">results</span></span>
 <span></span>
-<span><span class="co"># Plot saturation comparisons</span></span>
-<span><span class="va">plot_saturation_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/plot_compare_saturation.html">plot_compare_saturation</a></span><span class="op">(</span><span class="va">comp_saturation</span>, <span class="va">thresholds_list</span><span class="op">)</span></span>
+<span><span class="co"># View plot</span></span>
+<span><span class="va">saturation_comparison</span><span class="op">$</span><span class="va">plot</span></span>
 <span></span>
 <span><span class="co"># Generate word cloud</span></span>
 <span><span class="fu"><a href="reference/wordcloud.html">wordcloud</a></span><span class="op">(</span><span class="va">excerpts</span>, <span class="st">"c_knowledge_awareness"</span>, </span>
 <span>         max_words <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>         custom_stopwords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"racall"</span>, <span class="st">"stuff"</span>, <span class="st">"everyone's"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create co-occurence matrix</span></span>
-<span><span class="va">cooccur_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_cooccur_matrix.html">create_cooccur_matrix</a></span><span class="op">(</span><span class="va">excerpts</span>, min_bold <span class="op">=</span> <span class="fl">0.25</span>, scale <span class="op">=</span> <span class="st">"proportion"</span>, output <span class="op">=</span> <span class="st">"data.frame"</span><span class="op">)</span></span>
+<span><span class="co"># Create matrix, set threshold and plot</span></span>
+<span><span class="va">cooccur_01</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cooccur.html">cooccur</a></span><span class="op">(</span><span class="va">data_merged</span>,</span>
+<span>              matrix_threshold <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
+<span><span class="va">cooccur_01</span><span class="op">$</span><span class="va">matrix</span></span>
+<span><span class="va">cooccur_01</span><span class="op">$</span><span class="va">plot</span></span>
 <span></span>
-<span><span class="co"># Create co-occurence network map</span></span>
-<span><span class="va">map_cooccur_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/map_cooccur_matrix.html">map_cooccur_matrix</a></span><span class="op">(</span><span class="va">cooccur_matrix</span>, edge_min <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Topic model</span></span>
+<span><span class="co"># COMING SOON: Topic models</span></span>
 <span><span class="fu">topicmodel</span><span class="op">(</span><span class="va">excerpts</span>, <span class="st">"c_emerging_leader"</span>, n_topics <span class="op">=</span> <span class="fl">2</span>, n_terms <span class="op">=</span> <span class="fl">25</span>,</span>
 <span>           custom_stopwords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"na"</span>, <span class="st">"bruh"</span>, <span class="st">"theyre"</span>, <span class="st">"yeah"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
