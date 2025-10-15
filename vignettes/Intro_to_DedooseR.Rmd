@@ -135,7 +135,7 @@ recoded <- recode(
     )
   ),
   relabel_vars = list(
-    c_emotional_growth = "Child named or managed their emotions"
+    c_emotional_growth = "Emotional growth: identification and/or regulation"
   )
 )
 
