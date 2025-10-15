@@ -17,3 +17,5 @@ inst/doc
 ^inst/raw_data$
 ~\$test_data\.xlsx$
 ~\$.*\.xlsx$
+/doc/
+/Meta/

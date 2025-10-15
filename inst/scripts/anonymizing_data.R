@@ -28,33 +28,33 @@ test_data <- data |>
   c_self_expression, c_self_expression_identities, c_self_expression_interests_personality_emotions, c_self_expression_interests_personality_emotions, c_self_expression_other, 
   c_salience, c_salience_personal_development, c_salience_relevance)
 
-# Merge some codes into other for ease of understanding
-merges_list = list(
+# Recode some codes into others for ease of understanding
+recode_list <- list(
   c_school_climate = c("c_school_climate", "c_school_climate_other_mh_initiatives"),
   c_self_expression = c("c_self_expression", "c_self_expression_interests_personality_emotions"),
   c_salience = c("c_salience", "c_salience_personal_development", "c_salience_relevance")
 )
-merge <- merge_codes(test_data, 
-                    merges = merges_list,
-                    relabel_vars = list(
-                      c_school_climate = "school climate",
-                      c_self_expression = "self-expression",
-                      c_salience = "salience of mental health"
-                    ))
-merged_data <- merge$data_merged
-merged_codebook <- merge$codebook_merged
+recoded <- recode(test_data, 
+                  recodes = recode_list,
+                  relabel_vars = list(
+                    c_school_climate = "school climate",
+                    c_self_expression = "self-expression",
+                    c_salience = "salience of mental health"
+                  ))
+recoded_data <- recoded$data_recode
+recoded_codebook <- recoded$codebook_recode
 
-c_cols <- grep("^c_", names(merged_data), value = TRUE)
+c_cols <- grep("^c_", names(recoded_data), value = TRUE)
 
 # Drop rows where all code columns = FALSE
-merged_data <- merged_data |>
+recoded_data <- recoded_data |>
   dplyr::filter(rowSums(dplyr::across(dplyr::all_of(c_cols), ~ .x %in% TRUE), na.rm = TRUE) > 0)
 
 # Revert to raw data variable names so we can use as a demo dataset
 # Read raw data to verify code names
 colnames(df)
 
-raw_data <- merged_data |> 
+raw_data <- recoded_data |> 
 rename(
     `Media Title` = media_title,
     `Excerpt Creator` = excerpt_creator,
@@ -167,24 +167,24 @@ df <- clean_data(demo_data, preferred_coders)
 data <- df$data
 codebook <- df$codebook
 
-# Merge codes
-merges = list(
+# Recode themes
+recodes <- list(
   c_gateway_to_support = c("c_gateway_to_support", "c_gateway_to_support_becoming_a_gateway", "c_gateway_to_support_being_seen_as_a_gateway"),
   c_knowledge_awareness = c("c_knowledge_awareness", "c_vigilance"),
   c_self_expression = c("c_self_expression", "c_self_expression_identities", "c_self_expression_other"))
 
-merged_data <- merge_codes(data, merges,
+recoded <- recode(data, recodes,
 relabel_vars = list(
   c_knowledge_awareness = "knowledge & awareness of mental health",
   c_gateway_to_support = "becoming or being seen as a gateway to mental health support",
   c_self_expression = "self-expressin of identities, interests, and other"
 ))
-data_merged <- merged_data$data_merged
-codebook_merged <-merged_data$codebook
+data_recode <- recoded$data_recode
+codebook_recode <- recoded$codebook_recode
 
 # Create code summary
 code_summary <- create_code_summary(
-  data_merged, 
+  data_recode, 
   table_min_count = 5, 
   table_min_prop = NULL,
   plot = TRUE,
@@ -192,7 +192,7 @@ code_summary <- create_code_summary(
   output_type = "tibble",
   plot_metric = "count",
   use_labels = TRUE,
-  codebook = codebook_merged
+  codebook = codebook_recode
 )
 
 code_summary_table <- code_summary$table
@@ -221,18 +221,18 @@ compare_saturation(code_summary_table,
 
 # Cooccurence
 cooccur(
-  data_merged, 
+  data_recode, 
   min_bold = 0, 
   scale = "count",
   output = "tibble",
   plot = TRUE,
   edge_min = 4, 
   use_labels = TRUE, 
-  codebook = codebook_merged
+  codebook = codebook_recode
 )
 
 # View excerpts
-view_excerpts(data_merged)
+view_excerpts(data_recode)
 
 # Word cloud
-wordcloud(data_merged, "c_self_expression", max_words = 100)
+wordcloud(data_recode, "c_self_expression", max_words = 100)

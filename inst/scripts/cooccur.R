@@ -146,9 +146,9 @@ df <- clean_data(filepath,
 data <- df$data
 codebook <- df$codebook
 
-# Merge codes
-excerpts_merged <- merge_codes(data,
-                               merges = list(
+# Recode themes
+excerpts_recoded <- recode(data,
+                               recodes = list(
                                  c_belonging_connectedness = c(
                                    "c_sense_of_belonging", "c_sense_of_belonging_others", "c_sense_of_belonging_self",
                                    "c_sense_of_connectedness", "c_sense_of_connectedness_family",
@@ -162,13 +162,13 @@ excerpts_merged <- merge_codes(data,
                                  c_suicide_comfort = "Suicide Comfort Conversing"
                                ))
 
-data_merged <- excerpts_merged$data
-codebook_merged <- excerpts_merged$codebook
+data_recode <- excerpts_recoded$data_recode
+codebook_recode <- excerpts_recoded$codebook_recode
 
 # Return kable and plot network
-cooccur_results <- cooccur(data_merged, scale = "count", 
+cooccur_results <- cooccur(data_recode, scale = "count", 
                           output = "kable", plot = TRUE,
-                           use_labels = TRUE, codebook = codebook_merged)
+                           use_labels = TRUE, codebook = codebook_recode)
 
 # View results
 cooccur_results_table <- cooccur_results$matrix  # tibble or table of co-occurrence values

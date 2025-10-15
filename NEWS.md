@@ -1,4 +1,5 @@
 # DedooseR 0.0.5
+* 2025-10-13: Renamed `merge_codes()` to `recode()` to better reflect how the function combines themes
 * 2025-10-12: Test for all functions > 95%, package coverage is at 99.3% 🥳
 * 2025-10-04: Adding tests for each of the functions just to make extra sure its ready for y'all!
 * 2025-10-04: We have our first 8 functions 🥳
@@ -28,5 +29,4 @@
 # DedooseR 0.0.1
 
 * 2025-08-05: Welcome to DedooseR! Today, we added our first four functions - more to come soon ;) 
-
 

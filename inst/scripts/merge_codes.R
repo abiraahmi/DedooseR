@@ -1,11 +1,11 @@
-merge_codes <- function(data, merges, relabel_vars = NULL) {
+recode <- function(data, recodes, relabel_vars = NULL) {
   # data: a data.frame or tibble
-  # merges: a named list, where names are new vars, values are character vectors of old vars
+  # recodes: a named list, where names are new vars, values are character vectors of old vars
 
   all_from_vars <- c()
 
-  for (new_var in names(merges)) {
-    from_vars <- merges[[new_var]]
+  for (new_var in names(recodes)) {
+    from_vars <- recodes[[new_var]]
 
     # Check that all source variables exist
     if (!all(from_vars %in% names(data))) {
@@ -28,23 +28,23 @@ merge_codes <- function(data, merges, relabel_vars = NULL) {
   }
 
   # Drop all old vars at once
-  data_merged <- data[, !names(data) %in% all_from_vars, drop = FALSE]
+  data_recode <- data[, !names(data) %in% all_from_vars, drop = FALSE]
 
   # Create codebook for merged data
-  codebook_merged <- data.frame(
-    variable = names(data_merged),
-    label = sapply(names(data_merged), function(col) {
-      lbl <- labelled::var_label(data_merged[[col]])
+  codebook_recode <- data.frame(
+    variable = names(data_recode),
+    label = sapply(names(data_recode), function(col) {
+      lbl <- labelled::var_label(data_recode[[col]])
       if (is.null(lbl) || lbl == "") col else lbl
     }),
-    type = sapply(data_merged, function(x) class(x)[1]),
+    type = sapply(data_recode, function(x) class(x)[1]),
     stringsAsFactors = FALSE
   )
 
   # Return both outputs
   return(list(
-    data_merged = data_merged,
-    codebook_merged = codebook_merged
+    data_recode = data_recode,
+    codebook_recode = codebook_recode
   ))
 }
 
@@ -64,8 +64,8 @@ data <- clean_data$data
 codebook <- clean_data$codebook
 
 # Merge codes
-excerpts_merged <- merge_codes(data,
-                        merges = list(
+excerpts_recoded <- recode(data,
+                        recodes = list(
   c_belonging_connectedness = c(
     "c_sense_of_belonging", "c_sense_of_belonging_others", "c_sense_of_belonging_self",
     "c_sense_of_connectedness", "c_sense_of_connectedness_family",
@@ -79,5 +79,5 @@ relabel_vars = list(
   c_suicide_comfort = "Suicide Comfort Conversing"
 ))
 
-data_merged <- excerpts_merged$data
-codebook_merged <- excerpts_merged$codebook
+data_recode <- excerpts_recoded$data_recode
+codebook_recode <- excerpts_recoded$codebook_recode

@@ -123,9 +123,9 @@ clean_data <- clean_data(filepath,
 data <- clean_data$data
 codebook <- clean_data$codebook
 
-# Merge codes
-data_merged <- merge_codes(data,
-                               merges = list(
+# Recode themes
+recoded <- recode(data,
+                               recodes = list(
                                  c_belonging_connectedness = c(
                                    "c_sense_of_belonging", "c_sense_of_belonging_others", "c_sense_of_belonging_self",
                                    "c_sense_of_connectedness", "c_sense_of_connectedness_family",
@@ -139,10 +139,10 @@ data_merged <- merge_codes(data,
                                  c_suicide_comfort = "Suicide Comfort Conversing"
                                ))
 
-data_merged <- data_merged$data
-codebook_merged <- data_merged$codebook
+data_recode <- recoded$data_recode
+codebook_recode <- recoded$codebook_recode
 
 # Count codes
-code_summary <- create_code_summary(data_merged,
+code_summary <- create_code_summary(data_recode,
                                     table_min_count = 40,
                                     plot = TRUE)

@@ -138,9 +138,9 @@ df <- clean_data(filepath,
 data <- df$data
 codebook <- df$codebook
 
-# Merge codes
-excerpts_merged <- merge_codes(data,
-                               merges = list(
+# Recode themes
+excerpts_recoded <- recode(data,
+                               recodes = list(
                                  c_belonging_connectedness = c(
                                    "c_sense_of_belonging", "c_sense_of_belonging_others", "c_sense_of_belonging_self",
                                    "c_sense_of_connectedness", "c_sense_of_connectedness_family",
@@ -154,12 +154,12 @@ excerpts_merged <- merge_codes(data,
                                  c_suicide_comfort = "Suicide Comfort Conversing"
                                ))
 
-data_merged <- excerpts_merged$data
-codebook_merged <- excerpts_merged$codebook
+data_recode <- excerpts_recoded$data_recode
+codebook_recode <- excerpts_recoded$codebook_recode
 
 
 # Create code summary
-create_code_summary <- create_code_summary(data_merged,
+create_code_summary <- create_code_summary(data_recode,
                                            table_min_count = 40,
                                            plot = TRUE,
                                            output_type = "tibble")

@@ -19,8 +19,11 @@ raw Dedoose exports do not include a dedicated ID column. Instead, they arrive
 with transcript metadata, coder names, ranges, weights, and one column per code.
 This vignette walks through a typical workflow—cleaning excerpts, merging related
 codes, and reviewing the underlying text—using three core functions:
-`clean_data()`, `merge_codes()`, and `view_excerpts()`. The mock tibble above
-mirrors that structure so the entire vignette can render without private files.
+`clean_data()`, `recode()`, and `view_excerpts()`. To keep the example fun,
+we follow a fictional qualitative study of a summer music camp exploring how
+drumming circles and songwriting labs support child development. The mock tibble
+below mirrors a Dedoose export so the entire vignette can render without private
+files.
 
 ```{r setup}
 library(DedooseR)
@@ -31,38 +34,51 @@ demo_excerpts <- tribble(
   ~`Media Title`, ~`Excerpt Range`, ~`Excerpt Creator`, ~`Excerpt Date`,
   ~`Excerpt Copy`, ~`Resource Creator`, ~`Resource Date`,
   ~`Codes Applied Combined`,
-  ~`Code: Sense of Belonging & Connectedness Applied`,
-  ~`Code: Sense of Belonging & Connectedness Range`,
-  ~`Code: Sense of Belonging & Connectedness Weight`,
-  ~`Code: Sense of Belonging & Connectedness\\Peers Applied`,
-  ~`Code: Sense of Belonging & Connectedness\\Peers Range`,
-  ~`Code: Sense of Belonging & Connectedness\\Peers Weight`,
-  ~`Code: Long-term Impact Applied`,
-  ~`Code: Long-term Impact Range`,
-  ~`Code: Long-term Impact Weight`,
-  "Interview: Program Launch", "Excerpt 12-56", "Aliyah", as.Date("2023-04-12"),
-    "I finally felt like I belonged with my friends and in my school.",
-    "Staff Team", as.Date("2023-04-01"),
-    "Sense of Belonging & Connectedness",
+  ~`Code: Motor Skills Applied`,
+  ~`Code: Motor Skills Range`,
+  ~`Code: Motor Skills Weight`,
+  ~`Code: Social Skills Applied`,
+  ~`Code: Social Skills Range`,
+  ~`Code: Social Skills Weight`,
+  ~`Code: Self-expression Applied`,
+  ~`Code: Self-expression Range`,
+  ~`Code: Self-expression Weight`,
+  ~`Code: Emotional Regulation Applied`,
+  ~`Code: Emotional Regulation Range`,
+  ~`Code: Emotional Regulation Weight`,
+  ~`Code: Emotion Identification Applied`,
+  ~`Code: Emotion Identification Range`,
+  ~`Code: Emotion Identification Weight`,
+  "Interview: Opening Circle", "Excerpt 12-56", "Aliyah", as.Date("2023-06-10"),
+    "Keeping the djembe rhythm steady made my hands stronger, and pairing up for call-and-response helped the nervous kids giggle and join in.",
+    "Camp Director", as.Date("2023-06-01"),
+    "Motor Skills; Social Skills; Self-expression",
+    "True", "1-2", 1,
     "True", "1-2", 1,
     "True", "1-1", 1,
     "False", NA_character_, NA_real_,
-  "Focus Group: Summer Session", "Excerpt 04-38", "Rohan", as.Date("2023-07-28"),
-    "Staff kept checking in, so staying engaged over summer felt easier.",
-    "Evaluation Lead", as.Date("2023-07-15"),
-    "Sense of Belonging & Connectedness; Long-term Impact",
+    "False", NA_character_, NA_real_,
+  "Focus Group: Rhythm Relay", "Excerpt 04-38", "Rohan", as.Date("2023-07-18"),
+    "During the rhythm relay, we practiced breathing between verses, and campers started naming the moods behind each beat before the next handoff.",
+    "Evaluation Lead", as.Date("2023-07-12"),
+    "Social Skills; Emotional Regulation; Emotion Identification",
+    "False", NA_character_, NA_real_,
+    "True", "2-2", 2,
     "False", NA_character_, NA_real_,
     "True", "2-3", 2,
-    "True", "2-2", 2,
-  "Interview: Alumni Reflections", "Excerpt 77-112", "Aliyah", as.Date("2024-01-08"),
-    "That mentorship still shapes the goals I set for myself.",
+    "True", "2-3", 2,
+  "Interview: Alumni Showcase", "Excerpt 77-112", "Aliyah", as.Date("2024-01-08"),
+    "When I get mad now, I write a hook about it first. It helps me spot the feeling and decide whether I want to shout it or sing it soft.",
     "Alumni Coordinator", as.Date("2023-12-20"),
-    "Long-term Impact",
+    "Self-expression; Emotional Regulation; Emotion Identification",
     "False", NA_character_, NA_real_,
     "False", NA_character_, NA_real_,
+    "True", "4-5", 3,
+    "True", "4-5", 3,
     "True", "4-5", 3
 )
 
+# Take a peeksie! ----------------------------------
 demo_excerpts
 ```
 
@@ -72,11 +88,14 @@ demo_excerpts
 The `clean_data()` function standardizes column names, keeps the highest ranked
 coder per transcript, drops range/weight columns, prefixes code variables with
 `c_`, and returns both the cleaned data and a codebook. Supply the mock data along
-with your preferred coder order. You can optionally rename and relabel variables
+with your preferred coder order. If you have single-coded transcripts, you can simply list all your coders here. You can optionally rename and relabel variables
 at the same time.
 
 ```{r}
+# Define your preferred coders ----------------------------------
 preferred_coders <- c("Aliyah", "Rohan")
+
+# Run the function ----------------------------------
 
 cleaned <- clean_data(
   excerpts = demo_excerpts,
@@ -88,60 +107,64 @@ cleaned <- clean_data(
   )
 )
 
+# Take a peeksie! ----------------------------------
 cleaned$data
 ```
 
-Reviewing the codebook that ships with the cleaned data helps confirm variable
-labels and types before moving on.
+Bonus: this function also produces a codebook, which allows you to get an overview of your data and confirm your variable labels and types before moving on.
 
 ```{r}
 cleaned$codebook
 ```
 
-## 2. Merge related codes with `merge_codes()`
+## 2. Recode related codes with `recode()`
 
-When multiple codes capture the same idea, `merge_codes()` combines them into a
-single logical column and updates the codebook. Here, the general belonging code
-and its peers sub-code are collapsed into one composite while the remaining codes
-stay as-is.
+Qualitative analysis often requires a lot of code iteration. We begin our journey with our research interests in mind, alongside an openness to all else that may emerge. As we understand our data better, we begin to see the patterns in ideas and often decide to tease apart or collapse codes. 
+
+The `recode()` function combines selected codes into a
+single logical column and updates the codebook. Here, the two emotion-focused
+codes are collapsed into one composite while the remaining themes stay as-is. In similar fashion, you can tease apart codes. 
 
 ```{r}
-merged <- merge_codes(
+recoded <- recode(
   data = cleaned$data,
-  merges = list(
-    c_belonging_connectedness = c(
-      "c_sense_of_belonging_connectedness",
-      "c_sense_of_belonging_connectedness_peers"
+  recodes = list(
+    c_emotional_growth = c(
+      "c_emotional_regulation",
+      "c_emotion_identification"
     )
   ),
   relabel_vars = list(
-    c_belonging_connectedness = "Belonging or connectedness mentioned"
+    c_emotional_growth = "Child named or managed their emotions"
   )
 )
 
-merged$data_merged
+recoded$data_recode
 ```
 
 ```{r}
-merged$codebook_merged
+recoded$codebook_recode
 ```
+
+These two objects—`recoded$data_recode` and `recoded$codebook_recode`—are the ones
+we will carry into the follow-up vignette on summarizing codes. Knit this article
+first so they are easy to reuse.
 
 ## 3. Explore excerpts with `view_excerpts()`
 
-Finally, surface the excerpts behind each code. `view_excerpts()` opens an
+Finally, review the excerpts behind each code. `view_excerpts()` opens an
 interactive table powered by `DT`, letting you filter by code and search within
-text. To keep vignette builds stable, the chunk only runs when `DT` is
-available.
+text. 
 
 ```{r}
 if (requireNamespace("DT", quietly = TRUE)) {
-  view_excerpts(merged$data_merged)
+  view_excerpts(recoded$data_recode)
 } else {
   message("Install the DT package to launch the interactive excerpt browser.")
 }
 ```
 
-Replace `demo_excerpts` with your actual export when it is ready—the workflow
-remains the same. Start with `clean_data()` to standardize everything, merge or
-retire codes as your analysis evolves, and lean on `view_excerpts()` whenever
-you want to reconnect with the qualitative stories behind the summaries.
+TLDR: Start with `clean_data()` to standardize variable names and labels, recode variables as you iterate on your codebook, and lean on `view_excerpts()` whenever
+you want to review the excerpts by code stories behind the summaries.
+
+To learn how to create code summaries and visualize them, continue to the *Summarizing Codes* tutorial!

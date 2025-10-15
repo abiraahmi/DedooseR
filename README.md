@@ -69,9 +69,9 @@ clean_data <- clean_data(filepath,
 excerpts <- clean_data$data
 codebook <- clean_data$codebook
 
-# Merge codes
-excerpts_merged <- merge_codes(data,
-                               merges = list(
+# Recode themes
+excerpts_recoded <- recode(data,
+                               recodes = list(
                                  c_belonging_connectedness = c(
                                    "c_sense_of_belonging", "c_sense_of_belonging_others", "c_sense_of_belonging_self",
                                    "c_sense_of_connectedness", "c_sense_of_connectedness_family",
@@ -85,11 +85,11 @@ excerpts_merged <- merge_codes(data,
                                  c_suicide_comfort = "Suicide Comfort Conversing"
                                ))
 
-data_merged <- excerpts_merged$data
-codebook_merged <- excerpts_merged$codebook
+data_recode <- excerpts_recoded$data_recode
+codebook_recode <- excerpts_recoded$codebook_recode
 
 # Create code summary
-create_code_summary <- create_code_summary(data_merged,
+create_code_summary <- create_code_summary(data_recode,
                                     table_min_count = 40,
                                     table_min_prop = 0.25,
                                     plot = TRUE,
@@ -131,7 +131,7 @@ wordcloud(excerpts, "c_knowledge_awareness",
          custom_stopwords = c("racall", "stuff", "everyone's"))
 
 # Create matrix, set threshold and plot
-cooccur_01 <- cooccur(data_merged,
+cooccur_01 <- cooccur(data_recode,
               matrix_threshold = 15)
 cooccur_01$matrix
 cooccur_01$plot
@@ -151,5 +151,4 @@ Small, M. L., & Calarco, J. M. (2022). Qualitative Literacy: A Guide to
 Evaluating
 Ethnographic and Interview Research (1st ed.). University of California Press. 
 https://doi.org/10.2307/j.ctv2vr9c4x 
-
 
