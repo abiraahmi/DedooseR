@@ -51,6 +51,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/Intro_to_DedooseR.html">Cleaning, Merging, and Exploring Qualitative Data</a></li>
+    <li><a class="dropdown-item" href="../articles/Summarizing-Codes.html">Summarizing-Codes</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -90,9 +91,11 @@ Instead, they arrive with transcript metadata, coder names, ranges,
 weights, and one column per code. This vignette walks through a typical
 workflow—cleaning excerpts, merging related codes, and reviewing the
 underlying text—using three core functions: <code><a href="../reference/clean_data.html">clean_data()</a></code>,
-<code><a href="../reference/merge_codes.html">merge_codes()</a></code>, and <code><a href="../reference/view_excerpts.html">view_excerpts()</a></code>. The mock
-tibble above mirrors that structure so the entire vignette can render
-without private files.</p>
+<code><a href="../reference/recode.html">recode()</a></code>, and <code><a href="../reference/view_excerpts.html">view_excerpts()</a></code>. To keep the
+example fun, we follow a fictional qualitative study of a summer music
+camp exploring how drumming circles and songwriting labs support child
+development. The mock tibble below mirrors a Dedoose export so the
+entire vignette can render without private files.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abiraahmi.github.io/DedooseR">DedooseR</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span>
@@ -102,52 +105,65 @@ without private files.</p>
 <span>  <span class="op">~</span><span class="va">`Media Title`</span>, <span class="op">~</span><span class="va">`Excerpt Range`</span>, <span class="op">~</span><span class="va">`Excerpt Creator`</span>, <span class="op">~</span><span class="va">`Excerpt Date`</span>,</span>
 <span>  <span class="op">~</span><span class="va">`Excerpt Copy`</span>, <span class="op">~</span><span class="va">`Resource Creator`</span>, <span class="op">~</span><span class="va">`Resource Date`</span>,</span>
 <span>  <span class="op">~</span><span class="va">`Codes Applied Combined`</span>,</span>
-<span>  <span class="op">~</span><span class="va">`Code: Sense of Belonging &amp; Connectedness Applied`</span>,</span>
-<span>  <span class="op">~</span><span class="va">`Code: Sense of Belonging &amp; Connectedness Range`</span>,</span>
-<span>  <span class="op">~</span><span class="va">`Code: Sense of Belonging &amp; Connectedness Weight`</span>,</span>
-<span>  <span class="op">~</span><span class="va">`Code: Sense of Belonging &amp; Connectedness\\Peers Applied`</span>,</span>
-<span>  <span class="op">~</span><span class="va">`Code: Sense of Belonging &amp; Connectedness\\Peers Range`</span>,</span>
-<span>  <span class="op">~</span><span class="va">`Code: Sense of Belonging &amp; Connectedness\\Peers Weight`</span>,</span>
-<span>  <span class="op">~</span><span class="va">`Code: Long-term Impact Applied`</span>,</span>
-<span>  <span class="op">~</span><span class="va">`Code: Long-term Impact Range`</span>,</span>
-<span>  <span class="op">~</span><span class="va">`Code: Long-term Impact Weight`</span>,</span>
-<span>  <span class="st">"Interview: Program Launch"</span>, <span class="st">"Excerpt 12-56"</span>, <span class="st">"Aliyah"</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2023-04-12"</span><span class="op">)</span>,</span>
-<span>    <span class="st">"I finally felt like I belonged with my friends and in my school."</span>,</span>
-<span>    <span class="st">"Staff Team"</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2023-04-01"</span><span class="op">)</span>,</span>
-<span>    <span class="st">"Sense of Belonging &amp; Connectedness"</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Motor Skills Applied`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Motor Skills Range`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Motor Skills Weight`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Social Skills Applied`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Social Skills Range`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Social Skills Weight`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Self-expression Applied`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Self-expression Range`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Self-expression Weight`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Emotional Regulation Applied`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Emotional Regulation Range`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Emotional Regulation Weight`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Emotion Identification Applied`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Emotion Identification Range`</span>,</span>
+<span>  <span class="op">~</span><span class="va">`Code: Emotion Identification Weight`</span>,</span>
+<span>  <span class="st">"Interview: Opening Circle"</span>, <span class="st">"Excerpt 12-56"</span>, <span class="st">"Aliyah"</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2023-06-10"</span><span class="op">)</span>,</span>
+<span>    <span class="st">"Keeping the djembe rhythm steady made my hands stronger, and pairing up for call-and-response helped the nervous kids giggle and join in."</span>,</span>
+<span>    <span class="st">"Camp Director"</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2023-06-01"</span><span class="op">)</span>,</span>
+<span>    <span class="st">"Motor Skills; Social Skills; Self-expression"</span>,</span>
+<span>    <span class="st">"True"</span>, <span class="st">"1-2"</span>, <span class="fl">1</span>,</span>
 <span>    <span class="st">"True"</span>, <span class="st">"1-2"</span>, <span class="fl">1</span>,</span>
 <span>    <span class="st">"True"</span>, <span class="st">"1-1"</span>, <span class="fl">1</span>,</span>
 <span>    <span class="st">"False"</span>, <span class="cn">NA_character_</span>, <span class="cn">NA_real_</span>,</span>
-<span>  <span class="st">"Focus Group: Summer Session"</span>, <span class="st">"Excerpt 04-38"</span>, <span class="st">"Rohan"</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2023-07-28"</span><span class="op">)</span>,</span>
-<span>    <span class="st">"Staff kept checking in, so staying engaged over summer felt easier."</span>,</span>
-<span>    <span class="st">"Evaluation Lead"</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2023-07-15"</span><span class="op">)</span>,</span>
-<span>    <span class="st">"Sense of Belonging &amp; Connectedness; Long-term Impact"</span>,</span>
+<span>    <span class="st">"False"</span>, <span class="cn">NA_character_</span>, <span class="cn">NA_real_</span>,</span>
+<span>  <span class="st">"Focus Group: Rhythm Relay"</span>, <span class="st">"Excerpt 04-38"</span>, <span class="st">"Rohan"</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2023-07-18"</span><span class="op">)</span>,</span>
+<span>    <span class="st">"During the rhythm relay, we practiced breathing between verses, and campers started naming the moods behind each beat before the next handoff."</span>,</span>
+<span>    <span class="st">"Evaluation Lead"</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2023-07-12"</span><span class="op">)</span>,</span>
+<span>    <span class="st">"Social Skills; Emotional Regulation; Emotion Identification"</span>,</span>
+<span>    <span class="st">"False"</span>, <span class="cn">NA_character_</span>, <span class="cn">NA_real_</span>,</span>
+<span>    <span class="st">"True"</span>, <span class="st">"2-2"</span>, <span class="fl">2</span>,</span>
 <span>    <span class="st">"False"</span>, <span class="cn">NA_character_</span>, <span class="cn">NA_real_</span>,</span>
 <span>    <span class="st">"True"</span>, <span class="st">"2-3"</span>, <span class="fl">2</span>,</span>
-<span>    <span class="st">"True"</span>, <span class="st">"2-2"</span>, <span class="fl">2</span>,</span>
-<span>  <span class="st">"Interview: Alumni Reflections"</span>, <span class="st">"Excerpt 77-112"</span>, <span class="st">"Aliyah"</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-01-08"</span><span class="op">)</span>,</span>
-<span>    <span class="st">"That mentorship still shapes the goals I set for myself."</span>,</span>
+<span>    <span class="st">"True"</span>, <span class="st">"2-3"</span>, <span class="fl">2</span>,</span>
+<span>  <span class="st">"Interview: Alumni Showcase"</span>, <span class="st">"Excerpt 77-112"</span>, <span class="st">"Aliyah"</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-01-08"</span><span class="op">)</span>,</span>
+<span>    <span class="st">"When I get mad now, I write a hook about it first. It helps me spot the feeling and decide whether I want to shout it or sing it soft."</span>,</span>
 <span>    <span class="st">"Alumni Coordinator"</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2023-12-20"</span><span class="op">)</span>,</span>
-<span>    <span class="st">"Long-term Impact"</span>,</span>
+<span>    <span class="st">"Self-expression; Emotional Regulation; Emotion Identification"</span>,</span>
 <span>    <span class="st">"False"</span>, <span class="cn">NA_character_</span>, <span class="cn">NA_real_</span>,</span>
 <span>    <span class="st">"False"</span>, <span class="cn">NA_character_</span>, <span class="cn">NA_real_</span>,</span>
+<span>    <span class="st">"True"</span>, <span class="st">"4-5"</span>, <span class="fl">3</span>,</span>
+<span>    <span class="st">"True"</span>, <span class="st">"4-5"</span>, <span class="fl">3</span>,</span>
 <span>    <span class="st">"True"</span>, <span class="st">"4-5"</span>, <span class="fl">3</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Take a peeksie! ----------------------------------</span></span>
 <span><span class="va">demo_excerpts</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 17</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 23</span></span></span>
 <span><span class="co">#&gt;   `Media Title`  `Excerpt Range` `Excerpt Creator` `Excerpt Date` `Excerpt Copy`</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Interview: Pr… Excerpt 12-56   Aliyah            2023-04-12     I finally fel…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Focus Group: … Excerpt 04-38   Rohan             2023-07-28     Staff kept ch…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Interview: Al… Excerpt 77-112  Aliyah            2024-01-08     That mentorsh…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more variables: `Resource Creator` &lt;chr&gt;, `Resource Date` &lt;date&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   `Codes Applied Combined` &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   `Code: Sense of Belonging &amp; Connectedness Applied` &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   `Code: Sense of Belonging &amp; Connectedness Range` &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   `Code: Sense of Belonging &amp; Connectedness Weight` &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   `Code: Sense of Belonging &amp; Connectedness\\Peers Applied` &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   `Code: Sense of Belonging &amp; Connectedness\\Peers Range` &lt;chr&gt;, …</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Interview: Op… Excerpt 12-56   Aliyah            2023-06-10     Keeping the d…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Focus Group: … Excerpt 04-38   Rohan             2023-07-18     During the rh…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Interview: Al… Excerpt 77-112  Aliyah            2024-01-08     When I get ma…</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 18 more variables: `Resource Creator` &lt;chr&gt;, `Resource Date` &lt;date&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   `Codes Applied Combined` &lt;chr&gt;, `Code: Motor Skills Applied` &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   `Code: Motor Skills Range` &lt;chr&gt;, `Code: Motor Skills Weight` &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   `Code: Social Skills Applied` &lt;chr&gt;, `Code: Social Skills Range` &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   `Code: Social Skills Weight` &lt;dbl&gt;, `Code: Self-expression Applied` &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   `Code: Self-expression Range` &lt;chr&gt;, `Code: Self-expression Weight` &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   `Code: Emotional Regulation Applied` &lt;chr&gt;, …</span></span></span></code></pre></div>
 <div class="section level2">
 <h2 id="clean-excerpts-with-clean_data">1. Clean excerpts with <code>clean_data()</code><a class="anchor" aria-label="anchor" href="#clean-excerpts-with-clean_data"></a>
 </h2>
@@ -155,10 +171,14 @@ without private files.</p>
 keeps the highest ranked coder per transcript, drops range/weight
 columns, prefixes code variables with <code>c_</code>, and returns both
 the cleaned data and a codebook. Supply the mock data along with your
-preferred coder order. You can optionally rename and relabel variables
-at the same time.</p>
+preferred coder order. If you have single-coded transcripts, you can
+simply list all your coders here. You can optionally rename and relabel
+variables at the same time.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">preferred_coders</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Aliyah"</span>, <span class="st">"Rohan"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Define your preferred coders ----------------------------------</span></span>
+<span><span class="va">preferred_coders</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Aliyah"</span>, <span class="st">"Rohan"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Run the function ----------------------------------</span></span>
 <span></span>
 <span><span class="va">cleaned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clean_data.html">clean_data</a></span><span class="op">(</span></span>
 <span>  excerpts <span class="op">=</span> <span class="va">demo_excerpts</span>,</span>
@@ -170,145 +190,168 @@ at the same time.</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Take a peeksie! ----------------------------------</span></span>
 <span><span class="va">cleaned</span><span class="op">$</span><span class="va">data</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 11</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 13</span></span></span>
 <span><span class="co">#&gt;   media_title excerpt_creator excerpt_date excerpt resource_author resource_date</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Interview:… Aliyah          2023-04-12   I fina… Staff Team      2023-04-01   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Focus Grou… Rohan           2023-07-28   Staff … Evaluation Lead 2023-07-15   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Interview:… Aliyah          2024-01-08   That m… Alumni Coordin… 2023-12-20   </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: codes_applied_combined &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   c_sense_of_belonging_connectedness &lt;lgl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   c_sense_of_belonging_connectedness_peers &lt;lgl&gt;, c_long_term_impact &lt;lgl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Interview:… Aliyah          2023-06-10   Keepin… Camp Director   2023-06-01   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Focus Grou… Rohan           2023-07-18   During… Evaluation Lead 2023-07-12   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Interview:… Aliyah          2024-01-08   When I… Alumni Coordin… 2023-12-20   </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: codes_applied_combined &lt;chr&gt;, c_motor_skills &lt;lgl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   c_social_skills &lt;lgl&gt;, c_self_expression &lt;lgl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   c_emotional_regulation &lt;lgl&gt;, c_emotion_identification &lt;lgl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   coder_rank &lt;int&gt;</span></span></span></code></pre></div>
-<p>Reviewing the codebook that ships with the cleaned data helps confirm
-variable labels and types before moving on.</p>
+<p>Bonus: this function also produces a codebook, which allows you to
+get an overview of your data and confirm your variable labels and types
+before moving on.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cleaned</span><span class="op">$</span><span class="va">codebook</span></span>
-<span><span class="co">#&gt;                                                                          variable</span></span>
-<span><span class="co">#&gt; media_title                                                           media_title</span></span>
-<span><span class="co">#&gt; excerpt_creator                                                   excerpt_creator</span></span>
-<span><span class="co">#&gt; excerpt_date                                                         excerpt_date</span></span>
-<span><span class="co">#&gt; excerpt                                                                   excerpt</span></span>
-<span><span class="co">#&gt; resource_author                                                   resource_author</span></span>
-<span><span class="co">#&gt; resource_date                                                       resource_date</span></span>
-<span><span class="co">#&gt; codes_applied_combined                                     codes_applied_combined</span></span>
-<span><span class="co">#&gt; c_sense_of_belonging_connectedness             c_sense_of_belonging_connectedness</span></span>
-<span><span class="co">#&gt; c_sense_of_belonging_connectedness_peers c_sense_of_belonging_connectedness_peers</span></span>
-<span><span class="co">#&gt; c_long_term_impact                                             c_long_term_impact</span></span>
-<span><span class="co">#&gt; coder_rank                                                             coder_rank</span></span>
-<span><span class="co">#&gt;                                                                                        label</span></span>
-<span><span class="co">#&gt; media_title                                                   Interview or focus group title</span></span>
-<span><span class="co">#&gt; excerpt_creator                                                coder who created the excerpt</span></span>
-<span><span class="co">#&gt; excerpt_date                                                        date excerpt was created</span></span>
-<span><span class="co">#&gt; excerpt                                                                 full text of excerpt</span></span>
-<span><span class="co">#&gt; resource_author                                          Team member who uploaded to Dedoose</span></span>
-<span><span class="co">#&gt; resource_date                                     date media/transcript was added to Dedoose</span></span>
-<span><span class="co">#&gt; codes_applied_combined                                          all codes applied to excerpt</span></span>
-<span><span class="co">#&gt; c_sense_of_belonging_connectedness                        sense of belonging &amp; connectedness</span></span>
-<span><span class="co">#&gt; c_sense_of_belonging_connectedness_peers           sense of belonging &amp; connectedness\\peers</span></span>
-<span><span class="co">#&gt; c_long_term_impact                                                          long-term impact</span></span>
-<span><span class="co">#&gt; coder_rank                               rank of coder, according to listed coder preference</span></span>
-<span><span class="co">#&gt;                                               type</span></span>
-<span><span class="co">#&gt; media_title                              character</span></span>
-<span><span class="co">#&gt; excerpt_creator                          character</span></span>
-<span><span class="co">#&gt; excerpt_date                                  Date</span></span>
-<span><span class="co">#&gt; excerpt                                  character</span></span>
-<span><span class="co">#&gt; resource_author                          character</span></span>
-<span><span class="co">#&gt; resource_date                                 Date</span></span>
-<span><span class="co">#&gt; codes_applied_combined                   character</span></span>
-<span><span class="co">#&gt; c_sense_of_belonging_connectedness         logical</span></span>
-<span><span class="co">#&gt; c_sense_of_belonging_connectedness_peers   logical</span></span>
-<span><span class="co">#&gt; c_long_term_impact                         logical</span></span>
-<span><span class="co">#&gt; coder_rank                                 integer</span></span></code></pre></div>
+<span><span class="co">#&gt;                                          variable</span></span>
+<span><span class="co">#&gt; media_title                           media_title</span></span>
+<span><span class="co">#&gt; excerpt_creator                   excerpt_creator</span></span>
+<span><span class="co">#&gt; excerpt_date                         excerpt_date</span></span>
+<span><span class="co">#&gt; excerpt                                   excerpt</span></span>
+<span><span class="co">#&gt; resource_author                   resource_author</span></span>
+<span><span class="co">#&gt; resource_date                       resource_date</span></span>
+<span><span class="co">#&gt; codes_applied_combined     codes_applied_combined</span></span>
+<span><span class="co">#&gt; c_motor_skills                     c_motor_skills</span></span>
+<span><span class="co">#&gt; c_social_skills                   c_social_skills</span></span>
+<span><span class="co">#&gt; c_self_expression               c_self_expression</span></span>
+<span><span class="co">#&gt; c_emotional_regulation     c_emotional_regulation</span></span>
+<span><span class="co">#&gt; c_emotion_identification c_emotion_identification</span></span>
+<span><span class="co">#&gt; coder_rank                             coder_rank</span></span>
+<span><span class="co">#&gt;                                                                        label</span></span>
+<span><span class="co">#&gt; media_title                                   Interview or focus group title</span></span>
+<span><span class="co">#&gt; excerpt_creator                                coder who created the excerpt</span></span>
+<span><span class="co">#&gt; excerpt_date                                        date excerpt was created</span></span>
+<span><span class="co">#&gt; excerpt                                                 full text of excerpt</span></span>
+<span><span class="co">#&gt; resource_author                          Team member who uploaded to Dedoose</span></span>
+<span><span class="co">#&gt; resource_date                     date media/transcript was added to Dedoose</span></span>
+<span><span class="co">#&gt; codes_applied_combined                          all codes applied to excerpt</span></span>
+<span><span class="co">#&gt; c_motor_skills                                                  motor skills</span></span>
+<span><span class="co">#&gt; c_social_skills                                                social skills</span></span>
+<span><span class="co">#&gt; c_self_expression                                            self-expression</span></span>
+<span><span class="co">#&gt; c_emotional_regulation                                  emotional regulation</span></span>
+<span><span class="co">#&gt; c_emotion_identification                              emotion identification</span></span>
+<span><span class="co">#&gt; coder_rank               rank of coder, according to listed coder preference</span></span>
+<span><span class="co">#&gt;                               type</span></span>
+<span><span class="co">#&gt; media_title              character</span></span>
+<span><span class="co">#&gt; excerpt_creator          character</span></span>
+<span><span class="co">#&gt; excerpt_date                  Date</span></span>
+<span><span class="co">#&gt; excerpt                  character</span></span>
+<span><span class="co">#&gt; resource_author          character</span></span>
+<span><span class="co">#&gt; resource_date                 Date</span></span>
+<span><span class="co">#&gt; codes_applied_combined   character</span></span>
+<span><span class="co">#&gt; c_motor_skills             logical</span></span>
+<span><span class="co">#&gt; c_social_skills            logical</span></span>
+<span><span class="co">#&gt; c_self_expression          logical</span></span>
+<span><span class="co">#&gt; c_emotional_regulation     logical</span></span>
+<span><span class="co">#&gt; c_emotion_identification   logical</span></span>
+<span><span class="co">#&gt; coder_rank                 integer</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="merge-related-codes-with-merge_codes">2. Merge related codes with <code>merge_codes()</code><a class="anchor" aria-label="anchor" href="#merge-related-codes-with-merge_codes"></a>
+<h2 id="recode-related-codes-with-recode">2. Recode related codes with <code>recode()</code><a class="anchor" aria-label="anchor" href="#recode-related-codes-with-recode"></a>
 </h2>
-<p>When multiple codes capture the same idea, <code><a href="../reference/merge_codes.html">merge_codes()</a></code>
-combines them into a single logical column and updates the codebook.
-Here, the general belonging code and its peers sub-code are collapsed
-into one composite while the remaining codes stay as-is.</p>
+<p>Qualitative analysis often requires a lot of code iteration. We begin
+our journey with our research interests in mind, alongside an openness
+to all else that may emerge. As we understand our data better, we begin
+to see the patterns in ideas and often decide to tease apart or collapse
+codes.</p>
+<p>The <code><a href="../reference/recode.html">recode()</a></code> function combines selected codes into a
+single logical column and updates the codebook. Here, the two
+emotion-focused codes are collapsed into one composite while the
+remaining themes stay as-is. In similar fashion, you can tease apart
+codes.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">merged</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/merge_codes.html">merge_codes</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">recoded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/recode.html">recode</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">cleaned</span><span class="op">$</span><span class="va">data</span>,</span>
-<span>  merges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    c_belonging_connectedness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>      <span class="st">"c_sense_of_belonging_connectedness"</span>,</span>
-<span>      <span class="st">"c_sense_of_belonging_connectedness_peers"</span></span>
+<span>  recodes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    c_emotional_growth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"c_emotional_regulation"</span>,</span>
+<span>      <span class="st">"c_emotion_identification"</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  relabel_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    c_belonging_connectedness <span class="op">=</span> <span class="st">"Belonging or connectedness mentioned"</span></span>
+<span>    c_emotional_growth <span class="op">=</span> <span class="st">"Child named or managed their emotions"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">merged</span><span class="op">$</span><span class="va">data_merged</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 10</span></span></span>
+<span><span class="va">recoded</span><span class="op">$</span><span class="va">data_recode</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 12</span></span></span>
 <span><span class="co">#&gt;   media_title excerpt_creator excerpt_date excerpt resource_author resource_date</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Interview:… Aliyah          2023-04-12   I fina… Staff Team      2023-04-01   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Focus Grou… Rohan           2023-07-28   Staff … Evaluation Lead 2023-07-15   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Interview:… Aliyah          2024-01-08   That m… Alumni Coordin… 2023-12-20   </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: codes_applied_combined &lt;chr&gt;, c_long_term_impact &lt;lgl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   coder_rank &lt;int&gt;, c_belonging_connectedness &lt;lgl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Interview:… Aliyah          2023-06-10   Keepin… Camp Director   2023-06-01   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Focus Grou… Rohan           2023-07-18   During… Evaluation Lead 2023-07-12   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Interview:… Aliyah          2024-01-08   When I… Alumni Coordin… 2023-12-20   </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: codes_applied_combined &lt;chr&gt;, c_motor_skills &lt;lgl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   c_social_skills &lt;lgl&gt;, c_self_expression &lt;lgl&gt;, coder_rank &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   c_emotional_growth &lt;lgl&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">merged</span><span class="op">$</span><span class="va">codebook_merged</span></span>
-<span><span class="co">#&gt;                                            variable</span></span>
-<span><span class="co">#&gt; media_title                             media_title</span></span>
-<span><span class="co">#&gt; excerpt_creator                     excerpt_creator</span></span>
-<span><span class="co">#&gt; excerpt_date                           excerpt_date</span></span>
-<span><span class="co">#&gt; excerpt                                     excerpt</span></span>
-<span><span class="co">#&gt; resource_author                     resource_author</span></span>
-<span><span class="co">#&gt; resource_date                         resource_date</span></span>
-<span><span class="co">#&gt; codes_applied_combined       codes_applied_combined</span></span>
-<span><span class="co">#&gt; c_long_term_impact               c_long_term_impact</span></span>
-<span><span class="co">#&gt; coder_rank                               coder_rank</span></span>
-<span><span class="co">#&gt; c_belonging_connectedness c_belonging_connectedness</span></span>
-<span><span class="co">#&gt;                                                                         label</span></span>
-<span><span class="co">#&gt; media_title                                    Interview or focus group title</span></span>
-<span><span class="co">#&gt; excerpt_creator                                 coder who created the excerpt</span></span>
-<span><span class="co">#&gt; excerpt_date                                         date excerpt was created</span></span>
-<span><span class="co">#&gt; excerpt                                                  full text of excerpt</span></span>
-<span><span class="co">#&gt; resource_author                           Team member who uploaded to Dedoose</span></span>
-<span><span class="co">#&gt; resource_date                      date media/transcript was added to Dedoose</span></span>
-<span><span class="co">#&gt; codes_applied_combined                           all codes applied to excerpt</span></span>
-<span><span class="co">#&gt; c_long_term_impact                                           long-term impact</span></span>
-<span><span class="co">#&gt; coder_rank                rank of coder, according to listed coder preference</span></span>
-<span><span class="co">#&gt; c_belonging_connectedness                Belonging or connectedness mentioned</span></span>
-<span><span class="co">#&gt;                                type</span></span>
-<span><span class="co">#&gt; media_title               character</span></span>
-<span><span class="co">#&gt; excerpt_creator           character</span></span>
-<span><span class="co">#&gt; excerpt_date                   Date</span></span>
-<span><span class="co">#&gt; excerpt                   character</span></span>
-<span><span class="co">#&gt; resource_author           character</span></span>
-<span><span class="co">#&gt; resource_date                  Date</span></span>
-<span><span class="co">#&gt; codes_applied_combined    character</span></span>
-<span><span class="co">#&gt; c_long_term_impact          logical</span></span>
-<span><span class="co">#&gt; coder_rank                  integer</span></span>
-<span><span class="co">#&gt; c_belonging_connectedness   logical</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">recoded</span><span class="op">$</span><span class="va">codebook_recode</span></span>
+<span><span class="co">#&gt;                                      variable</span></span>
+<span><span class="co">#&gt; media_title                       media_title</span></span>
+<span><span class="co">#&gt; excerpt_creator               excerpt_creator</span></span>
+<span><span class="co">#&gt; excerpt_date                     excerpt_date</span></span>
+<span><span class="co">#&gt; excerpt                               excerpt</span></span>
+<span><span class="co">#&gt; resource_author               resource_author</span></span>
+<span><span class="co">#&gt; resource_date                   resource_date</span></span>
+<span><span class="co">#&gt; codes_applied_combined codes_applied_combined</span></span>
+<span><span class="co">#&gt; c_motor_skills                 c_motor_skills</span></span>
+<span><span class="co">#&gt; c_social_skills               c_social_skills</span></span>
+<span><span class="co">#&gt; c_self_expression           c_self_expression</span></span>
+<span><span class="co">#&gt; coder_rank                         coder_rank</span></span>
+<span><span class="co">#&gt; c_emotional_growth         c_emotional_growth</span></span>
+<span><span class="co">#&gt;                                                                      label</span></span>
+<span><span class="co">#&gt; media_title                                 Interview or focus group title</span></span>
+<span><span class="co">#&gt; excerpt_creator                              coder who created the excerpt</span></span>
+<span><span class="co">#&gt; excerpt_date                                      date excerpt was created</span></span>
+<span><span class="co">#&gt; excerpt                                               full text of excerpt</span></span>
+<span><span class="co">#&gt; resource_author                        Team member who uploaded to Dedoose</span></span>
+<span><span class="co">#&gt; resource_date                   date media/transcript was added to Dedoose</span></span>
+<span><span class="co">#&gt; codes_applied_combined                        all codes applied to excerpt</span></span>
+<span><span class="co">#&gt; c_motor_skills                                                motor skills</span></span>
+<span><span class="co">#&gt; c_social_skills                                              social skills</span></span>
+<span><span class="co">#&gt; c_self_expression                                          self-expression</span></span>
+<span><span class="co">#&gt; coder_rank             rank of coder, according to listed coder preference</span></span>
+<span><span class="co">#&gt; c_emotional_growth                   Child named or managed their emotions</span></span>
+<span><span class="co">#&gt;                             type</span></span>
+<span><span class="co">#&gt; media_title            character</span></span>
+<span><span class="co">#&gt; excerpt_creator        character</span></span>
+<span><span class="co">#&gt; excerpt_date                Date</span></span>
+<span><span class="co">#&gt; excerpt                character</span></span>
+<span><span class="co">#&gt; resource_author        character</span></span>
+<span><span class="co">#&gt; resource_date               Date</span></span>
+<span><span class="co">#&gt; codes_applied_combined character</span></span>
+<span><span class="co">#&gt; c_motor_skills           logical</span></span>
+<span><span class="co">#&gt; c_social_skills          logical</span></span>
+<span><span class="co">#&gt; c_self_expression        logical</span></span>
+<span><span class="co">#&gt; coder_rank               integer</span></span>
+<span><span class="co">#&gt; c_emotional_growth       logical</span></span></code></pre></div>
+<p>These two objects—<code>recoded$data_recode</code> and
+<code>recoded$codebook_recode</code>—are the ones we will carry into the
+follow-up vignette on summarizing codes. Knit this article first so they
+are easy to reuse.</p>
 </div>
 <div class="section level2">
 <h2 id="explore-excerpts-with-view_excerpts">3. Explore excerpts with <code>view_excerpts()</code><a class="anchor" aria-label="anchor" href="#explore-excerpts-with-view_excerpts"></a>
 </h2>
-<p>Finally, surface the excerpts behind each code.
+<p>Finally, review the excerpts behind each code.
 <code><a href="../reference/view_excerpts.html">view_excerpts()</a></code> opens an interactive table powered by
-<code>DT</code>, letting you filter by code and search within text. To
-keep vignette builds stable, the chunk only runs when <code>DT</code> is
-available.</p>
+<code>DT</code>, letting you filter by code and search within text.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"DT"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="../reference/view_excerpts.html">view_excerpts</a></span><span class="op">(</span><span class="va">merged</span><span class="op">$</span><span class="va">data_merged</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="../reference/view_excerpts.html">view_excerpts</a></span><span class="op">(</span><span class="va">recoded</span><span class="op">$</span><span class="va">data_recode</span><span class="op">)</span></span>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Install the DT package to launch the interactive excerpt browser."</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <div class="datatables html-widget html-fill-item" id="htmlwidget-ac96cb3ee4656e2e9ec3" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["Belonging or connectedness mentioned","long-term impact","Belonging or connectedness mentioned","long-term impact"],["I finally felt like I belonged with my friends and in my school.","Staff kept checking in, so staying engaged over summer felt easier.","Staff kept checking in, so staying engaged over summer felt easier.","That mentorship still shapes the goals I set for myself."]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Code<\/th>\n      <th>Excerpt<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"autoWidth":false,"columnDefs":[{"width":"150px","targets":0},{"width":"600px","targets":1},{"name":"code","targets":0},{"name":"excerpt","targets":1}],"initComplete":"function(settings, json) {\n  this.api().columns([0]).every(function() {\n    var column = this;\n    var select = $('<select><option value=\"\"><\/option><\/select>')\n      .css('margin-top', '5px')\n      .appendTo($(column.header()))\n      .on('change', function() {\n        var val = $.fn.dataTable.util.escapeRegex($(this).val());\n        column.search(val ? '^' + val + '$' : '', true, false).draw();\n      });\n    column.data().unique().sort().each(function(d, j) {\n      select.append('<option value=\"' + d + '\">' + d + '<\/option>');\n    });\n  });\n}","headerCallback":"function(thead, data, start, end, display) {\n        $(thead).find(\"th\").css(\"background-color\", \"#330662\").css(\"color\", \"white\");\n      }","order":[],"orderClasses":false,"orderCellsTop":true,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[0]; $(this.api().cell(row, 0).node()).css({'white-space':'nowrap'});\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'white-space':'normal','word-break':'break-word'});\n}"}},"evals":["options.initComplete","options.headerCallback","options.rowCallback"],"jsHooks":[]}</script><p>Replace <code>demo_excerpts</code> with your actual export when it is
-ready—the workflow remains the same. Start with
-<code><a href="../reference/clean_data.html">clean_data()</a></code> to standardize everything, merge or retire
-codes as your analysis evolves, and lean on <code><a href="../reference/view_excerpts.html">view_excerpts()</a></code>
-whenever you want to reconnect with the qualitative stories behind the
-summaries.</p>
+<script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["motor skills","social skills","self-expression","social skills","Child named or managed their emotions","self-expression","Child named or managed their emotions"],["Keeping the djembe rhythm steady made my hands stronger, and pairing up for call-and-response helped the nervous kids giggle and join in.","Keeping the djembe rhythm steady made my hands stronger, and pairing up for call-and-response helped the nervous kids giggle and join in.","Keeping the djembe rhythm steady made my hands stronger, and pairing up for call-and-response helped the nervous kids giggle and join in.","During the rhythm relay, we practiced breathing between verses, and campers started naming the moods behind each beat before the next handoff.","During the rhythm relay, we practiced breathing between verses, and campers started naming the moods behind each beat before the next handoff.","When I get mad now, I write a hook about it first. It helps me spot the feeling and decide whether I want to shout it or sing it soft.","When I get mad now, I write a hook about it first. It helps me spot the feeling and decide whether I want to shout it or sing it soft."]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Code<\/th>\n      <th>Excerpt<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"autoWidth":false,"columnDefs":[{"width":"150px","targets":0},{"width":"600px","targets":1},{"name":"code","targets":0},{"name":"excerpt","targets":1}],"initComplete":"function(settings, json) {\n  this.api().columns([0]).every(function() {\n    var column = this;\n    var select = $('<select><option value=\"\"><\/option><\/select>')\n      .css('margin-top', '5px')\n      .appendTo($(column.header()))\n      .on('change', function() {\n        var val = $.fn.dataTable.util.escapeRegex($(this).val());\n        column.search(val ? '^' + val + '$' : '', true, false).draw();\n      });\n    column.data().unique().sort().each(function(d, j) {\n      select.append('<option value=\"' + d + '\">' + d + '<\/option>');\n    });\n  });\n}","headerCallback":"function(thead, data, start, end, display) {\n        $(thead).find(\"th\").css(\"background-color\", \"#330662\").css(\"color\", \"white\");\n      }","order":[],"orderClasses":false,"orderCellsTop":true,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[0]; $(this.api().cell(row, 0).node()).css({'white-space':'nowrap'});\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'white-space':'normal','word-break':'break-word'});\n}"}},"evals":["options.initComplete","options.headerCallback","options.rowCallback"],"jsHooks":[]}</script><p>TLDR: Start with <code><a href="../reference/clean_data.html">clean_data()</a></code> to standardize variable
+names and labels, recode variables as you iterate on your codebook, and
+lean on <code><a href="../reference/view_excerpts.html">view_excerpts()</a></code> whenever you want to review the
+excerpts by code stories behind the summaries.</p>
+<p>To learn how to create code summaries and visualize them, continue to
+the <em>Summarizing Codes</em> tutorial!</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

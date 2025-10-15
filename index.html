@@ -55,6 +55,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/Intro_to_DedooseR.html">Cleaning, Merging, and Exploring Qualitative Data</a></li>
+    <li><a class="dropdown-item" href="articles/Summarizing-Codes.html">Summarizing-Codes</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -134,9 +135,9 @@
 <span><span class="va">excerpts</span> <span class="op">&lt;-</span> <span class="va">clean_data</span><span class="op">$</span><span class="va">data</span></span>
 <span><span class="va">codebook</span> <span class="op">&lt;-</span> <span class="va">clean_data</span><span class="op">$</span><span class="va">codebook</span></span>
 <span></span>
-<span><span class="co"># Merge codes</span></span>
-<span><span class="va">excerpts_merged</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/merge_codes.html">merge_codes</a></span><span class="op">(</span><span class="va">data</span>,</span>
-<span>                               merges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span><span class="co"># Recode themes</span></span>
+<span><span class="va">excerpts_recoded</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/recode.html">recode</a></span><span class="op">(</span><span class="va">data</span>,</span>
+<span>                               recodes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>                                 c_belonging_connectedness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>                                   <span class="st">"c_sense_of_belonging"</span>, <span class="st">"c_sense_of_belonging_others"</span>, <span class="st">"c_sense_of_belonging_self"</span>,</span>
 <span>                                   <span class="st">"c_sense_of_connectedness"</span>, <span class="st">"c_sense_of_connectedness_family"</span>,</span>
@@ -150,11 +151,11 @@
 <span>                                 c_suicide_comfort <span class="op">=</span> <span class="st">"Suicide Comfort Conversing"</span></span>
 <span>                               <span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">data_merged</span> <span class="op">&lt;-</span> <span class="va">excerpts_merged</span><span class="op">$</span><span class="va">data</span></span>
-<span><span class="va">codebook_merged</span> <span class="op">&lt;-</span> <span class="va">excerpts_merged</span><span class="op">$</span><span class="va">codebook</span></span>
+<span><span class="va">data_recode</span> <span class="op">&lt;-</span> <span class="va">excerpts_recoded</span><span class="op">$</span><span class="va">data_recode</span></span>
+<span><span class="va">codebook_recode</span> <span class="op">&lt;-</span> <span class="va">excerpts_recoded</span><span class="op">$</span><span class="va">codebook_recode</span></span>
 <span></span>
 <span><span class="co"># Create code summary</span></span>
-<span><span class="va">create_code_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_code_summary.html">create_code_summary</a></span><span class="op">(</span><span class="va">data_merged</span>,</span>
+<span><span class="va">create_code_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_code_summary.html">create_code_summary</a></span><span class="op">(</span><span class="va">data_recode</span>,</span>
 <span>                                    table_min_count <span class="op">=</span> <span class="fl">40</span>,</span>
 <span>                                    table_min_prop <span class="op">=</span> <span class="fl">0.25</span>,</span>
 <span>                                    plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -196,7 +197,7 @@
 <span>         custom_stopwords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"racall"</span>, <span class="st">"stuff"</span>, <span class="st">"everyone's"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create matrix, set threshold and plot</span></span>
-<span><span class="va">cooccur_01</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cooccur.html">cooccur</a></span><span class="op">(</span><span class="va">data_merged</span>,</span>
+<span><span class="va">cooccur_01</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cooccur.html">cooccur</a></span><span class="op">(</span><span class="va">data_recode</span>,</span>
 <span>              matrix_threshold <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
 <span><span class="va">cooccur_01</span><span class="op">$</span><span class="va">matrix</span></span>
 <span><span class="va">cooccur_01</span><span class="op">$</span><span class="va">plot</span></span>
