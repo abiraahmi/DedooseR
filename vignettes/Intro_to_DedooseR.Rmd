@@ -1,5 +1,5 @@
 ---
-title: "Cleaning, Merging, and Exploring Qualitative Data"
+title: "1. Cleaning, Merging, and Exploring Qualitative Data"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Cleaning, Merging, and Exploring Qualitative Data}

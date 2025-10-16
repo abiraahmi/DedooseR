@@ -1,5 +1,5 @@
 ---
-title: "Assessing_Code_Saturation"
+title: "3. Assessing Code Saturation"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Assessing_Code_Saturation}

@@ -1,5 +1,5 @@
 ---
-title: "Cooccurence"
+title: "4. Cooccurence"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Cooccurence}

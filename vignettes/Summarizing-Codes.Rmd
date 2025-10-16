@@ -1,5 +1,5 @@
 ---
-title: "Summarizing-Codes"
+title: "2. Summarizing Codes"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Summarizing-Codes}
