@@ -47,7 +47,6 @@ Imports:
     dplyr,
     tidyr,
     ggplot2,
-    knitr,
     DT,
     tibble,
     labelled,
@@ -60,6 +59,7 @@ Imports:
     haven,
     openxlsx
 Suggests:
+    knitr,
     rmarkdown,
     testthat (>= 3.0.0),
     readxl
