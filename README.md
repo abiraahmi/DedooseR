@@ -11,21 +11,16 @@ and conduct qualitative coding and analysis with rigor.
 
 ## Key Features
 
-DedooseR currently allows you to:
+DedooseR currently has 8 key functions that allow you to:
 
-- Clean data exported from Dedoose and populate a codebook
-- Create code summaries with code counts and proportions across transcripts 
-while defining min frequencies and proportions to table and plot!
-- Set a saturation criteria and plot it
-- Plot and play with saturation thresholds
-- Produce and plot code co-occurrence heatmaps  
-- Create network maps between codes
-- Generate word clouds
-
-### Coming Soon
-- Run topic models to understand the distribution of topics and top terms within them for selected codes
-- Creating reliability tests and calculating reliability per coder (Cohen's kappa) and between coders 
-(Fleiss' kappa)
+- `clean_data`: standardizes column names, keeps the highest ranked coder per transcript, drops range/weight columns, prefixes code variables with c_, and returns both the cleaned data and a codebook.
+- `recode`: combines selected codes into a single logical column and updates the codebook
+- `view_excerpts`: create an interactive, filterable datatable to view the excerpts behind each code
+- `wordcloud`: filters excerpts for a selected code, removes common stop words, and renders the result into a beautiful word cloud
+- `create_code_summary` to summarize code counts and the proportion of transcripts/media objects they come from, set a min count or proportion for the summary output and plot counts, proportions or both!
+- `set_saturation`: uses the output of create_code_summary to filter and visualiz codes that meet minimum appearance targets
+- `compare_saturation`: builds on the same summary table to check multiple threshold sets at once - useful when you want a strict bar versus a more liberal bar. You can also plot these different bars against each other!
+- `cooccurence`: helps you see which codes travel together within the same transcript or media title, building both a matrix and a network plot
 
 ## Why This Package?
 
@@ -52,95 +47,9 @@ You can install the development version of DedooseR from
 pak::pak("abiraahmi/DedooseR")
 ```
 
-## Example
+## How do I use the package?
+The vignettes walk you through how to use each of the functions, from cleaning to recoding to viewing excerpts to assessing saturation and creating code co-occurence network maps, so do check them out!
 
-This is a basic example which shows you how you may the package:
-
-``` r
-library(DedooseR)
-
-# Clean data
-filepath <- read_xlsx("inst/raw_data/test_data.xlsx")
-preferred_coders <- c("a", "l", "i", "r", "s", "v", "c", "n", "k")
-clean_data <- clean_data(filepath,
-           preferred_coders,
-           rename_vars = list(memo_destigmatization = "...274"),
-           relabel_vars = list(title = "Memo: Destigmatization"))
-excerpts <- clean_data$data
-codebook <- clean_data$codebook
-
-# Recode themes
-excerpts_recoded <- recode(data,
-                               recodes = list(
-                                 c_belonging_connectedness = c(
-                                   "c_sense_of_belonging", "c_sense_of_belonging_others", "c_sense_of_belonging_self",
-                                   "c_sense_of_connectedness", "c_sense_of_connectedness_family",
-                                   "c_sense_of_connectedness_peers", "c_sense_of_connectedness_school_community",
-                                   "c_sense_of_connectedness_staff"
-                                 ),
-                                 c_suicide_comfort = c("c__suicide_comfort_directing_change", "c__suicide_comfort_general")
-                               ),
-                               relabel_vars = list(
-                                 c_belonging_connectedness = "Sense of Belonging & Connectedness",
-                                 c_suicide_comfort = "Suicide Comfort Conversing"
-                               ))
-
-data_recode <- excerpts_recoded$data_recode
-codebook_recode <- excerpts_recoded$codebook_recode
-
-# Create code summary
-create_code_summary <- create_code_summary(data_recode,
-                                    table_min_count = 40,
-                                    table_min_prop = 0.25,
-                                    plot = TRUE,
-                                    plot_metric = "prop")
-                           
-# View excerpts in filterable table
-view_excerpts(excerpts)                           
-
-# Set saturation 
-out <- set_saturation(create_code_summary, 
-table_min_count = 40,
-table_min_n_media_titles = 0.25,
-plot = TRUE, 
-plot_metric = "both") # Plot both metrics on the same graph
-out$plot
-
-
-# Compare saturation
-
-# Define thresholds list
-thresholds_list <- list(
-  "Liberal" = list(code_count = 40, prop_media_title = 0.2),
-  "Strict"  = list(code_count = 60, prop_media_title = 0.6)
-)
-
-# Compare against thresholds
-saturation_comparison <- compare_saturation(code_summary, thresholds_list,
-                                            plot = TRUE,
-                                            plot_metric = "both")
-# View table
-saturation_comparison$results
-
-# View plot
-saturation_comparison$plot
-
-# Generate word cloud
-wordcloud(excerpts, "c_knowledge_awareness", 
-         max_words = 100,
-         custom_stopwords = c("racall", "stuff", "everyone's"))
-
-# Create matrix, set threshold and plot
-cooccur_01 <- cooccur(data_recode,
-              matrix_threshold = 15)
-cooccur_01$matrix
-cooccur_01$plot
-
-# COMING SOON: Topic models
-topicmodel(excerpts, "c_emerging_leader", n_topics = 2, n_terms = 25,
-           custom_stopwords = c("na", "bruh", "theyre", "yeah"))
-
-```
 
 ## References
 Hennink, M., & Kaiser, B. N. (2022). Sample sizes for saturation in qualitative 
