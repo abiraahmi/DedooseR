@@ -2,7 +2,7 @@
 title: "4. Cooccurence"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Cooccurence}
+  %\VignetteIndexEntry{4. Cooccurence}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

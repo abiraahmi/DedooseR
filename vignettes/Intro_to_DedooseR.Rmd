@@ -2,7 +2,7 @@
 title: "1. Cleaning, Merging, and Exploring Qualitative Data"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Cleaning, Merging, and Exploring Qualitative Data}
+  %\VignetteIndexEntry{1. Cleaning, Merging, and Exploring Qualitative Data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -369,6 +369,9 @@ Finally, review the excerpts behind each code. `view_excerpts()` opens an
 interactive table powered by `DT`, letting you filter by code and search within
 text. 
 
+```{r}
+view_excerpts(recoded$data_recode)
+```
 ```{r}
 if (requireNamespace("DT", quietly = TRUE)) {
   view_excerpts(recoded$data_recode)

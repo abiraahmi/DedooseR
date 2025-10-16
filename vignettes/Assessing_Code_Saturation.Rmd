@@ -2,7 +2,7 @@
 title: "3. Assessing Code Saturation"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Assessing_Code_Saturation}
+  %\VignetteIndexEntry{3. Assessing Code Saturation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -372,4 +372,3 @@ And here’s the faceted view that spotlights which codes meet each target level
 ```{r}
 comparison_results$plot
 ```
-

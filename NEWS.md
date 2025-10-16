@@ -1,3 +1,6 @@
+# DedooseR 0.0.6
+* 2025-10-16: Added vignettes for all functions :) 
+
 # DedooseR 0.0.5
 * 2025-10-13: Renamed `merge_codes()` to `recode()` to better reflect how the function combines themes
 * 2025-10-12: Test for all functions > 95%, package coverage is at 99.3% 🥳

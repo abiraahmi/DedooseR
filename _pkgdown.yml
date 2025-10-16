@@ -25,6 +25,13 @@ template:
     logo: reference/figures/sticker.png
 build:
   vignettes: false
+articles:
+  - title: "Tutorials"
+    contents:
+      - Intro_to_DedooseR
+      - Summarizing_Codes
+      - Assessing_Code_Saturation
+      - Cooccurence
 navbar:
   right:
     - icon: fa-github fa-lg

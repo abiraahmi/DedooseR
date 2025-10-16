@@ -2,7 +2,7 @@
 title: "2. Summarizing Codes"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Summarizing-Codes}
+  %\VignetteIndexEntry{2. Summarizing Codes}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

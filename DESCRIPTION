@@ -1,6 +1,6 @@
 Package: DedooseR
 Title: DedooseR for Qualitative data monitoring & analysis
-Version: 0.0.5
+Version: 0.0.6
 Authors@R: 
     c(
       person(
@@ -47,6 +47,7 @@ Imports:
     dplyr,
     tidyr,
     ggplot2,
+    knitr,
     DT,
     tibble,
     labelled,
@@ -59,7 +60,6 @@ Imports:
     haven,
     openxlsx
 Suggests:
-    knitr,
     rmarkdown,
     testthat (>= 3.0.0),
     readxl
