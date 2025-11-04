@@ -29,6 +29,7 @@ your environment. The chunk below rebuilds them so this article stands alone.
 
 ```{r}
 library(tibble)
+library(DedooseR)
 
 code_order <- c(
   "Motor Skills",

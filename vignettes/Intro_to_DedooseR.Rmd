@@ -30,8 +30,8 @@ files.
 
 library(tibble)
 library(purrr)
-library(dplyr)
 library(DedooseR)
+library(tidyverse)
 
 # Mock excerpts that mimic a Dedoose export ----------------------------------
 code_order <- c(
