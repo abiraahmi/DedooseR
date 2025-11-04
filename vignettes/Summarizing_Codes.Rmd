@@ -174,7 +174,7 @@ demo_excerpts <- tibble(
     "During the rhythm relay, we practiced breathing between verses so the kids could wait for their cue instead of jumping in early. Mapping the rhymes to eight-count phrases let them chart syllables like a fractions lesson, and when one camper shouted over the group we paused to name the frustration, reset, and talk about how mistakes fuel the next take.",
     "When I get mad now, I write a hook about it first. It helps me spot the feeling, note the anxious thoughts that used to stay bottled up, and decide whether I want to shout it or sing it soft. Drafting verses in my notebook also keeps my reading teacher happy because I'm practicing structure while I hype myself up.",
     "In lyric lab the trio revised their chorus, taking turns so nobody rushed the mic while they jotted rhyme schemes on the whiteboard. Naming which lines sounded brave versus nervous let them cheer each other on, and the rewrites doubled as a grammar check that made them proud to keep refining.",
-    "During the campfire reflection, one camper admitted she shuts down when the melody shifts minor while her friend blurts jokes to cover his jitters, so we charted both reactions on the mood wheel. They annotated lyric sheets to spot evidence for those feelings, and sharing coping plans made them feel less alone and more capable.",
+    "During the campfire reflection, one camper admitted that she sometimes shuts down when we practice sad songs. Now, we check in during practice to spot evidence for those feelings and share coping plans when needed",
     "On practice night we tapped the rim pattern slowly so the shy drummer could breathe through the butterflies and wait for the downbeat before attacking the snare. They tracked tempos in a spreadsheet for homework, proving to themselves that patient repetitions improve control even when anxiety creeps in mid-song.",
     "During the studio session debrief, the counselors noted how Tasha's freestyles shifted from loud interruptions to collaborative echoes once we rehearsed conversation stems. She marked the beats she wanted to emphasize on her lyric worksheet, and bragged that the script gave her confidence without shutting down her big energy.",
     "The teen beat makers synced their keyboard riffs with the drum pad, counting rests together so each person held back until the loop called for them. Charting the chord inversions on staff paper turned into a mini theory lesson, and the crew loved seeing how breathing through the tricky hand switch built real confidence.",
@@ -302,7 +302,7 @@ cleaned <- clean_data(
 )
 
 # Recode if needed ----------------------------------
-recoded <- DedooseR::recode(
+recoded <- recode_themes(
   data = cleaned$data,
   recodes = list(
     c_emotional_growth = c(

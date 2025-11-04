@@ -124,7 +124,7 @@ data <- clean_data$data
 codebook <- clean_data$codebook
 
 # Recode themes
-recoded <- recode(data,
+recoded <- recode_themes(data,
                                recodes = list(
                                  c_belonging_connectedness = c(
                                    "c_sense_of_belonging", "c_sense_of_belonging_others", "c_sense_of_belonging_self",

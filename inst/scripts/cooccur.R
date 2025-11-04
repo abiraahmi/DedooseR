@@ -147,7 +147,7 @@ data <- df$data
 codebook <- df$codebook
 
 # Recode themes
-excerpts_recoded <- recode(data,
+excerpts_recoded <- recode_themes(data,
                                recodes = list(
                                  c_belonging_connectedness = c(
                                    "c_sense_of_belonging", "c_sense_of_belonging_others", "c_sense_of_belonging_self",

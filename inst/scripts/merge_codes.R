@@ -1,4 +1,4 @@
-recode <- function(data, recodes, relabel_vars = NULL) {
+recode_themes <- function(data, recodes, relabel_vars = NULL) {
   # data: a data.frame or tibble
   # recodes: a named list, where names are new vars, values are character vectors of old vars
 
@@ -64,7 +64,7 @@ data <- clean_data$data
 codebook <- clean_data$codebook
 
 # Merge codes
-excerpts_recoded <- recode(data,
+excerpts_recoded <- recode_themes(data,
                         recodes = list(
   c_belonging_connectedness = c(
     "c_sense_of_belonging", "c_sense_of_belonging_others", "c_sense_of_belonging_self",

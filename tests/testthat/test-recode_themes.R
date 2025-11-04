@@ -1,5 +1,5 @@
 # Test 1: recoded variables + untouched codes remain
-test_that("recode() combines logical codes and preserves labels", {
+test_that("recode_themes() combines logical codes and preserves labels", {
   raw <- dplyr::tibble(
     excerpt_copy = c("Text A", "Text B", "Text C"),
     c_positive_impact = c(TRUE, FALSE, TRUE),
@@ -17,7 +17,7 @@ test_that("recode() combines logical codes and preserves labels", {
     c_positive = "Positive affect"
   )
 
-  result <- recode(raw, recode_plan, relabel_vars = relabels)
+  result <- recode_themes(raw, recode_plan, relabel_vars = relabels)
   data_recode <- result[["data_recode"]]
   codebook_recode <- result[["codebook_recode"]]
   expect_identical(data_recode, result[["data_merged"]])
@@ -58,8 +58,8 @@ test_that("recode() combines logical codes and preserves labels", {
   expect_equal(codebook_negative$type, "logical")
 })
 
-# Test 2: recode() drops source variables but preserves overlapping names
-test_that("recode() drops source variables but preserves overlapping names", {
+# Test 2: recode_themes() drops source variables but preserves overlapping names
+test_that("recode_themes() drops source variables but preserves overlapping names", {
   raw <- dplyr::tibble(
     excerpt_copy = c("Text A", "Text B"),
     c_positive = c(TRUE, FALSE),
@@ -68,7 +68,7 @@ test_that("recode() drops source variables but preserves overlapping names", {
   recode_plan <- list(
     c_positive = c("c_positive", "c_joy")
   )
-  result <- recode(raw, recode_plan)
+  result <- recode_themes(raw, recode_plan)
   data_recode <- result[["data_recode"]]
 
   # 1. Original source column `c_joy` is dropped after recoding
@@ -86,7 +86,7 @@ test_that("recode() drops source variables but preserves overlapping names", {
   expect_identical(labelled::var_label(data_recode[["c_positive"]]), "c_positive")
 })
 
-test_that("recode() errors when source variables are missing", {
+test_that("recode_themes() errors when source variables are missing", {
   raw <- dplyr::tibble(
     c_positive = c(TRUE, FALSE)
   )
@@ -95,8 +95,72 @@ test_that("recode() errors when source variables are missing", {
   )
 
   expect_error(
-    recode(raw, recode_plan),
+    recode_themes(raw, recode_plan),
     "Some variables for c_positive not found in dataset",
     fixed = TRUE
+  )
+})
+
+test_that("recode_themes() method dispatch works with tibble inputs when dplyr is attached", {
+  needs_detach <- !("package:dplyr" %in% search())
+  if (needs_detach) {
+    library(dplyr)
+    on.exit(detach("package:dplyr", character.only = TRUE), add = TRUE)
+  }
+
+  raw <- tibble::tibble(
+    excerpt_copy = c("A", "B"),
+    c_positive_impact = c(TRUE, FALSE),
+    c_joy = c(TRUE, TRUE)
+  )
+
+  result <- recode_themes(
+    data = raw,
+    recodes = list(c_positive = c("c_positive_impact", "c_joy")),
+    relabel_vars = list(c_positive = "Positive affect")
+  )
+
+  expect_s3_class(result$data_recode, "tbl_df")
+  expect_true("c_positive" %in% names(result$data_recode))
+  expect_equal(
+    result$data_recode[["c_positive"]],
+    c(TRUE, TRUE),
+    ignore_attr = TRUE
+  )
+  expect_identical(
+    labelled::var_label(result$data_recode[["c_positive"]]),
+    "Positive affect"
+  )
+})
+
+test_that("recode_themes() handles haven labelled columns (e.g., from .dta files)", {
+  raw <- tibble::tibble(
+    c_emotional_regulation = haven::labelled(
+      c(1, 0, 1),
+      labels = c(`not coded` = 0, coded = 1)
+    ),
+    c_emotion_identification = haven::labelled(
+      c(0, 1, 1),
+      labels = c(`not coded` = 0, coded = 1)
+    )
+  )
+
+  result <- recode_themes(
+    data = raw,
+    recodes = list(
+      c_emotional_growth = c("c_emotional_regulation", "c_emotion_identification")
+    )
+  )
+
+  expect_identical(names(result$data_recode), "c_emotional_growth")
+  expect_s3_class(result$data_recode, "tbl_df")
+  expect_equal(
+    result$data_recode[["c_emotional_growth"]],
+    c(TRUE, TRUE, TRUE),
+    ignore_attr = TRUE
+  )
+  expect_identical(
+    labelled::var_label(result$data_recode[["c_emotional_growth"]]),
+    "c_emotional_growth"
   )
 })

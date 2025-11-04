@@ -34,7 +34,7 @@ recode_list <- list(
   c_self_expression = c("c_self_expression", "c_self_expression_interests_personality_emotions"),
   c_salience = c("c_salience", "c_salience_personal_development", "c_salience_relevance")
 )
-recoded <- recode(test_data, 
+recoded <- recode_themes(test_data, 
                   recodes = recode_list,
                   relabel_vars = list(
                     c_school_climate = "school climate",
@@ -173,7 +173,7 @@ recodes <- list(
   c_knowledge_awareness = c("c_knowledge_awareness", "c_vigilance"),
   c_self_expression = c("c_self_expression", "c_self_expression_identities", "c_self_expression_other"))
 
-recoded <- recode(data, recodes,
+recoded <- recode_themes(data, recodes,
 relabel_vars = list(
   c_knowledge_awareness = "knowledge & awareness of mental health",
   c_gateway_to_support = "becoming or being seen as a gateway to mental health support",

@@ -1,15 +1,16 @@
 #' Recode logical code variables and optionally relabel them
 #'
 #' @description
-#' Combines multiple logical (TRUE/FALSE) code variables into new composite
-#' variables. For each new variable, the function computes a logical OR across
-#' the specified source variables—meaning the new variable is `TRUE` when *any*
-#' source variable is `TRUE`. Optionally, descriptive labels can be supplied for
-#' the newly created variables, and a codebook summarizing the resulting dataset
-#' is returned.
+#' `recode_themes()` combines multiple logical (TRUE/FALSE) code variables into
+#' new composite variables. For each new variable, the function computes a
+#' logical OR across the specified source variables—meaning the new variable is
+#' `TRUE` when *any* source variable is `TRUE`. Optionally, descriptive labels
+#' can be supplied for the newly created variables, and a codebook summarizing
+#' the resulting dataset is returned.
 #'
-#' @param data A data frame or tibble containing logical code variables (for
-#'   example, the output from `clean_data()`).
+#' @param data A data frame, tibble, or haven-labelled data frame (for example,
+#'   the output from `clean_data()` or a dataset read from a `.dta` file)
+#'   containing logical code variables.
 #' @param recodes A named list where each name is a new variable to create and
 #'   each value is a character vector of existing variable names to combine.
 #'   For example:
@@ -51,8 +52,8 @@
 #'   c_stress = c("c_anxiety", "c_pressure")
 #' )
 #'
-#' # Run recode() with new labels
-#' result <- recode(
+#' # Run recode_themes() with new labels
+#' result <- recode_themes(
 #'   data = df,
 #'   recodes = recode_plan,
 #'   relabel_vars = list(
@@ -73,7 +74,45 @@
 #'
 #' @importFrom labelled var_label
 #' @export
-recode <- function(data, recodes, relabel_vars = NULL) {
+recode_themes <- function(data, recodes, relabel_vars = NULL) {
+  UseMethod("recode_themes")
+}
+
+#' @rdname recode_themes
+#' @export
+recode_themes.data.frame <- function(data, recodes, relabel_vars = NULL) {
+  recode_themes_data_frame_impl(
+    data = data,
+    recodes = recodes,
+    relabel_vars = relabel_vars
+  )
+}
+
+#' @rdname recode_themes
+#' @export
+recode_themes.tbl_df <- function(data, recodes, relabel_vars = NULL) {
+  recode_themes_data_frame_impl(
+    data = data,
+    recodes = recodes,
+    relabel_vars = relabel_vars
+  )
+}
+
+#' @rdname recode_themes
+#' @export
+recode_themes.default <- function(data, recodes, relabel_vars = NULL) {
+  stop("`recode_themes()` only supports data frames or tibbles.", call. = FALSE)
+}
+
+recode_themes_data_frame_impl <- function(data, recodes, relabel_vars = NULL) {
+  if (missing(recodes)) {
+    stop("`recodes` must be provided when recoding data-frame objects.", call. = FALSE)
+  }
+
+  if (!is.list(recodes) || is.null(names(recodes)) || any(names(recodes) == "")) {
+    stop("`recodes` must be a named list of variables to combine.", call. = FALSE)
+  }
+
   all_from_vars <- c()
 
   for (new_var in names(recodes)) {
