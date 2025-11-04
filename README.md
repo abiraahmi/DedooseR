@@ -14,7 +14,7 @@ and conduct qualitative coding and analysis with rigor.
 DedooseR currently has 8 key functions that allow you to:
 
 - `clean_data`: standardizes column names, keeps the highest ranked coder per transcript, drops range/weight columns, prefixes code variables with c_, and returns both the cleaned data and a codebook.
-- `recode`: combines selected codes into a single logical column and updates the codebook
+- `recode_themes`: combines selected codes into a single logical column and updates the codebook
 - `view_excerpts`: create an interactive, filterable datatable to view the excerpts behind each code
 - `wordcloud`: filters excerpts for a selected code, removes common stop words, and renders the result into a beautiful word cloud
 - `create_code_summary` to summarize code counts and the proportion of transcripts/media objects they come from, set a min count or proportion for the summary output and plot counts, proportions or both!
