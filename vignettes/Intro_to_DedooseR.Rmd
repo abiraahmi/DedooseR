@@ -28,10 +28,11 @@ files.
 
 ```{r setup}
 
+library(DedooseR)
 library(tibble)
 library(purrr)
-library(DedooseR)
-library(tidyverse)
+library(dplyr)
+
 
 # Mock excerpts that mimic a Dedoose export ----------------------------------
 code_order <- c(
