@@ -58,8 +58,7 @@ Imports:
     tidytext,
     purrr,
     haven,
-    openxlsx
-Suggests:
+    openxlsx,
     rmarkdown,
     testthat (>= 3.0.0),
     readxl
