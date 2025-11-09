@@ -12,23 +12,23 @@ DedooseR currently has 8 key functions that allow you to:
 
 - `clean_data`: standardizes column names, keeps the highest ranked
   coder per transcript, drops range/weight columns, prefixes code
-  variables with c\_, and returns both the cleaned data and a codebook.
+  variables with c\_, and returns both a cleaned dataset and codebook
 - `recode_themes`: combines selected codes into a single logical column
-  and updates the codebook
+  and updates the codebook.
 - `view_excerpts`: create an interactive, filterable datatable to view
   the excerpts behind each code
 - `wordcloud`: filters excerpts for a selected code, removes common stop
   words, and renders the result into a beautiful word cloud
 - `create_code_summary` to summarize code counts and the proportion of
   transcripts/media objects they come from, set a min count or
-  proportion for the summary output and plot counts, proportions or
-  both!
+  proportion for the summary output and plot counts and proportions (or
+  both!)
 - `set_saturation`: uses the output of create_code_summary to filter and
-  visualiz codes that meet minimum appearance targets
-- `compare_saturation`: builds on the same summary table to check
-  multiple threshold sets at once - useful when you want a strict bar
+  visualize codes that meet minimum appearance targets
+- `compare_saturation`: builds on the summary table to check multiple
+  threshold sets at once - useful when you want compare a strict bar
   versus a more liberal bar. You can also plot these different bars
-  against each other!
+  against each other
 - `cooccurence`: helps you see which codes travel together within the
   same transcript or media title, building both a matrix and a network
   plot
@@ -51,13 +51,9 @@ allows for gain greater confidence in both the **depth** and
 
 ## Installation
 
-You can install the development version of DedooseR from
-[GitHub](https://github.com/) with:
-
-``` r
-# install.packages("pak")
-pak::pak("abiraahmi/DedooseR")
-```
+DedooseR is currently available to install on demand, but will be more
+widely accessible very soon. Email <abiraahmi.shankar@nyu.edu> if you’d
+like to get your hands on it!
 
 ## How do I use the package?
 
