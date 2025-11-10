@@ -2,32 +2,23 @@
 % Please edit documentation in R/recode_themes.R
 \name{recode_themes}
 \alias{recode_themes}
-\alias{recode_themes.data.frame}
-\alias{recode_themes.tbl_df}
-\alias{recode_themes.default}
 \title{Recode logical code variables and optionally relabel them}
 \usage{
 recode_themes(data, recodes, relabel_vars = NULL)
-
-\method{recode_themes}{data.frame}(data, recodes, relabel_vars = NULL)
-
-\method{recode_themes}{tbl_df}(data, recodes, relabel_vars = NULL)
-
-\method{recode_themes}{default}(data, recodes, relabel_vars = NULL)
 }
 \arguments{
 \item{data}{A data frame, tibble, or haven-labelled data frame (for example,
-the output from \code{clean_data()} or a dataset read from a \code{.dta} file)
+the output from clean_data() or a dataset read from a .dta file)
 containing logical code variables.}
 
 \item{recodes}{A named list where each name is a new variable to create and
 each value is a character vector of existing variable names to combine.
 For example:
-\code{list(c_help = c("c_support", "c_assist"), c_stress = c("c_anxiety", "c_pressure"))}}
+list(c_help = c("c_support", "c_assist"), c_stress = c("c_anxiety", "c_pressure"))}
 
 \item{relabel_vars}{Optional named list of variable labels for the new
 composite variables in the format
-\code{list(new_var = "New variable label")}. If omitted, the new variable names
+list(new_var = "New variable label"). If omitted, the new variable names
 are used as default labels.}
 }
 \value{
@@ -42,16 +33,16 @@ available), and data types.}
 }
 }
 \description{
-\code{recode_themes()} combines multiple logical (TRUE/FALSE) code variables into
+recode_themes() combines multiple logical (TRUE/FALSE) code variables into
 new composite variables. For each new variable, the function computes a
 logical OR across the specified source variables—meaning the new variable is
-\code{TRUE} when \emph{any} source variable is \code{TRUE}. Optionally, descriptive labels
+TRUE when any source variable is TRUE. Optionally, descriptive labels
 can be supplied for the newly created variables, and a codebook summarizing
 the resulting dataset is returned.
 }
 \details{
 The function first verifies that the specified source variables exist in the
-dataset. It then creates the new logical variables defined by \code{recodes},
+dataset. It then creates the new logical variables defined by recodes,
 assigns user-specified or default labels, removes the original source
 variables (unless one overlaps with a new variable name), and builds a
 codebook summarizing the recoded dataset.
@@ -59,26 +50,26 @@ codebook summarizing the recoded dataset.
 \examples{
 # Example dataset
 df <- data.frame(
-  c_support = c(TRUE, FALSE, TRUE),
-  c_assist = c(FALSE, TRUE, TRUE),
-  c_anxiety = c(TRUE, FALSE, FALSE),
-  c_pressure = c(FALSE, TRUE, FALSE)
+c_support = c(TRUE, FALSE, TRUE),
+c_assist = c(FALSE, TRUE, TRUE),
+c_anxiety = c(TRUE, FALSE, FALSE),
+c_pressure = c(FALSE, TRUE, FALSE)
 )
 
 # Define recodes
 recode_plan <- list(
-  c_help = c("c_support", "c_assist"),
-  c_stress = c("c_anxiety", "c_pressure")
+c_help = c("c_support", "c_assist"),
+c_stress = c("c_anxiety", "c_pressure")
 )
 
 # Run recode_themes() with new labels
 result <- recode_themes(
-  data = df,
-  recodes = recode_plan,
-  relabel_vars = list(
-    c_help = "Mentions of helping or supporting others",
-    c_stress = "Mentions of stress or pressure"
-  )
+data = df,
+recodes = recode_plan,
+relabel_vars = list(
+c_help = "Mentions of helping or supporting others",
+c_stress = "Mentions of stress or pressure"
+)
 )
 
 # Extract recoded data and codebook
