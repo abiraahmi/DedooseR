@@ -24,7 +24,10 @@ DedooseR currently has 8 key functions that allow you to:
 
 ## Why This Package?
 
-Ongoing challenges in qualitative research include defining what constitutes high-quality data and demonstrating transparency in how saturation is  reached (Small & Calarco, 2022). Informed by guidelines for high-quality  qualitative research (Hennink & Kaiser, 2022), DedooseR allows you to
+Ongoing challenges in qualitative research include defining what constitutes 
+high-quality data and demonstrating transparency in how saturation is 
+reached (Small & Calarco, 2022). Informed by guidelines for high-quality 
+qualitative research (Hennink & Kaiser, 2022), DedooseR allows you to
 better understand your data with quality tags in Dedoose like:
 
 - The **concreteness** of excerpts (priority code)
@@ -36,26 +39,18 @@ of datasets.
 
 ## Installation
 
-You can install the released version of DedooseR from CRAN:
-
-```r
-install.packages("DedooseR")
-```
-
-And load it using:
-
-```r
-library(DedooseR)
-```
+DedooseR is currently available to install on demand, but will be more widely accessible very soon. Email abiraahmi.shankar@nyu.edu if you'd like to get your hands on it!
 
 ## How do I use the package?
 The vignettes walk you through how to use each of the functions, from cleaning to recoding to viewing excerpts to assessing saturation and creating code co-occurence network maps, so do check them out!
 
-## Acknowledgements
-We sincerely thank Ritvik Kammend, Karen Edema, and Safalta Shukla for their contributions to testing the package and refining its documentation and examples. Their care and curiosity helped the project take a clearer, steadier shape.
-
 ## References
-Hennink, M., & Kaiser, B. N. (2022). Sample sizes for saturation in qualitative  research: A systematic review of empirical tests. Social science & medicine, 292, 114523.
+Hennink, M., & Kaiser, B. N. (2022). Sample sizes for saturation in qualitative 
+research: A
+systematic review of empirical tests. Social science & medicine, 292, 114523.
 
-Small, M. L., & Calarco, J. M. (2022). Qualitative Literacy: A Guide to Evaluating Ethnographic and Interview Research (1st ed.). University of California Press. https://doi.org/10.2307/j.ctv2vr9c4x 
+Small, M. L., & Calarco, J. M. (2022). Qualitative Literacy: A Guide to 
+Evaluating
+Ethnographic and Interview Research (1st ed.). University of California Press. 
+https://doi.org/10.2307/j.ctv2vr9c4x 
 

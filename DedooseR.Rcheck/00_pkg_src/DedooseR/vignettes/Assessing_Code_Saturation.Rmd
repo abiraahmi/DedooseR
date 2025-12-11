@@ -364,7 +364,7 @@ comparison_results <- compare_saturation(
   plot_metric = "both"
 )
 
-comparison_results$results 
+comparison_results$results
 ```
 
 And here’s the faceted view that spotlights which codes meet each target level.

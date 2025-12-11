@@ -1,29 +1,18 @@
----
-title: "3. Assessing Code Saturation"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{3. Assessing Code Saturation}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-```{r, include = FALSE}
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-```
 
-Assessing saturation often comes down to two practical questions: **Which codes show up often enough?** and **Do they stretch across a wide enough slice of transcripts or media objects?** The `set_saturation()` and `compare_saturation()` helpers turn those questions into repeatable filters and visuals. This vignette builds on the same mock excerpts used in the earlier articles so you can knit everything in order or cherry-pick what you need.
+## ----setup--------------------------------------------------------------------
 
-
-If you knitted the *Cleaning, Merging, and Exploring Qualitative Data* or *Summarizing Codes* vignettes just before this one, you already have `recoded$data_recode` and `recoded$codebook_recode` in your environment. The chunk below recreates them so this article is self-contained—feel free to skip it when reusing objects from the prior tutorial.
-
-```{r setup}
-# Cleaning, recoding and creating code summaries
 library(DedooseR)
 library(tibble)
+library(purrr)
+library(dplyr)
 
+
+# Mock excerpts that mimic a Dedoose export ----------------------------------
 code_order <- c(
   "Motor Skills",
   "Social Skills",
@@ -37,6 +26,7 @@ code_order <- c(
   "Self-esteem",
   "Growth Mindset"
 )
+
 code_weights <- c(
   "Motor Skills" = 1,
   "Social Skills" = 1,
@@ -50,6 +40,7 @@ code_weights <- c(
   "Self-esteem" = 1,
   "Growth Mindset" = 1
 )
+
 code_assignments <- list(
   c("Motor Skills", "Social Skills", "Self-expression", "Academic Skills", "Self-esteem", "Growth Mindset"),
   c("Social Skills", "Emotional Regulation", "Emotion Identification", "Inhibitory Control", "Externalizing Behavior", "Academic Skills", "Growth Mindset"),
@@ -72,6 +63,7 @@ code_assignments <- list(
   c("Self-expression", "Internalizing Behavior", "Academic Skills", "Growth Mindset"),
   c("Social Skills", "Emotional Regulation", "Emotion Identification", "Inhibitory Control", "Internalizing Behavior", "Academic Skills", "Self-esteem", "Growth Mindset")
 )
+
 demo_excerpts <- tibble(
   `Media Title` = c(
     "Interview: Opening Circle",
@@ -228,9 +220,9 @@ demo_excerpts <- tibble(
     "2023-11-15"
   ))
 ) |>
-  dplyr::mutate(
+  mutate(
     range_stub = sub("Excerpt ", "", `Excerpt Range`),
-    code_details = purrr::map2(
+    code_details = map2(
       code_assignments,
       range_stub,
       ~ tibble(
@@ -239,27 +231,31 @@ demo_excerpts <- tibble(
         weight = unname(code_weights[.x])
       )
     ),
-    `Codes Applied Combined` = purrr::map_chr(
+    `Codes Applied Combined` = map_chr(
       code_details,
       ~ paste(intersect(code_order, .x$code), collapse = "; ")
     )
   )
+
 for (code in code_order) {
   applied_col <- paste0("Code: ", code, " Applied")
   range_col <- paste0("Code: ", code, " Range")
   weight_col <- paste0("Code: ", code, " Weight")
-  demo_excerpts[[applied_col]] <- purrr::map_chr(
+
+  demo_excerpts[[applied_col]] <- map_chr(
     demo_excerpts$code_details,
     ~ if (code %in% .x$code) "True" else "False"
   )
-  demo_excerpts[[range_col]] <- purrr::map_chr(
+
+  demo_excerpts[[range_col]] <- map_chr(
     demo_excerpts$code_details,
     ~ {
       rng <- .x$range[.x$code == code]
       if (length(rng) == 0) NA_character_ else rng
     }
   )
-  demo_excerpts[[weight_col]] <- purrr::map_dbl(
+
+  demo_excerpts[[weight_col]] <- map_dbl(
     demo_excerpts$code_details,
     ~ {
       wt <- .x$weight[.x$code == code]
@@ -267,16 +263,23 @@ for (code in code_order) {
     }
   )
 }
+
 demo_excerpts <- demo_excerpts |>
-  dplyr::select(
+  select(
     -range_stub,
     -code_details
   ) |>
-  dplyr::relocate(`Codes Applied Combined`, .after = `Resource Date`)
+  relocate(`Codes Applied Combined`, .after = `Resource Date`)
+
+# Take a peeksie! ----------------------------------
 demo_excerpts
 
-
+## -----------------------------------------------------------------------------
+# Define your preferred coders ----------------------------------
 preferred_coders <- c("Aliyah", "Rohan", "Lina", "Mateo", "Priya", "Jordan")
+
+# Run the function ----------------------------------
+
 cleaned <- clean_data(
   excerpts = demo_excerpts,
   preferred_coders = preferred_coders,
@@ -286,6 +289,14 @@ cleaned <- clean_data(
     resource_author = "Team member who uploaded to Dedoose"
   )
 )
+
+# Take a peeksie! ----------------------------------
+cleaned$data
+
+## -----------------------------------------------------------------------------
+cleaned$codebook
+
+## -----------------------------------------------------------------------------
 recoded <- recode_themes(
   data = cleaned$data,
   recodes = list(
@@ -295,80 +306,22 @@ recoded <- recode_themes(
     )
   ),
   relabel_vars = list(
-    c_emotional_growth = "Emotional growth: identification and/or regulation"
-  )
-)
-data <- recoded$data_recode
-codebook <- recoded$codebook_recode
-dim(data)
-
-summary_results <- create_code_summary(
-  excerpts = data,
-  table_min_count = 1,
-  plot = TRUE,
-  plot_metric = "both",
-  output_type = "tibble",
-  use_labels = TRUE,
-  codebook = codebook
-)
-summary_results$table
-```
-
-`set_saturation()` uses the output of `create_code_summary` to filter and visualiz  codes that meet minimum appearance targets. Here we look for at least eight excerpts and presence in 40% of media
-titles (eight of the 20 transcripts). The dual-axis plot keeps counts and coverage together.
-```{r}
-total_media_titles <- dplyr::n_distinct(data$media_title)
-saturation_results <- set_saturation(
-  code_counts = summary_results$table,
-  total_media_titles = total_media_titles,
-  table_min_count = 8,
-  table_min_prop = 0.4,
-  plot = TRUE,
-  plot_metric = "both",
-  fill_color = "#3B7EA1"
-)
-saturation_results$table
-```
-
-And you can visualize it too :)
-
-```{r}
-saturation_results$plot
-```
-
-`compare_saturation()` builds on the same summary table to check multiple
-threshold sets at once - useful when you want a strict bar versus a more liberal bar.
-Each threshold needs a minimum excerpt count and a minimum proportion of media
-titles.
-
-```{r}
-
-```
-
-```{r}
-thresholds <- list(
-  "Liberal (>=8 excerpts, >=40% transcripts)" = list(
-    code_count = 8,
-    prop_media_title = 0.4
-  ),
-  "Strict (>=12 excerpts, >=60% transcripts)" = list(
-    code_count = 12,
-    prop_media_title = 0.6
+    c_emotional_growth = "emotional growth: identification and/or regulation"
   )
 )
 
-comparison_results <- compare_saturation(
-  code_summary = summary_results$table,
-  thresholds_list = thresholds,
-  plot = TRUE,
-  plot_metric = "both"
-)
+recoded$data_recode
 
-comparison_results$results 
-```
+## -----------------------------------------------------------------------------
+recoded$codebook_recode
 
-And here’s the faceted view that spotlights which codes meet each target level.
+## -----------------------------------------------------------------------------
+view_excerpts(recoded$data_recode)
 
-```{r}
-comparison_results$plot
-```
+## -----------------------------------------------------------------------------
+if (requireNamespace("DT", quietly = TRUE)) {
+  view_excerpts(recoded$data_recode)
+} else {
+  message("Install the DT package to launch the interactive excerpt browser.")
+}
+

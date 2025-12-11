@@ -7,5 +7,11 @@
 ^pkgdown$
 ^\.github$
 ^inst/raw_data/~\$test_data\.xlsx$
+^inst/raw_data/~\$.*
+^inst/scripts/~\$.*
 ^doc$
 ^Meta$
+^cran-comments\.md$
+^.*\.DS_Store$
+^DedooseR\.Rcheck$
+^.*\.tar\.gz$

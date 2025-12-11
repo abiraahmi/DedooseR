@@ -1,6 +1,6 @@
 Package: DedooseR
-Title: DedooseR for Qualitative Data Monitoring & Analysis
-Version: 1.0.0
+Title: DedooseR for Qualitative data monitoring & analysis
+Version: 0.0.6
 Authors@R: 
     c(
       person(
@@ -25,12 +25,6 @@ Authors@R:
         comment = c(ORCID = "0000-0002-1925-4954")
       ),
       person(
-        given  = "Sabrina",
-        family = "Stockmans", 
-        email  = "sls9864@nyu.edu", 
-        role   = c("ctb")
-      ),
-      person(
         given  = "Pamela",
         family = "Morris-Perez", 
         email  = "pam7@nyu.edu", 
@@ -44,29 +38,23 @@ Description: DedooseR is an R package that streamlines the analysis of
              view and organize excerpts, develop 
              dynamic codebooks, and assess interrater reliability - all within R.
 License: Apache License (>= 2)
-URL: https://abiraahmi.github.io/DedooseR, https://github.com/abiraahmi/DedooseR
+URL: https://abiraahmi.github.io/DedooseR,
+        https://github.com/abiraahmi/DedooseR
 BugReports: https://github.com/abiraahmi/DedooseR/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-Imports:
-    dplyr,
-    tidyr,
-    ggplot2,
-    knitr,
-    DT,
-    tibble,
-    labelled,
-    kableExtra,
-    ggraph,
-    igraph,
-    wordcloud2,
-    tidytext,
-    purrr,
-    haven,
-    openxlsx
+Imports: dplyr, tidyr, ggplot2, knitr, DT, tibble, labelled,
+        kableExtra, ggraph, igraph, wordcloud2, tidytext, purrr, haven,
+        openxlsx, rmarkdown, testthat (>= 3.0.0), readxl
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-Suggests:
-    rmarkdown,
-    testthat (>= 3.0.0)
+NeedsCompilation: no
+Packaged: 2025-11-10 19:21:31 UTC; abishankar
+Author: Abiraahmi Shankar [aut, cre] (<https://orcid.org/0000-0001-8354-5353>),
+  Catalina Cañizares [aut] (<https://orcid.org/0000-0002-6854-5205>),
+  Francisco Cardozo [aut] (<https://orcid.org/0000-0002-1925-4954>),
+  Pamela Morris-Perez [aut] (<https://orcid.org/0000-0003-3375-3458>)
+Maintainer: Abiraahmi Shankar <abiraahmi.shankar@nyu.edu>
+Depends: R (>= 3.5.0)
+Built: R 4.4.1; ; 2025-11-10 19:21:48 UTC; unix

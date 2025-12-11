@@ -1,25 +1,10 @@
----
-title: "3. Assessing Code Saturation"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{3. Assessing Code Saturation}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-```{r, include = FALSE}
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-```
 
-Assessing saturation often comes down to two practical questions: **Which codes show up often enough?** and **Do they stretch across a wide enough slice of transcripts or media objects?** The `set_saturation()` and `compare_saturation()` helpers turn those questions into repeatable filters and visuals. This vignette builds on the same mock excerpts used in the earlier articles so you can knit everything in order or cherry-pick what you need.
-
-
-If you knitted the *Cleaning, Merging, and Exploring Qualitative Data* or *Summarizing Codes* vignettes just before this one, you already have `recoded$data_recode` and `recoded$codebook_recode` in your environment. The chunk below recreates them so this article is self-contained—feel free to skip it when reusing objects from the prior tutorial.
-
-```{r setup}
+## ----setup--------------------------------------------------------------------
 # Cleaning, recoding and creating code summaries
 library(DedooseR)
 library(tibble)
@@ -312,11 +297,8 @@ summary_results <- create_code_summary(
   codebook = codebook
 )
 summary_results$table
-```
 
-`set_saturation()` uses the output of `create_code_summary` to filter and visualiz  codes that meet minimum appearance targets. Here we look for at least eight excerpts and presence in 40% of media
-titles (eight of the 20 transcripts). The dual-axis plot keeps counts and coverage together.
-```{r}
+## -----------------------------------------------------------------------------
 total_media_titles <- dplyr::n_distinct(data$media_title)
 saturation_results <- set_saturation(
   code_counts = summary_results$table,
@@ -328,24 +310,14 @@ saturation_results <- set_saturation(
   fill_color = "#3B7EA1"
 )
 saturation_results$table
-```
 
-And you can visualize it too :)
-
-```{r}
+## -----------------------------------------------------------------------------
 saturation_results$plot
-```
 
-`compare_saturation()` builds on the same summary table to check multiple
-threshold sets at once - useful when you want a strict bar versus a more liberal bar.
-Each threshold needs a minimum excerpt count and a minimum proportion of media
-titles.
+## -----------------------------------------------------------------------------
 
-```{r}
 
-```
-
-```{r}
+## -----------------------------------------------------------------------------
 thresholds <- list(
   "Liberal (>=8 excerpts, >=40% transcripts)" = list(
     code_count = 8,
@@ -364,11 +336,8 @@ comparison_results <- compare_saturation(
   plot_metric = "both"
 )
 
-comparison_results$results 
-```
+comparison_results$results
 
-And here’s the faceted view that spotlights which codes meet each target level.
-
-```{r}
+## -----------------------------------------------------------------------------
 comparison_results$plot
-```
+
