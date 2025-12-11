@@ -1,6 +1,6 @@
 Package: DedooseR
 Title: DedooseR for Qualitative Data Monitoring & Analysis
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: 
     c(
       person(

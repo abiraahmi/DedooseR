@@ -1,3 +1,5 @@
+# DedooseR 1.0.1
+
 # DedooseR 1.0.0
 * 2025-12-11: First version ready for release 🥳
 
