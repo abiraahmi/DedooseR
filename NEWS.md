@@ -1,3 +1,5 @@
+# DedooseR 2.0.0
+
 # DedooseR 1.0.1
 
 # DedooseR 1.0.0
