@@ -19,3 +19,7 @@ inst/doc
 ~\$.*\.xlsx$
 /doc/
 /Meta/
+
+# Build artifacts
+DedooseR.Rcheck/
+*.tar.gz
