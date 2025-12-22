@@ -1,5 +1,10 @@
 # Changelog
 
+## DedooseR 2.0.0.1
+
+- DESCRIPTION tweaks for CRAN (Title/Description wording, URL
+  canonicalization)
+
 ## DedooseR 2.0.0
 
 - Ready for release 🥳

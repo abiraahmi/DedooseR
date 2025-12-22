@@ -22,13 +22,13 @@ Source:
 [`DESCRIPTION`](https://github.com/abiraahmi/DedooseR/blob/main/DESCRIPTION)
 
 Shankar A, Cañizares C, Cardozo F, Stockmans S, Morris-Perez P (2025).
-*DedooseR: DedooseR for Qualitative Data Monitoring & Analysis*. R
-package version 2.0.0, <https://abiraahmi.github.io/DedooseR>.
+*DedooseR: Monitoring and Analyzing Dedoose Qualitative Data Exports*. R
+package version 2.0.0.1, <https://abiraahmi.github.io/DedooseR/>.
 
     @Manual{,
-      title = {DedooseR: DedooseR for Qualitative Data Monitoring & Analysis},
+      title = {DedooseR: Monitoring and Analyzing Dedoose Qualitative Data Exports},
       author = {Abiraahmi Shankar and Catalina Cañizares and Francisco Cardozo and Sabrina Stockmans and Pamela Morris-Perez},
       year = {2025},
-      note = {R package version 2.0.0},
-      url = {https://abiraahmi.github.io/DedooseR},
+      note = {R package version 2.0.0.1},
+      url = {https://abiraahmi.github.io/DedooseR/},
     }
