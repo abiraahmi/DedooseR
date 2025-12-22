@@ -11,6 +11,8 @@
 - **Francisco Cardozo**. Author.
   [](https://orcid.org/0000-0002-1925-4954)
 
+- **Sabrina Stockmans**. Author.
+
 - **Pamela Morris-Perez**. Author.
   [](https://orcid.org/0000-0003-3375-3458)
 
@@ -19,14 +21,14 @@
 Source:
 [`DESCRIPTION`](https://github.com/abiraahmi/DedooseR/blob/main/DESCRIPTION)
 
-Shankar A, Cañizares C, Cardozo F, Morris-Perez P (2025). *DedooseR:
-DedooseR for Qualitative data monitoring & analysis*. R package version
-0.0.6, <https://abiraahmi.github.io/DedooseR>.
+Shankar A, Cañizares C, Cardozo F, Stockmans S, Morris-Perez P (2025).
+*DedooseR: DedooseR for Qualitative Data Monitoring & Analysis*. R
+package version 2.0.0, <https://abiraahmi.github.io/DedooseR>.
 
     @Manual{,
-      title = {DedooseR: DedooseR for Qualitative data monitoring & analysis},
-      author = {Abiraahmi Shankar and Catalina Cañizares and Francisco Cardozo and Pamela Morris-Perez},
+      title = {DedooseR: DedooseR for Qualitative Data Monitoring & Analysis},
+      author = {Abiraahmi Shankar and Catalina Cañizares and Francisco Cardozo and Sabrina Stockmans and Pamela Morris-Perez},
       year = {2025},
-      note = {R package version 0.0.6},
+      note = {R package version 2.0.0},
       url = {https://abiraahmi.github.io/DedooseR},
     }

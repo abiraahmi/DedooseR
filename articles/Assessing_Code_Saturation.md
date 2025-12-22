@@ -432,7 +432,7 @@ comparison_results <- compare_saturation(
   plot_metric = "both"
 )
 
-comparison_results$results
+comparison_results$results 
 #> # A tibble: 10 × 6
 #>    code            count n_media_titles prop_media_titles Liberal (>=8 excerpt…¹
 #>    <chr>           <int>          <int>             <dbl> <lgl>                 

@@ -1,5 +1,13 @@
 # Changelog
 
+## DedooseR 2.0.0
+
+- Ready for release 🥳
+
+## DedooseR 1.0.0 and 1.0.1
+
+- 2025-12-11: Prepping for release!
+
 ## DedooseR 0.0.6
 
 - 2025-10-16: Added vignettes for all functions :)

@@ -51,15 +51,30 @@ allows for gain greater confidence in both the **depth** and
 
 ## Installation
 
-DedooseR is currently available to install on demand, but will be more
-widely accessible very soon. Email <abiraahmi.shankar@nyu.edu> if you’d
-like to get your hands on it!
+You can install the released version of DedooseR from CRAN:
+
+``` r
+install.packages("DedooseR")
+```
+
+And load it using:
+
+``` r
+library(DedooseR)
+```
 
 ## How do I use the package?
 
 The vignettes walk you through how to use each of the functions, from
 cleaning to recoding to viewing excerpts to assessing saturation and
 creating code co-occurence network maps, so do check them out!
+
+## Acknowledgements
+
+We sincerely thank Ritvik Kammend, Karen Edema, and Safalta Shukla for
+their contributions to testing the package and refining its
+documentation and examples. Their care and curiosity helped the project
+take a clearer, steadier shape.
 
 ## References
 
