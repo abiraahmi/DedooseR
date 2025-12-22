@@ -14,6 +14,7 @@
 ^cran-comments\.md$
 ^.*\.DS_Store$
 ^DedooseR\.Rcheck$
+^\.git_push_trace\.log$
 ^.*\.tar\.gz$
 ^revdep$
 ^CRAN-SUBMISSION$
