@@ -1,0 +1,12 @@
+pandoc: 3.6.3
+pkgdown: 2.1.3
+pkgdown_sha: ~
+articles:
+  Assessing_Code_Saturation: Assessing_Code_Saturation.html
+  Cooccurence: Cooccurence.html
+  Intro_to_DedooseR: Intro_to_DedooseR.html
+  Summarizing_Codes: Summarizing_Codes.html
+last_built: 2025-12-22T12:13Z
+urls:
+  reference: https://abiraahmi.github.io/DedooseR/reference
+  article: https://abiraahmi.github.io/DedooseR/articles

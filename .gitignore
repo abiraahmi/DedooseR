@@ -9,7 +9,6 @@
 *.rds
 *.parquet
 .DS_Store
-docs
 # Testing all functions script
 ^inst/scripts$
 inst/scripts/testing_all_functions.R

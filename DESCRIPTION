@@ -28,7 +28,7 @@ Authors@R:
         given  = "Sabrina",
         family = "Stockmans", 
         email  = "sls9864@nyu.edu", 
-        role   = c("ctb")
+        role   = c("aut")
       ),
       person(
         given  = "Pamela",
