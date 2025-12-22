@@ -1,24 +1,31 @@
-.Rproj.user
+# R / RStudio
+.Rproj.user/
 .Rhistory
 .RData
 .Ruserdata
+
+# OS junk
+.DS_Store
+
 # Data files
 *.csv
 *.xlsx
 *.xls
 *.rds
 *.parquet
-.DS_Store
-# Testing all functions script
-^inst/scripts$
-inst/scripts/testing_all_functions.R
-inst/doc
-^inst/raw_data$
-~\$test_data\.xlsx$
-~\$.*\.xlsx$
-/doc/
-/Meta/
 
-# Build artifacts
+# Package build artifacts
 DedooseR.Rcheck/
 *.tar.gz
+
+# pkgdown / documentation artifacts
+inst/doc/
+doc/
+Meta/
+
+# Internal scripts (do NOT publish)
+inst/scripts/
+inst/raw_data/
+
+# Temporary Office files
+~$*.xlsx
