@@ -2,6 +2,7 @@
 # DedooseR 
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/abiraahmi/DedooseR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/abiraahmi/DedooseR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 **DedooseR** is an R package that connects with 
