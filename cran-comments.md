@@ -7,7 +7,7 @@ This is a resubmission following CRAN feedback.
 - Windows Server 2022, R-devel (CRAN checks)
 - Debian GNU/Linux, R-devel (CRAN checks)
 
-## R CMD check results
+## R CMD check resultst
 There were no ERRORs or WARNINGs.
 
 There was 1 NOTE:
@@ -19,3 +19,4 @@ There was 1 NOTE:
 - Revised Title and Description per CRAN guidelines.
 - Fixed NEWS.md heading consistency.
 - Bumped version to 2.0.0.1.
+- Fixed minor error in URL entry in DESCRIPTION

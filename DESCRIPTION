@@ -43,7 +43,7 @@ Description: Streamlines analysis of qualitative data exported from Dedoose.
   organizing excerpts, generating dynamic codebooks, and producing code network maps
   within R.
 License: Apache License (>= 2)
-URL: URL: https://abiraahmi.github.io/DedooseR/, https://github.com/abiraahmi/DedooseR
+URL: https://abiraahmi.github.io/DedooseR, https://github.com/abiraahmi/DedooseR
 BugReports: https://github.com/abiraahmi/DedooseR/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
