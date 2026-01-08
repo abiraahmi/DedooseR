@@ -20,3 +20,4 @@ There was 1 NOTE:
 - Fixed NEWS.md heading consistency.
 - Bumped version to 2.0.0.1.
 - Fixed minor error in URL entry in DESCRIPTION
+- Removed test files from tarball

@@ -6,11 +6,8 @@
 ^docs$
 ^pkgdown$
 ^\.github$
-^inst/raw_data/~\$test_data\.xlsx$
-^inst/raw_data/~\$.*
-^inst/scripts/~\$.*
-^inst/scripts$
-^inst/scripts/
+^inst$
+^inst/
 ^doc$
 ^Meta$
 ^cran-comments\.md$
