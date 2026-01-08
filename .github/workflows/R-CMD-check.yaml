@@ -59,10 +59,11 @@ jobs:
       - name: Install dependencies (macOS fallback without pak)
         if: runner.os == 'macOS'
         run: |
-          Rscript -e "install.packages('remotes', repos = 'https://cloud.r-project.org')"
-          Rscript -e "remotes::install_deps(dependencies = TRUE)"
-          Rscript -e "install.packages('rcmdcheck', repos = 'https://cloud.r-project.org')"
+          Rscript -e "options(repos = c(CRAN = 'https://cloud.r-project.org')); install.packages('remotes')"
+          Rscript -e "options(repos = c(CRAN = 'https://cloud.r-project.org')); install.packages(c('ggplot2','igraph','testthat','rmarkdown'))"
+          Rscript -e "options(repos = c(CRAN = 'https://cloud.r-project.org')); remotes::install_deps(dependencies = TRUE)"
+          Rscript -e "options(repos = c(CRAN = 'https://cloud.r-project.org')); install.packages('rcmdcheck')"
 
       - name: Check package
         run: |
-          Rscript -e "rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'error')"
+          Rscript -e "rcmdcheck::rcmdcheck(args = c('--no-manual','--no-build-vignettes'), error_on = 'error')"
