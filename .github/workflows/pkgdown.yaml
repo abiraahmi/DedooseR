@@ -8,7 +8,7 @@ on:
     types: [published]
   workflow_dispatch:
 
-name: pkgdown.yaml
+name: pkgdown
 
 permissions: read-all
 
@@ -22,6 +22,7 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     permissions:
       contents: write
+
     steps:
       - uses: actions/checkout@v4
 
@@ -31,14 +32,25 @@ jobs:
         with:
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::pkgdown, local::.
-          needs: website
+      - name: Install package dependencies
+        shell: Rscript {0}
+        run: |
+          install.packages("remotes")
+          remotes::install_deps(dependencies = TRUE)
+          install.packages("pkgdown")
+
+      - name: Install package
+        shell: Rscript {0}
+        run: |
+          remotes::install_local()
 
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
+        run: |
+          pkgdown::build_site_github_pages(
+            new_process = FALSE,
+            install = FALSE
+          )
 
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'
