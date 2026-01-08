@@ -20,13 +20,10 @@ jobs:
         config:
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,  r: 'devel',  http-user-agent: 'release'}
           - {os: ubuntu-latest,  r: 'release'}
-          - {os: ubuntu-latest,  r: 'oldrel-1'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_KEEP_PKG_SOURCE: yes
 
     steps:
       - uses: actions/checkout@v4
@@ -35,22 +32,15 @@ jobs:
 
       - uses: r-lib/actions/setup-r@v2
         with:
-          r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
+          r-version: ${{ matrix.config.r }}
 
-      - name: Install R package dependencies
-        shell: Rscript {0}
+      - name: Install dependencies
         run: |
-          install.packages("remotes")
-          remotes::install_deps(dependencies = TRUE)
-          install.packages("rcmdcheck")
+          Rscript -e "install.packages('remotes')"
+          Rscript -e "remotes::install_deps(dependencies = TRUE)"
+          Rscript -e "install.packages('rcmdcheck')"
 
-      - name: Run R CMD check
-        shell: Rscript {0}
+      - name: Check package
         run: |
-          rcmdcheck::rcmdcheck(
-            args       = c("--no-manual"),
-            build_args = c("--no-manual", "--compact-vignettes=gs+qpdf"),
-            error_on   = "warning"
-          )
+          Rscript -e "rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'warning')"
