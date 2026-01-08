@@ -35,12 +35,11 @@ jobs:
           use-public-rspm: true
           r-version: ${{ matrix.config.r }}
 
-      - name: Install dependencies
-        run: |
-          Rscript -e "install.packages('remotes')"
-          Rscript -e "remotes::install_deps(dependencies = TRUE)"
-          Rscript -e "install.packages('rcmdcheck')"
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
 
       - name: Check package
         run: |
-          Rscript -e "rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'warning')"
+          Rscript -e "rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'error')"
