@@ -50,10 +50,18 @@ jobs:
         shell: pwsh
 
       - uses: r-lib/actions/setup-r-dependencies@v2
+        if: runner.os != 'macOS'
         with:
           extra-packages: any::rcmdcheck
           needs: check
-          cache-version: 2
+          cache-version: 3
+
+      - name: Install dependencies (macOS fallback without pak)
+        if: runner.os == 'macOS'
+        run: |
+          Rscript -e "install.packages('remotes', repos = 'https://cloud.r-project.org')"
+          Rscript -e "remotes::install_deps(dependencies = TRUE)"
+          Rscript -e "install.packages('rcmdcheck', repos = 'https://cloud.r-project.org')"
 
       - name: Check package
         run: |
