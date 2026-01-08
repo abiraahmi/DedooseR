@@ -1,6 +1,12 @@
 # Changelog
 
+## DedooseR 2.0.0.2
+
+- Removed test files from package
+
 ## DedooseR 2.0.0.1
+
+CRAN release: 2026-01-07
 
 - DESCRIPTION tweaks for CRAN (Title/Description wording, URL
   canonicalization)
