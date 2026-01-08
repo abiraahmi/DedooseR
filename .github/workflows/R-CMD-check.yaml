@@ -35,10 +35,19 @@ jobs:
           use-public-rspm: true
           r-version: ${{ matrix.config.r }}
 
-      - name: Remove stale lockfile and local tarballs
+      - name: Remove stale lockfile and local tarballs (Unix)
+        if: runner.os != 'Windows'
         run: |
           rm -f .github/pkg.lock || true
           rm -f *.tar.gz || true
+        shell: bash
+
+      - name: Remove stale lockfile and local tarballs (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          if (Test-Path .github/pkg.lock) { Remove-Item .github/pkg.lock -Force -ErrorAction SilentlyContinue }
+          Get-ChildItem -Filter *.tar.gz | ForEach-Object { Remove-Item $_.FullName -Force -ErrorAction SilentlyContinue }
+        shell: pwsh
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
