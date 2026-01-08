@@ -38,7 +38,7 @@ Authors@R:
         comment = c(ORCID = "0000-0003-3375-3458")
       )
     )
-Description: Streamlines analysis of qualitative data exported from 'Dedoose' <https://www.dedoose.com>..
+Description: Streamlines analysis of qualitative data exported from 'Dedoose' <https://www.dedoose.com>.
   Supports monitoring thematic saturation, calculating code frequencies,
   organizing excerpts, generating dynamic codebooks, and producing code network maps
   within 'R'.
