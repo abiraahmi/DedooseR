@@ -35,10 +35,16 @@ jobs:
           use-public-rspm: true
           r-version: ${{ matrix.config.r }}
 
+      - name: Remove stale lockfile and local tarballs
+        run: |
+          rm -f .github/pkg.lock || true
+          rm -f *.tar.gz || true
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
+          cache-version: 2
 
       - name: Check package
         run: |
