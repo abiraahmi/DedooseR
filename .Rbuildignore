@@ -6,8 +6,10 @@
 ^docs$
 ^pkgdown$
 ^\.github$
-^inst$
-^inst/
+^inst/scripts$
+^inst/scripts/
+^inst/raw_data$
+^inst/raw_data/
 ^doc$
 ^Meta$
 ^cran-comments\.md$
